@@ -1,556 +1,262 @@
--- Pearl×Neøn Studio | DarkNess Library - DOORS Edition [Multi-Language & WalkSpeed]
--- Theme: Neon Aqua & Dark Obsidian | Saturn Hub
--- Updated: Dynamic Multi-Language Alphabet Switching for All UI Elements, Main Character WalkSpeed Bar
+-- ==========================================================
+-- DARKNESS HUB (REWORK EDITION) - CUSTOM UI ENGINE
+-- ==========================================================
 
-local DarkNessLibrary = {}
-DarkNessLibrary.__index = DarkNessLibrary
-
-local NeonAqua = Color3.fromRGB(0, 255, 220)
-local DarkObsidian = Color3.fromRGB(15, 15, 20)
-local HeaderGray = Color3.fromRGB(20, 25, 35)
-local ElementGray = Color3.fromRGB(25, 25, 35)
-local ElementGrayHover = Color3.fromRGB(25, 45, 55)
-local TextGray = Color3.fromRGB(200, 200, 200)
-
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- ==========================================
--- DİL SÖZLÜĞÜ VE ALFABE SİSTEMİ (Localization)
--- ==========================================
-local currentLanguage = "TR"
+-- Eski UI varsa temizle
+if CoreGui:FindFirstChild("DarkNessHubGui") then
+    CoreGui.DarkNessHubGui:Destroy()
+end
 
-local Locales = {
-    TR = {
-        Main = "Ana Sayfa", Floors = "Katlar", Misc = "Diğer", Visuals = "Görseller", Info = "Bilgi", Credits = "Krediler & Dil", Exploits = "Hileler",
-        Character = "Karakter", WalkSpeed = "Koşma Hızı", MenuVisible = "Menü: GÖRÜNÜR", MenuHidden = "Menü: GİZLİ",
-        EntityESP = "Varlık ESP", ItemESP = "Eşya ESP", DoorESP = "Kapı & Tuş Takımı ESP", Fullbright = "Tam Aydınlık", NoFog = "Sisi Kaldır"
-    },
-    EN = {
-        Main = "Main", Floors = "Floors", Misc = "Misc", Visuals = "Visuals", Info = "Information", Credits = "Credits & Lang", Exploits = "Exploits",
-        Character = "Character", WalkSpeed = "WalkSpeed", MenuVisible = "Menu: VISIBLE", MenuHidden = "Menu: HIDDEN",
-        EntityESP = "Entity ESP", ItemESP = "Item ESP", DoorESP = "Door & Keypad ESP", Fullbright = "Fullbright", NoFog = "No Fog"
-    },
-    ES = {
-        Main = "Principal", Floors = "Pisos", Misc = "Varios", Visuals = "Visuales", Info = "Información", Credits = "Créditos y Idioma", Exploits = "Exploits",
-        Character = "Personaje", WalkSpeed = "Velocidad", MenuVisible = "Menú: VISIBLE", MenuHidden = "Menú: OCULTO",
-        EntityESP = "ESP de Entidades", ItemESP = "ESP de Objetos", DoorESP = "ESP de Puertas", Fullbright = "Brillo Máximo", NoFog = "Sin Niebla"
-    },
-    PT = {
-        Main = "Principal", Floors = "Andares", Misc = "Diversos", Visuals = "Visuais", Info = "Informação", Credits = "Créditos e Idioma", Exploits = "Exploits",
-        Character = "Personagem", WalkSpeed = "Velocidade", MenuVisible = "Menu: VISÍVEL", MenuHidden = "Menu: OCULTO",
-        EntityESP = "ESP de Entidades", ItemESP = "ESP de Itens", DoorESP = "ESP de Portas", Fullbright = "Brilho Total", NoFog = "Sem Névoa"
-    },
-    FR = {
-        Main = "Principal", Floors = "Étages", Misc = "Divers", Visuals = "Visuels", Info = "Information", Credits & Lang = "Crédits & Langue", Exploits = "Exploits",
-        Character = "Personnage", WalkSpeed = "Vitesse", MenuVisible = "Menu : VISIBLE", MenuHidden = "Menu : CACHÉ",
-        EntityESP = "ESP d'Entité", ItemESP = "ESP d'Objet", DoorESP = "ESP de Porte", Fullbright = "Pleine Lumière", NoFog = "Sans Brouillard"
-    },
-    RU = {
-        Main = "Главная", Floors = "Этажи", Misc = "Разное", Visuals = "Визуал", Info = "Информация", Credits = "Авторы и Язык", Exploits = "Эксплойты",
-        Character = "Персонаж", WalkSpeed = "Скорость бега", MenuVisible = "Меню: ВИДИМО", MenuHidden = "Меню: СКРЫТО",
-        EntityESP = "ESP Сущностей", ItemESP = "ESP Предметов", DoorESP = "ESP Дверей", Fullbright = "Яркий свет", NoFog = "Без тумана"
-    },
-    CN = {
-        Main = "主页", Floors = "楼层", Misc = "其他", Visuals = "视觉", Info = "信息", Credits = "制作组与语言", Exploits = "漏洞脚本",
-        Character = "角色", WalkSpeed = "移动速度", MenuVisible = "菜单: 显示", MenuHidden = "菜单: 隐藏",
-        EntityESP = "实体透视", ItemESP = "物品透视", DoorESP = "门与密码盘透视", Fullbright = "全局明亮", NoFog = "去除雾气"
-    },
-    KR = {
-        Main = "메인", Floors = "층수", Misc = "기타", Visuals = "시각 효과", Info = "정보", Credits = "크레딧 및 언어", Exploits = "익스플로잇",
-        Character = "캐릭터", WalkSpeed = "이동 속도", MenuVisible = "메뉴: 표시됨", MenuHidden = "메뉴: 숨김",
-        EntityESP = "엔티티 ESP", ItemESP = "아이템 ESP", DoorESP = "문 & 키패드 ESP", Fullbright = "최대 밝기", NoFog = "안개 제거"
-    },
-    JP = {
-        Main = "メイン", Floors = "階層", Misc = "その他", Visuals = "ビジュアル", Info = "情報", Credits = "クレジットと言語", Exploits = "スクリプト",
-        Character = "キャラクター", WalkSpeed = "移動速度", MenuVisible = "メニュー: 表示", MenuHidden = "メニュー: 非表示",
-        EntityESP = "エンティティESP", ItemESP = "アイテムESP", DoorESP = "ドア＆キーパッドESP", Fullbright = "フルブライト", NoFog = "霧削除"
-    }
-}
+-- Ana ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "DarkNessHubGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
 
-local function L(key)
-    if Locales[currentLanguage] and Locales[currentLanguage][key] then
-        return Locales[currentLanguage][key]
+-- 1. ANA PENCERE (MAIN FRAME) - Siyah & Aqua Tema
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 580, 0, 380)
+MainFrame.Position = UDim2.new(0.5, -290, 0.5, -190)
+MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 16) -- Derin Siyah / Obsidian
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = MainFrame
+
+-- Aqua Çerçeve / Işıma Efekti (UIStroke)
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = Color3.fromRGB(0, 229, 255) -- Parlak Aqua
+UIStroke.Thickness = 2
+UIStroke.Parent = MainFrame
+
+-- Sol Menü / Sekme Paneli
+local Sidebar = Instance.new("ScrollingFrame")
+Sidebar.Name = "Sidebar"
+Sidebar.Size = UDim2.new(0, 150, 1, -50)
+Sidebar.Position = UDim2.new(0, 0, 0, 50)
+Sidebar.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+Sidebar.BackgroundTransparency = 0.5
+Sidebar.BorderSizePixel = 0
+Sidebar.ScrollBarThickness = 2
+Sidebar.CanvasSize = UDim2.new(0, 0, 0, 320)
+Sidebar.Parent = MainFrame
+
+local SidebarLayout = Instance.new("UIListLayout")
+SidebarLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+SidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
+SidebarLayout.Padding = UDim.new(0, 6)
+SidebarLayout.Parent = Sidebar
+
+local SidebarPadding = Instance.new("UIPadding")
+SidebarPadding.PaddingTop = UDim.new(0, 10)
+SidebarPadding.Parent = Sidebar
+
+-- Üst Bar (Title & Kontroller)
+local TopBar = Instance.new("Frame")
+TopBar.Size = UDim2.new(1, 0, 0, 50)
+TopBar.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+TopBar.BorderSizePixel = 0
+TopBar.Parent = MainFrame
+
+local TopBarCorner = Instance.new("UICorner")
+TopBarCorner.CornerRadius = UDim.new(0, 10)
+TopBarCorner.Parent = TopBar
+
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(0, 300, 1, 0)
+TitleLabel.Position = UDim2.new(0, 15, 0, 0)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = "⚡ DARKNESS HUB <font color='#00E5FF'>(Rework)</font>"
+TitleLabel.RichText = true
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextSize = 14
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.Parent = TopBar
+
+-- LOCK TUŞU (Ekranı Kilitleme / Sürüklemeyi Kapatma)
+local IsLocked = false
+local LockButton = Instance.new("TextButton")
+LockButton.Size = UDim2.new(0, 32, 0, 32)
+LockButton.Position = UDim2.new(1, -78, 0.5, -16)
+LockButton.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+LockButton.Text = "🔓"
+LockButton.TextColor3 = Color3.fromRGB(0, 229, 255)
+LockButton.TextSize = 14
+LockButton.Font = Enum.Font.GothamBold
+LockButton.Parent = TopBar
+
+local LockCorner = Instance.new("UICorner")
+LockCorner.CornerRadius = UDim.new(0, 6)
+LockCorner.Parent = LockButton
+
+LockButton.MouseButton1Click:Connect(function()
+    IsLocked = not IsLocked
+    MainFrame.Draggable = not IsLocked
+    if IsLocked then
+        LockButton.Text = "🔒"
+        LockButton.BackgroundColor3 = Color3.fromRGB(0, 100, 120)
+    else
+        LockButton.Text = "🔓"
+        LockButton.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
     end
-    return Locales["EN"][key] or key
+end)
+
+-- SEKMELER (CONTAINER)
+local Container = Instance.new("Folder")
+Container.Name = "TabContainers"
+Container.Parent = MainFrame
+
+local TabFrames = {}
+local TabButtons = {}
+
+local function CreateTab(name, icon)
+    -- Buton
+    local Btn = Instance.new("TextButton")
+    Btn.Size = UDim2.new(0, 135, 0, 35)
+    Btn.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    Btn.BackgroundTransparency = 0.5
+    Btn.Text = "  " .. icon .. "  " .. name
+    Btn.TextColor3 = Color3.fromRGB(180, 180, 200)
+    Btn.TextSize = 12
+    Btn.Font = Enum.Font.GothamBold
+    Btn.TextXAlignment = Enum.TextXAlignment.Left
+    Btn.Parent = Sidebar
+
+    local BtnCorner = Instance.new("UICorner")
+    BtnCorner.CornerRadius = UDim.new(0, 6)
+    BtnCorner.Parent = Btn
+
+    -- Sayfa
+    local Page = Instance.new("ScrollingFrame")
+    Page.Name = name .. "Page"
+    Page.Size = UDim2.new(1, -160, 1, -60)
+    Page.Position = UDim2.new(0, 155, 0, 55)
+    Page.BackgroundTransparency = 1
+    Page.BorderSizePixel = 0
+    Page.ScrollBarThickness = 3
+    Page.CanvasSize = UDim2.new(0, 0, 0, 500)
+    Page.Visible = false
+    Page.Parent = MainFrame
+
+    local PageLayout = Instance.new("UIListLayout")
+    PageLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    PageLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    PageLayout.Padding = UDim.new(0, 8)
+    PageLayout.Parent = Page
+
+    TabFrames[name] = Page
+    TabButtons[name] = Btn
+
+    Btn.MouseButton1Click:Connect(function()
+        for tName, p in pairs(TabFrames) do
+            p.Visible = false
+            TabButtons[tName].BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+            TabButtons[tName].TextColor3 = Color3.fromRGB(180, 180, 200)
+        end
+        Page.Visible = true
+        Btn.BackgroundColor3 = Color3.fromRGB(0, 229, 255)
+        Btn.TextColor3 = Color3.fromRGB(12, 12, 16)
+    end)
+
+    return Page
 end
 
-function DarkNessLibrary.new(titleText)
-    local self = setmetatable({}, DarkNessLibrary)
-    
-    if game:GetService("CoreGui"):FindFirstChild("SaturnHubDoors") then
-        game:GetService("CoreGui").SaturnHubDoors:Destroy()
+-- İSTEDİĞİN SEKMELERİN OLUŞTURULMASI
+local TabMain = CreateTab("Main", "🚪")
+local TabFloors = CreateTab("Floors", "🪜")
+local TabMisc = CreateTab("Misc", "🖥️")
+local TabExploits = CreateTab("Exploits", "🌟")
+local TabVisuals = CreateTab("Visuals", "🛡️") -- Hacker Simgesi | Visuals
+local TabInfo = CreateTab("Information", "ℹ️")
+local TabCredits = CreateTab("Credits", "📂")
+
+-- İlk sekmeyi aktif et
+TabFrames["Main"].Visible = true
+TabButtons["Main"].BackgroundColor3 = Color3.fromRGB(0, 229, 255)
+TabButtons["Main"].TextColor3 = Color3.fromRGB(12, 12, 16)
+
+-- 2. MENÜYÜ AÇMA / KAPAMA TUŞU (Sağ Üst Kapatma Tuşu)
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 32, 0, 32)
+CloseButton.Position = UDim2.new(1, -38, 0.5, -16)
+CloseButton.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+CloseButton.Text = "✕"
+CloseButton.TextColor3 = Color3.fromRGB(255, 80, 80)
+CloseButton.TextSize = 14
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.Parent = TopBar
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 6)
+CloseCorner.Parent = CloseButton
+
+local MenuVisible = true
+CloseButton.MouseButton1Click:Connect(function()
+    MenuVisible = not MenuVisible
+    MainFrame.Visible = MenuVisible
+end)
+
+-- Klavyeden INSERT tuşu ile menüyü gizleyip açma (Toggle Tuşu)
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.Insert then
+        MenuVisible = not MenuVisible
+        MainFrame.Visible = MenuVisible
     end
-    
-    local protect = function(gui)
-        if syn and syn.protect_gui then
-            syn.protect_gui(gui)
-            gui.Parent = game:GetService("CoreGui")
-        elseif gethui then
-            gui.Parent = gethui()
-        else
-            gui.Parent = game:GetService("CoreGui")
-        end
-    end
+end)
 
-    self.ScreenGui = Instance.new("ScreenGui")
-    self.ScreenGui.Name = "SaturnHubDoors"
-    self.ScreenGui.ResetOnSpawn = false
-    self.ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    protect(self.ScreenGui)
+-- 3. BİLDİRİM SİSTEMİ (DarkNess Hub Başarıyla Yüklendi)
+task.spawn(function()
+    local NotifGui = Instance.new("ScreenGui")
+    NotifGui.Name = "DarkNessNotif"
+    NotifGui.Parent = CoreGui
 
-    -- Genişletilmiş Menü
-    self.MainFrame = Instance.new("Frame")
-    self.MainFrame.Name = "MainFrame"
-    self.MainFrame.Size = UDim2.new(0, 760, 0, 520)
-    self.MainFrame.Position = UDim2.new(0.5, -380, 0.5, -260)
-    self.MainFrame.BackgroundColor3 = DarkObsidian
-    self.MainFrame.BorderSizePixel = 0
-    self.MainFrame.Parent = self.ScreenGui
-
-    self.Stroke = Instance.new("UIStroke")
-    self.Stroke.Color = NeonAqua
-    self.Stroke.Thickness = 1.5
-    self.Stroke.Parent = self.MainFrame
-
-    self.Corner = Instance.new("UICorner")
-    self.Corner.CornerRadius = UDim.new(0, 8)
-    self.Corner.Parent = self.MainFrame
-
-    -- Başlık Barı (Draggable)
-    self.Header = Instance.new("TextLabel")
-    self.Header.Size = UDim2.new(1, 0, 0, 45)
-    self.Header.BackgroundColor3 = HeaderGray
-    self.Header.BorderSizePixel = 0
-    self.Header.Text = "  " .. titleText .. " | DOORS Multi-Language & WalkSpeed"
-    self.Header.TextColor3 = NeonAqua
-    self.Header.TextSize = 14
-    self.Header.Font = Enum.Font.GothamBold
-    self.Header.TextXAlignment = Enum.TextXAlignment.Left
-    self.Header.Parent = self.MainFrame
-
-    local HeaderCorner = Instance.new("UICorner")
-    HeaderCorner.CornerRadius = UDim.new(0, 8)
-    HeaderCorner.Parent = self.Header
-
-    -- Sürüklenebilirlik (Draggable)
-    local UserInputService = game:GetService("UserInputService")
-    local dragging, dragInput, dragStart, startPos
-
-    self.Header.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = self.MainFrame.Position
-            
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
-
-    self.Header.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            local delta = input.Position - dragStart
-            self.MainFrame.Position = UDim2.new(
-                startPos.X.Scale, 
-                startPos.X.Offset + delta.X, 
-                startPos.Y.Scale, 
-                startPos.Y.Offset + delta.Y
-            )
-        end
-    end)
-
-    -- Sekme Listesi (Sol)
-    self.TabListFrame = Instance.new("ScrollingFrame")
-    self.TabListFrame.Size = UDim2.new(0, 160, 1, -55)
-    self.TabListFrame.Position = UDim2.new(0, 8, 0, 48)
-    self.TabListFrame.BackgroundTransparency = 1
-    self.TabListFrame.BorderSizePixel = 0
-    self.TabListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-    self.TabListFrame.ScrollBarThickness = 2
-    self.TabListFrame.Parent = self.MainFrame
-
-    self.TabLayout = Instance.new("UIListLayout")
-    self.TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    self.TabLayout.Padding = UDim.new(0, 6)
-    self.TabLayout.Parent = self.TabListFrame
-
-    -- İçerik Alanı (Sağ)
-    self.ContentArea = Instance.new("Frame")
-    self.ContentArea.Size = UDim2.new(1, -180, 1, -55)
-    self.ContentArea.Position = UDim2.new(0, 172, 0, 48)
-    self.ContentArea.BackgroundTransparency = 1
-    self.ContentArea.BorderSizePixel = 0
-    self.ContentArea.Parent = self.MainFrame
-
-    self.Tabs = {}
-    return self
-end
-
-function DarkNessLibrary:CreateTab(name, iconText)
-    local self = self
-    
-    local TabBtn = Instance.new("TextButton")
-    TabBtn.Size = UDim2.new(1, 0, 0, 36)
-    TabBtn.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
-    TabBtn.BorderSizePixel = 0
-    TabBtn.Text = "  " .. iconText .. "  " .. name
-    TabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-    TabBtn.TextSize = 12
-    TabBtn.Font = Enum.Font.GothamSemibold
-    TabBtn.TextXAlignment = Enum.TextXAlignment.Left
-    TabBtn.Parent = self.TabListFrame
-
-    local TabCorner = Instance.new("UICorner")
-    TabCorner.CornerRadius = UDim.new(0, 6)
-    TabCorner.Parent = TabBtn
-
-    local TabContainer = Instance.new("ScrollingFrame")
-    TabContainer.Size = UDim2.new(1, 0, 1, 0)
-    TabContainer.BackgroundTransparency = 1
-    TabContainer.BorderSizePixel = 0
-    TabContainer.Visible = false
-    TabContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
-    TabContainer.ScrollBarThickness = 4
-    TabContainer.Parent = self.ContentArea
-
-    local ContainerLayout = Instance.new("UIListLayout")
-    ContainerLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    ContainerLayout.Padding = UDim.new(0, 8)
-    ContainerLayout.Parent = TabContainer
-
-    ContainerLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        TabContainer.CanvasSize = UDim2.new(0, 0, 0, ContainerLayout.AbsoluteContentSize.Y + 20)
-    end)
-
-    TabBtn.MouseButton1Click:Connect(function()
-        for _, tab in pairs(self.Tabs) do
-            tab.Container.Visible = false
-            tab.Button.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
-            tab.Button.TextColor3 = Color3.fromRGB(180, 180, 180)
-        end
-        TabContainer.Visible = true
-        TabBtn.BackgroundColor3 = ElementGrayHover
-        TabBtn.TextColor3 = NeonAqua
-    end)
-
-    if #self.Tabs == 0 then
-        TabContainer.Visible = true
-        TabBtn.BackgroundColor3 = ElementGrayHover
-        TabBtn.TextColor3 = NeonAqua
-    end
-
-    table.insert(self.Tabs, { Container = TabContainer, Button = TabBtn })
-    self.TabListFrame.CanvasSize = UDim2.new(0, 0, 0, self.TabLayout.AbsoluteContentSize.Y + 20)
-
-    return TabContainer
-end
-
-function DarkNessLibrary:AddToggle(parentTab, nameText, callback)
-    local ToggleBtn = Instance.new("TextButton")
-    ToggleBtn.Size = UDim2.new(1, -10, 0, 36)
-    ToggleBtn.BackgroundColor3 = ElementGray
-    ToggleBtn.BorderSizePixel = 0
-    ToggleBtn.Text = "  " .. nameText .. ": [OFF]"
-    ToggleBtn.TextColor3 = TextGray
-    ToggleBtn.TextSize = 12
-    ToggleBtn.Font = Enum.Font.GothamBold
-    ToggleBtn.TextXAlignment = Enum.TextXAlignment.Left
-    ToggleBtn.Parent = parentTab
-
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 6)
-    Corner.Parent = ToggleBtn
-
-    local state = false
-    ToggleBtn.MouseButton1Click:Connect(function()
-        state = not state
-        if state then
-            ToggleBtn.Text = "  " .. nameText .. ": [ON]"
-            ToggleBtn.TextColor3 = NeonAqua
-            ToggleBtn.BackgroundColor3 = ElementGrayHover
-        else
-            ToggleBtn.Text = "  " .. nameText .. ": [OFF]"
-            ToggleBtn.TextColor3 = TextGray
-            ToggleBtn.BackgroundColor3 = ElementGray
-        end
-        if callback then callback(state) end
-    end)
-end
-
-function DarkNessLibrary:AddLabel(parentTab, text)
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(1, -10, 0, 30)
-    Label.BackgroundTransparency = 1
-    Label.Text = "  " .. text
-    Label.TextColor3 = NeonAqua
-    Label.TextSize = 13
-    Label.Font = Enum.Font.GothamBold
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Parent = parentTab
-    return Label
-end
-
--- ==========================================
--- UZUN SLIDER (Long Slider) - WalkSpeed İçin (16-100)
--- ==========================================
-function DarkNessLibrary:AddLongSlider(parentTab, nameText, min, max, callback)
-    local SliderFrame = Instance.new("Frame")
-    SliderFrame.Size = UDim2.new(1, -10, 0, 55)
-    SliderFrame.BackgroundColor3 = ElementGray
-    SliderFrame.BorderSizePixel = 0
-    SliderFrame.Parent = parentTab
-
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 6)
-    Corner.Parent = SliderFrame
-
-    local Title = Instance.new("TextLabel")
-    Title.Size = UDim2.new(1, -15, 0, 20)
-    Title.Position = UDim2.new(0, 10, 0, 6)
-    Title.BackgroundTransparency = 1
-    Title.Text = nameText .. " [16]"
-    Title.TextColor3 = TextGray
-    Title.TextSize = 12
-    Title.Font = Enum.Font.GothamBold
-    Title.TextXAlignment = Enum.TextXAlignment.Left
-    Title.Parent = SliderFrame
-
-    -- Uzun Kaydırma Barı
-    local Bar = Instance.new("TextButton")
-    Bar.Size = UDim2.new(1, -20, 0, 16)
-    Bar.Position = UDim2.new(0, 10, 0, 30)
-    Bar.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-    Bar.Text = ""
-    Bar.AutoButtonColor = false
-    Bar.Parent = SliderFrame
-
-    local BarCorner = Instance.new("UICorner")
-    BarCorner.CornerRadius = UDim.new(0, 4)
-    BarCorner.Parent = Bar
-
-    local Fill = Instance.new("Frame")
-    Fill.Size = UDim2.new(0, 0, 1, 0)
-    Fill.BackgroundColor3 = NeonAqua
-    Fill.BorderSizePixel = 0
-    Fill.Parent = Bar
-
-    local FillCorner = Instance.new("UICorner")
-    FillCorner.CornerRadius = UDim.new(0, 4)
-    FillCorner.Parent = Fill
-
-    local UserInputService = game:GetService("UserInputService")
-    local dragging = false
-
-    Bar.MouseButton1Down:Connect(function()
-        dragging = true
-    end)
-
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local pos = math.clamp((input.Position.X - Bar.AbsolutePosition.X) / Bar.AbsoluteSize.X, 0, 1)
-            Fill.Size = UDim2.new(pos, 0, 1, 0)
-            local val = math.floor(min + ((max - min) * pos))
-            Title.Text = nameText .. " [" .. tostring(val) .. "]"
-            if callback then callback(val) end
-        end
-    end)
-end
-
-function DarkNessLibrary:SendNotification(text)
-    local Notif = Instance.new("Frame")
-    Notif.Size = UDim2.new(0, 300, 0, 45)
-    Notif.Position = UDim2.new(1, -320, 0, 20)
-    Notif.BackgroundColor3 = HeaderGray
-    Notif.BorderSizePixel = 0
-    Notif.Parent = self.ScreenGui
-
-    local NotifStroke = Instance.new("UIStroke")
-    NotifStroke.Color = NeonAqua
-    NotifStroke.Thickness = 1.2
-    NotifStroke.Parent = Notif
+    local NotifFrame = Instance.new("Frame")
+    NotifFrame.Size = UDim2.new(0, 320, 0, 55)
+    NotifFrame.Position = UDim2.new(1, 20, 0.85, 0) -- Sağ alttan kayacak
+    NotifFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+    NotifFrame.BorderSizePixel = 0
+    NotifFrame.Parent = NotifGui
 
     local NotifCorner = Instance.new("UICorner")
-    NotifCorner.CornerRadius = UDim.new(0, 6)
-    NotifCorner.Parent = Notif
+    NotifCorner.CornerRadius = UDim.new(0, 8)
+    NotifCorner.Parent = NotifFrame
+
+    local NotifStroke = Instance.new("UIStroke")
+    NotifStroke.Color = Color3.fromRGB(0, 229, 255)
+    NotifStroke.Thickness = 1.5
+    NotifStroke.Parent = NotifFrame
 
     local NotifText = Instance.new("TextLabel")
-    NotifText.Size = UDim2.new(1, 0, 1, 0)
+    NotifText.Size = UDim2.new(1, -15, 1, 0)
+    NotifText.Position = UDim2.new(0, 15, 0, 0)
     NotifText.BackgroundTransparency = 1
-    NotifText.Text = text
-    NotifText.TextColor3 = NeonAqua
+    NotifText.Text = "⚡ <b>DarkNess Hub (ReworkEdition)</b>\n<font color='#00E5FF'>Başarıyla Yüklendi!</font>"
+    NotifText.RichText = true
+    NotifText.TextColor3 = Color3.fromRGB(255, 255, 255)
     NotifText.TextSize = 13
-    NotifText.Font = Enum.Font.GothamBold
-    NotifText.Parent = Notif
+    NotifText.Font = Enum.Font.Gotham
+    NotifText.TextXAlignment = Enum.TextXAlignment.Left
+    NotifText.Parent = NotifFrame
 
-    task.spawn(function()
-        task.wait(3.5)
-        for i = 0, 1, 0.1 do
-            Notif.BackgroundTransparency = i
-            NotifText.TextTransparency = i
-            NotifStroke.Transparency = i
-            task.wait(0.03)
-        end
-        Notif:Destroy()
-    end)
-end
-
-function DarkNessLibrary:CreateExternalShortcuts(menuFrame)
-    local ShortcutHolder = Instance.new("Frame")
-    ShortcutHolder.Name = "ExternalShortcuts"
-    ShortcutHolder.Size = UDim2.new(0, 160, 0, 50)
-    ShortcutHolder.Position = UDim2.new(1, -175, 0.5, -25)
-    ShortcutHolder.BackgroundColor3 = DarkObsidian
-    ShortcutHolder.BorderSizePixel = 0
-    ShortcutHolder.Parent = self.ScreenGui
-
-    local HolderStroke = Instance.new("UIStroke")
-    HolderStroke.Color = NeonAqua
-    HolderStroke.Thickness = 1.5
-    HolderStroke.Parent = ShortcutHolder
-
-    local HolderCorner = Instance.new("UICorner")
-    HolderCorner.CornerRadius = UDim.new(0, 6)
-    HolderCorner.Parent = ShortcutHolder
-
-    local MenuToggleBtn = Instance.new("TextButton")
-    MenuToggleBtn.Size = UDim2.new(1, -16, 0, 32)
-    MenuToggleBtn.Position = UDim2.new(0, 8, 0, 9)
-    MenuToggleBtn.BackgroundColor3 = ElementGrayHover
-    MenuToggleBtn.Text = L("MenuVisible")
-    MenuToggleBtn.TextColor3 = NeonAqua
-    MenuToggleBtn.TextSize = 11
-    MenuToggleBtn.Font = Enum.Font.GothamBold
-    MenuToggleBtn.Parent = ShortcutHolder
-
-    local MTCorner = Instance.new("UICorner")
-    MTCorner.CornerRadius = UDim.new(0, 4)
-    MTCorner.Parent = MenuToggleBtn
-
-    local menuVisible = true
-    MenuToggleBtn.MouseButton1Click:Connect(function()
-        menuVisible = not menuVisible
-        menuFrame.Visible = menuVisible
-        if menuVisible then
-            MenuToggleBtn.Text = L("MenuVisible")
-            MenuToggleBtn.TextColor3 = NeonAqua
-            MenuToggleBtn.BackgroundColor3 = ElementGrayHover
-        else
-            MenuToggleBtn.Text = L("MenuHidden")
-            MenuToggleBtn.TextColor3 = TextGray
-            MenuToggleBtn.BackgroundColor3 = ElementGray
-        end
-    end)
-end
-
--- ==========================================
--- ÇALIŞTIRMA & SEKMELER
--- ==========================================
-
-local SaturnWindow = DarkNessLibrary.new("Saturn Hub | DOORS Multi-Language")
-
-SaturnWindow:SendNotification("Saturn Hub DOORS Aktifleştirildi! 🚪✨")
-
-local MainTab     = SaturnWindow:CreateTab("Main", "🚪")
-local FloorsTab   = SaturnWindow:CreateTab("Floors", "🪜")
-local MiscTab     = SaturnWindow:CreateTab("Misc", "🖥️")
-local VisualsTab  = SaturnWindow:CreateTab("Visuals", "💻")
-local InfoTab     = SaturnWindow:CreateTab("Information", "ℹ️")
-local CreditsTab  = SaturnWindow:CreateTab("Credits & Lang", "📂")
-local ExploitsTab = SaturnWindow:CreateTab("Exploits", "🌟")
-
--- ==========================================
--- 1) MAIN SEKMESİ (Character & Uzun Bar WalkSpeed)
--- ==========================================
-SaturnWindow:AddLabel(MainTab, "--- CHARACTER ---")
-
-SaturnWindow:AddLongSlider(MainTab, "WalkSpeed", 16, 100, function(val)
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-        LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = val
-    end
+    -- Giriş Animasyonu
+    NotifFrame:TweenPosition(UDim2.new(1, -340, 0.85, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.5, true)
+    
+    task.wait(4)
+    
+    -- Çıkış Animasyonu
+    NotifFrame:TweenPosition(UDim2.new(1, 20, 0.85, 0), Enum.EasingDirection.In, Enum.EasingStyle.Quad, 0.5, true)
+    task.wait(0.5)
+    NotifGui:Destroy()
 end)
-
--- ==========================================
--- 2) FLOORS SEKMESİ
--- ==========================================
-SaturnWindow:AddLabel(FloorsTab, "Aktif Kat Filtreleme Sistemi")
-SaturnWindow:AddToggle(FloorsTab, "Hotel Features", function(state) end)
-SaturnWindow:AddToggle(FloorsTab, "Mines Features", function(state) end)
-SaturnWindow:AddToggle(FloorsTab, "Archives Features", function(state) end)
-
--- ==========================================
--- 3) MISC SEKMESİ
--- ==========================================
-SaturnWindow:AddToggle(MiscTab, "Noclip / Misc", function(state) end)
-
--- ==========================================
--- 5) INFORMATION SEKMESİ
--- ==========================================
-SaturnWindow:AddLabel(InfoTab, "Saturn Hub V2 - DOORS Edition")
-SaturnWindow:AddLabel(InfoTab, "Geliştirici: By Pearl×Neøn")
-
--- ==========================================
--- 6) CREDITS & DİL DESTEĞİ SEKMESİ (Orijinal Alfabe)
--- ==========================================
-SaturnWindow:AddLabel(CreditsTab, "--- Dil Seçimi / Language / Язык / 语言 ---")
-
-SaturnWindow:AddToggle(CreditsTab, "Türkçe (TR) [Türkçe Alfabe]", function(state) 
-    if state then currentLanguage = "TR" SaturnWindow:SendNotification("Dil Türkçe olarak ayarlandı!") end 
-end)
-
-SaturnWindow:AddToggle(CreditsTab, "English (EN) [Latin Alphabet]", function(state) 
-    if state then currentLanguage = "EN" SaturnWindow:SendNotification("Language set to English!") end 
-end)
-
-SaturnWindow:AddToggle(CreditsTab, "Español (ES) [Alfabeto Español]", function(state) 
-    if state then currentLanguage = "ES" SaturnWindow:SendNotification("¡Idioma configurado a Español!") end 
-end)
-
-SaturnWindow:AddToggle(CreditsTab, "Português / Brasileiro (PT)", function(state) 
-    if state then currentLanguage = "PT" SaturnWindow:SendNotification("Idioma alterado para Português!") end 
-end)
-
-SaturnWindow:AddToggle(CreditsTab, "Français (FR) [Alphabet Français]", function(state) 
-    if state then currentLanguage = "FR" SaturnWindow:SendNotification("Langue définie sur Français!") end 
-end)
-
-SaturnWindow:AddToggle(CreditsTab, "Русский (RU) [Кириллица]", function(state) 
-    if state then currentLanguage = "RU" SaturnWindow:SendNotification("Язык изменен на Русский!") end 
-end)
-
-SaturnWindow:AddToggle(CreditsTab, "中文 (CN) [汉字]", function(state) 
-    if state then currentLanguage = "CN" SaturnWindow:SendNotification("语言已切换为中文!") end 
-end)
-
-SaturnWindow:AddToggle(CreditsTab, "한국어 (KR) [한글]", function(state) 
-    if state then currentLanguage = "KR" SaturnWindow:SendNotification("언어가 한국어로 설정되었습니다!") end 
-end)
-
-SaturnWindow:AddToggle(CreditsTab, "日本語 (JP) [ひらがな/カタカナ/漢字]", function(state) 
-    if state then currentLanguage = "JP" SaturnWindow:SendNotification("言語が日本語に設定されました！") end 
-end)
-
--- ==========================================
--- 7) EXPLOITS SEKMESİ
--- ==========================================
-SaturnWindow:AddToggle(ExploitsTab, "Instant Revive", function(state) end)
-
--- Dış Menü Gizleme/Açma Tuşu
-SaturnWindow:CreateExternalShortcuts(SaturnWindow.MainFrame)
-
-print("[SaturnHub] Multi-Language & WalkSpeed Slider Sürümü Başarıyla Yüklendi kanka!")
