@@ -1,5 +1,5 @@
 -- ==========================================================
--- DARKNESS HUB (REWORK EDITION) - ULTIMATE MASTER SUITE (HOTEL & UI)
+-- DARKNESS HUB (REWORK EDITION) - ULTIMATE MASTER SUITE (HOTEL & MINES)
 -- ==========================================================
 
 local CoreGui = game:GetService("CoreGui")
@@ -28,7 +28,7 @@ local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 840, 0, 480)
 MainFrame.Position = UDim2.new(0.5, -420, 0.5, -240)
-MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 16) -- Derin Siyah / Obsidian
+MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 16)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
@@ -38,13 +38,12 @@ local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 10)
 UICorner.Parent = MainFrame
 
--- Aqua Çerçeve / Işıma Efekti (UIStroke)
 local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = Color3.fromRGB(0, 229, 255) -- Parlak Aqua
+UIStroke.Color = Color3.fromRGB(0, 229, 255)
 UIStroke.Thickness = 2
 UIStroke.Parent = MainFrame
 
--- Sol Menü / Sekme Paneli (Genişlik: 200px)
+-- Sol Menü / Sekme Paneli
 local Sidebar = Instance.new("ScrollingFrame")
 Sidebar.Name = "Sidebar"
 Sidebar.Size = UDim2.new(0, 200, 1, -55)
@@ -89,7 +88,7 @@ TitleLabel.Font = Enum.Font.GothamBold
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 TitleLabel.Parent = TopBar
 
--- 🔍 ARAMA MOTORU (Sağ Üstte, Başlık Barının İçinde)
+-- ARAMA MOTORU
 local SearchBox = Instance.new("TextBox")
 SearchBox.Size = UDim2.new(0, 180, 0, 34)
 SearchBox.Position = UDim2.new(1, -435, 0.5, -17)
@@ -112,7 +111,7 @@ SearchStroke.Transparency = 0.5
 SearchStroke.Thickness = 1
 SearchStroke.Parent = SearchBox
 
--- 2. MENÜNÜN DIŞINDA UZUN VE METİNSEL KONTROL TUŞLARI
+-- HARİCİ KONTROL TUŞLARI
 local ExternalControls = Instance.new("ScreenGui")
 ExternalControls.Name = "DarkNessFloatingControls"
 ExternalControls.ResetOnSpawn = false
@@ -198,7 +197,6 @@ ToggleButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- INSERT Kısayol Tuşu
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.Insert then
         MenuVisible = not MenuVisible
@@ -213,7 +211,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- SEKMELER (CONTAINER)
+-- SEKMELER
 local Container = Instance.new("Folder")
 Container.Name = "TabContainers"
 Container.Parent = MainFrame
@@ -271,7 +269,6 @@ local function CreateTab(name, icon)
     return Page
 end
 
--- TÜM SEKMELER
 local TabMain = CreateTab("Main", "🚪")
 local TabFloors = CreateTab("Floors", "🪜")
 local TabMisc = CreateTab("Misc", "🖥️")
@@ -280,13 +277,12 @@ local TabVisuals = CreateTab("Visuals", "🛡️")
 local TabInfo = CreateTab("Information", "ℹ️")
 local TabCredits = CreateTab("Credits", "📂")
 
--- İlk sekmeyi aktif et
 TabFrames["Main"].Visible = true
 TabButtons["Main"].BackgroundColor3 = Color3.fromRGB(0, 229, 255)
 TabButtons["Main"].TextColor3 = Color3.fromRGB(12, 12, 16)
 
 -- ==========================================================
--- DİNAMİK KAT FİLTRELEME SİSTEMİ (FLOORS TAB & MAP CONTAINERS)
+-- DİNAMİK KAT FİLTRELEME SİSTEMİ
 -- ==========================================================
 local FloorContainers = {}
 
@@ -308,7 +304,6 @@ local function CreateFloorContainer(floorName)
     return Frame
 end
 
--- Kat Konteynerleri
 local HotelFloor = CreateFloorContainer("Hotel")
 local MinesFloor = CreateFloorContainer("Mines")
 local ArchivesFloor = CreateFloorContainer("Archives")
@@ -317,7 +312,6 @@ local OutDoorsFloor = CreateFloorContainer("OutDoors")
 local BackDoorFloor = CreateFloorContainer("BackDoor")
 local HollowEventFloor = CreateFloorContainer("TheHollow")
 
--- Bilgilendirme / Durum Etiketi
 local StatusLabel = Instance.new("TextLabel")
 StatusLabel.Size = UDim2.new(0, 580, 0, 30)
 StatusLabel.BackgroundTransparency = 1
@@ -328,7 +322,6 @@ StatusLabel.Font = Enum.Font.GothamBold
 StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
 StatusLabel.Parent = TabFloors
 
--- Toggle Oluşturma Yardımcısı (`CreateToggleHelper`)
 local function CreateToggleHelper(parent, text, callback)
     local ToggleBtn = Instance.new("TextButton")
     ToggleBtn.Size = UDim2.new(0, 580, 0, 38)
@@ -367,151 +360,66 @@ local function CreateToggleHelper(parent, text, callback)
 end
 
 -- ==========================================================
--- HOTEL ÖZELLİKLERİ (HOTEL FLOOR MODÜLLERİ)
+-- HOTEL ÖZELLİKLERİ
 -- ==========================================================
-
--- 1. Anti-Jamming (Optimized Sound Purger)
 _G.AntiJamming = _G.AntiJamming or false
-
 local function purgeSound(snd)
     if not _G.AntiJamming then return end
-    if not snd or not snd.Parent then return end
-    if not snd:IsA("Sound") then return end
-    
+    if not snd or not snd.Parent or not snd:IsA("Sound") then return end
     local sName = string.lower(snd.Name)
     local sId = string.lower(tostring(snd.SoundId))
-    
     if sName:find("jeff") or sName:find("shop") or sName:find("jamming") or sId:find("jeff") or sId:find("shop") then
-        pcall(function()
-            snd.Volume = 0
-            snd:Stop()
-            snd:Destroy()
-        end)
+        pcall(function() snd.Volume = 0; snd:Stop(); snd:Destroy() end)
     end
 end
-
 task.spawn(function()
     while true do
         task.wait(0.2)
         if _G.AntiJamming then
             pcall(function()
-                for _, snd in ipairs(SoundService:GetDescendants()) do
-                    purgeSound(snd)
-                end
-                local currentRooms = Workspace:FindFirstChild("CurrentRooms")
-                if currentRooms then
-                    for _, snd in ipairs(currentRooms:GetDescendants()) do
-                        purgeSound(snd)
-                    end
-                end
+                for _, snd in ipairs(SoundService:GetDescendants()) do purgeSound(snd) end
+                local cr = Workspace:FindFirstChild("CurrentRooms")
+                if cr then for _, snd in ipairs(cr:GetDescendants()) do purgeSound(snd) end end
             end)
         end
     end
 end)
-
 SoundService.DescendantAdded:Connect(purgeSound)
+CreateToggleHelper(HotelFloor, "Anti-Jamming (Jamming / Jeff Shop Sesini Kaldırır)", function(state) _G.AntiJamming = state end)
 
-local function monitorRoomsSound(roomsFolder)
-    if not roomsFolder then return end
-    roomsFolder.DescendantAdded:Connect(purgeSound)
-    for _, snd in ipairs(roomsFolder:GetDescendants()) do
-        purgeSound(snd)
-    end
-end
-
-local existingRoomsSound = Workspace:FindFirstChild("CurrentRooms")
-if existingRoomsSound then
-    monitorRoomsSound(existingRoomsSound)
-end
-
-Workspace.ChildAdded:Connect(function(child)
-    if child.Name == "CurrentRooms" then
-        monitorRoomsSound(child)
-    end
-end)
-
-CreateToggleHelper(HotelFloor, "Anti-Jamming (Jamming / Jeff Shop Sesini Kaldırır)", function(state)
-    _G.AntiJamming = state
-end)
-
--- 2. Anti-Ransom (A-90 Purger)
 _G.AntiRansom = _G.AntiRansom or false
-
 local function purgeRansom(obj)
-    if not _G.AntiRansom then return end
-    if not obj or not obj.Parent then return end
-    
+    if not _G.AntiRansom or not obj or not obj.Parent then return end
     pcall(function()
-        local nameLower = string.lower(obj.Name)
-        if nameLower:find("ransom") or nameLower:find("a-90") or nameLower:find("jumpscare") then
+        local n = string.lower(obj.Name)
+        if n:find("ransom") or n:find("a-90") or n:find("jumpscare") then
             if obj:IsA("Model") or obj:IsA("BasePart") or obj:IsA("ScreenGui") or obj:IsA("Frame") or obj:IsA("ImageLabel") then
                 obj:Destroy()
             end
         end
     end)
 end
-
 task.spawn(function()
     while true do
         task.wait(0.2)
         if _G.AntiRansom then
             pcall(function()
                 local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
-                local foldersToScan = {
-                    Workspace:FindFirstChild("CurrentRooms"), 
-                    Workspace:FindFirstChild("Entities"), 
-                    playerGui
-                }
-                
-                for _, folder in ipairs(foldersToScan) do
-                    if folder then
-                        for _, v in ipairs(folder:GetDescendants()) do
-                            purgeRansom(v)
-                        end
-                    end
-                end
+                local folders = {Workspace:FindFirstChild("CurrentRooms"), Workspace:FindFirstChild("Entities"), playerGui}
+                for _, f in ipairs(folders) do if f then for _, v in ipairs(f:GetDescendants()) do purgeRansom(v) end end end
             end)
         end
     end
 end)
+CreateToggleHelper(HotelFloor, "Anti-Ransom (Ransom / A-90'ı Siler)", function(state) _G.AntiRansom = state end)
 
-local function monitorFolderRansom(folder)
-    if not folder then return end
-    folder.DescendantAdded:Connect(purgeRansom)
-    for _, v in ipairs(folder:GetDescendants()) do
-        purgeRansom(v)
-    end
-end
-
-if Workspace:FindFirstChild("Entities") then
-    monitorFolderRansom(Workspace.Entities)
-end
-
-local currentRoomsRansom = Workspace:FindFirstChild("CurrentRooms")
-if currentRoomsRansom then
-    monitorFolderRansom(currentRoomsRansom)
-end
-
-local playerGuiRansom = LocalPlayer:FindFirstChild("PlayerGui")
-if playerGuiRansom then
-    monitorFolderRansom(playerGuiRansom)
-end
-
-CreateToggleHelper(HotelFloor, "Anti-Ransom (Ransom / A-90'ı Siler)", function(state)
-    _G.AntiRansom = state
-end)
-
--- 3. Seek Helper
 _G.SeekHelper = _G.SeekHelper or false
-
 local function applySeekHighlight(obj)
-    if not _G.SeekHelper then return end
-    if not obj or not obj.Parent then return end
-    
+    if not _G.SeekHelper or not obj or not obj.Parent then return end
     pcall(function()
         if (obj:IsA("BasePart") or obj:IsA("Model")) and not obj:FindFirstChild("DarkNessSeekHighlight") then
-            local nameLower = string.lower(obj.Name)
-            if nameLower:find("path") or nameLower:find("guide") or nameLower:find("route") or nameLower:find("chase") or nameLower:find("trigger") or nameLower:find("hand") then
+            local n = string.lower(obj.Name)
+            if n:find("path") or n:find("guide") or n:find("route") or n:find("chase") or n:find("trigger") or n:find("hand") then
                 local h = Instance.new("Highlight")
                 h.Name = "DarkNessSeekHighlight"
                 h.Adornee = obj
@@ -524,91 +432,109 @@ local function applySeekHighlight(obj)
         end
     end)
 end
-
 task.spawn(function()
     while true do
         task.wait(0.2)
         if _G.SeekHelper then
             pcall(function()
-                local currentRooms = Workspace:FindFirstChild("CurrentRooms")
-                if currentRooms then
-                    for _, v in ipairs(currentRooms:GetDescendants()) do
-                        applySeekHighlight(v)
-                    end
-                end
+                local cr = Workspace:FindFirstChild("CurrentRooms")
+                if cr then for _, v in ipairs(cr:GetDescendants()) do applySeekHighlight(v) end end
             end)
         end
     end
 end)
-
-local function monitorRoomsSeek(roomsFolder)
-    if not roomsFolder then return end
-    roomsFolder.DescendantAdded:Connect(applySeekHighlight)
-    for _, v in ipairs(roomsFolder:GetDescendants()) do
-        applySeekHighlight(v)
-    end
-end
-
-local existingRoomsSeek = Workspace:FindFirstChild("CurrentRooms")
-if existingRoomsSeek then
-    monitorRoomsSeek(existingRoomsSeek)
-end
-
 CreateToggleHelper(HotelFloor, "Seek Helper (Seek Koşusu Rehberi ve Yolu)", function(state)
     _G.SeekHelper = state
     if not state then
         pcall(function()
-            local currentRooms = Workspace:FindFirstChild("CurrentRooms")
-            if currentRooms then
-                for _, v in ipairs(currentRooms:GetDescendants()) do
-                    if v.Name == "DarkNessSeekHighlight" then
-                        v:Destroy()
-                    end
-                end
-            end
+            local cr = Workspace:FindFirstChild("CurrentRooms")
+            if cr then for _, v in ipairs(cr:GetDescendants()) do if v.Name == "DarkNessSeekHighlight" then v:Destroy() end end end
         end)
     end
 end)
 
--- 4. Figure God Mode
 _G.FigureGodMode = _G.FigureGodMode or false
-
 local function bypassFigure(obj)
-    if not _G.FigureGodMode then return end
-    if not obj or not obj.Parent then return end
-    
+    if not _G.FigureGodMode or not obj or not obj.Parent then return end
     pcall(function()
-        local nameLower = string.lower(obj.Name)
-        if nameLower:find("figure") then
+        if string.lower(obj.Name):find("figure") then
             if obj:IsA("Model") or obj:IsA("BasePart") then
                 for _, part in ipairs(obj:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.CanTouch = false
-                    elseif part:IsA("Script") or part:IsA("LocalScript") then
-                        part.Disabled = true
-                    end
+                    if part:IsA("BasePart") then part.CanTouch = false
+                    elseif part:IsA("Script") or part:IsA("LocalScript") then part.Disabled = true end
                 end
-                if obj:IsA("BasePart") then
-                    obj.CanTouch = false
-                end
+                if obj:IsA("BasePart") then obj.CanTouch = false end
             end
         end
     end)
 end
-
 task.spawn(function()
     while true do
         task.wait(0.2)
         if _G.FigureGodMode then
             pcall(function()
-                local foldersToScan = {
-                    Workspace:FindFirstChild("CurrentRooms"), 
-                    Workspace:FindFirstChild("Entities")
-                }
-                for _, folder in ipairs(foldersToScan) do
-                    if folder then
-                        for _, v in ipairs(folder:GetDescendants()) do
-                            bypassFigure(v)
+                local folders = {Workspace:FindFirstChild("CurrentRooms"), Workspace:FindFirstChild("Entities")}
+                for _, f in ipairs(folders) do if f then for _, v in ipairs(f:GetDescendants()) do bypassFigure(v) end end end
+            end)
+        end
+    end
+end)
+CreateToggleHelper(HotelFloor, "Figure God Mode (Figure Hasar Almaz / Görmez)", function(state) _G.FigureGodMode = state end)
+
+-- ==========================================================
+-- MINES ÖZELLİKLERİ (MINES FLOOR MODÜLLERİ)
+-- ==========================================================
+
+-- ==========================================================
+-- MINES: AUTO SOLVER (GRUMBLE 150-151)
+-- ==========================================================
+
+_G.MinesAutoSolver = _G.MinesAutoSolver or false
+
+task.spawn(function()
+    while true do
+        task.wait(0.2)
+        if _G.MinesAutoSolver then
+            pcall(function()
+                local currentRooms = Workspace:FindFirstChild("CurrentRooms")
+                if not currentRooms then return end
+                
+                local character = LocalPlayer.Character
+                local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+                if not rootPart then return end
+                
+                for _, room in ipairs(currentRooms:GetChildren()) do
+                    local roomNum = tonumber(room.Name)
+                    if roomNum and (roomNum >= 150 and roomNum <= 151) then
+                        for _, obj in ipairs(room:GetDescendants()) do
+                            if obj:IsA("BasePart") or obj:IsA("Model") then
+                                local nameLower = string.lower(obj.Name)
+                                if nameLower:find("anchor") or nameLower:find("puzzle") or nameLower:find("lever") or nameLower:find("pad") or nameLower:find("node") then
+                                    local prompt = obj:FindFirstChildWhichIsA("ProximityPrompt", true)
+                                    if prompt and prompt.Enabled and not obj:GetAttribute("DarkNessSolving") then
+                                        local objPart = obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")) or obj
+                                        if objPart then
+                                            local distance = (rootPart.Position - objPart.Position).Magnitude
+                                            if distance <= 35 then
+                                                obj:SetAttribute("DarkNessSolving", true)
+                                                if fireproximityprompt then fireproximityprompt(prompt) end
+                                                if not obj:FindFirstChild("DarkNessSolverHighlight") then
+                                                    local h = Instance.new("Highlight")
+                                                    h.Name = "DarkNessSolverHighlight"
+                                                    h.Adornee = obj
+                                                    h.FillColor = Color3.fromRGB(0, 255, 100)
+                                                    h.FillTransparency = 0.4
+                                                    h.OutlineTransparency = 0
+                                                    h.Parent = obj
+                                                end
+                                                task.delay(1, function()
+                                                    if obj and obj.Parent then obj:SetAttribute("DarkNessSolving", nil) end
+                                                end)
+                                            end
+                                        end
+                                    end
+                                end
+                            end
                         end
                     end
                 end
@@ -617,105 +543,184 @@ task.spawn(function()
     end
 end)
 
-local function monitorFolderFigure(folder)
-    if not folder then return end
-    folder.DescendantAdded:Connect(bypassFigure)
-    for _, v in ipairs(folder:GetDescendants()) do
-        bypassFigure(v)
-    end
-end
-
-if Workspace:FindFirstChild("Entities") then
-    monitorFolderFigure(Workspace.Entities)
-end
-
-local currentRoomsFigure = Workspace:FindFirstChild("CurrentRooms")
-if currentRoomsFigure then
-    monitorFolderFigure(currentRoomsFigure)
-end
-
-CreateToggleHelper(HotelFloor, "Figure God Mode (Figure Hasar Almaz / Görmez)", function(state)
-    _G.FigureGodMode = state
+CreateToggleHelper(MinesFloor, "Auto Solver (Grumble Puzzle / Anchor Tamamlama)", function(state) 
+    _G.MinesAutoSolver = state 
 end)
 
 -- ==========================================================
--- KAT ALGILAMA VE OTOMATİK GİZLEME DÖNGÜSÜ
+-- MINES: AUTO-DAM SEEK (VALVE & WHEEL SOLVER)
 -- ==========================================================
+
+_G.AutoDamSeek = _G.AutoDamSeek or false
+
 task.spawn(function()
     while true do
-        task.wait(1)
+        task.wait(0.2)
+        if _G.AutoDamSeek then
+            pcall(function()
+                local currentRooms = Workspace:FindFirstChild("CurrentRooms")
+                if not currentRooms then return end
+                
+                local character = LocalPlayer.Character
+                local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+                if not rootPart then return end
+                
+                for _, room in ipairs(currentRooms:GetChildren()) do
+                    for _, obj in ipairs(room:GetDescendants()) do
+                        if obj:IsA("BasePart") or obj:IsA("Model") then
+                            local nameLower = string.lower(obj.Name)
+                            if nameLower:find("valve") or nameLower:find("wheel") or nameLower:find("dam") or nameLower:find("breaker") or nameLower:find("lever") then
+                                local prompt = obj:FindFirstChildWhichIsA("ProximityPrompt", true)
+                                if prompt and prompt.Enabled and not obj:GetAttribute("DarkNessDamSolving") then
+                                    local objPart = obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")) or obj
+                                    if objPart then
+                                        local distance = (rootPart.Position - objPart.Position).Magnitude
+                                        if distance <= 35 then
+                                            obj:SetAttribute("DarkNessDamSolving", true)
+                                            if fireproximityprompt then fireproximityprompt(prompt) end
+                                            if not obj:FindFirstChild("DarkNessDamHighlight") then
+                                                local h = Instance.new("Highlight")
+                                                h.Name = "DarkNessDamHighlight"
+                                                h.Adornee = obj
+                                                h.FillColor = Color3.fromRGB(0, 200, 255)
+                                                h.FillTransparency = 0.4
+                                                h.OutlineTransparency = 0
+                                                h.Parent = obj
+                                            end
+                                            task.delay(1, function()
+                                                if obj and obj.Parent then obj:SetAttribute("DarkNessDamSolving", nil) end
+                                            end)
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+CreateToggleHelper(MinesFloor, "Auto-Dam Seek (Baraj Çarklarını / Vanaları Otomatik Çevirir)", function(state)
+    _G.AutoDamSeek = state
+    if not state then
         pcall(function()
-            local currentRooms = Workspace:FindFirstChild("CurrentRooms")
-            local detectedFloor = "Hotel"
-            
-            if currentRooms then
-                if Workspace:FindFirstChild("Archives") or currentRooms:FindFirstChild("Archives") then
-                    detectedFloor = "Archives"
-                elseif Workspace:FindFirstChild("Mines") or currentRooms:FindFirstChild("Mines") then
-                    detectedFloor = "Mines"
-                elseif Workspace:FindFirstChild("StairWell") or currentRooms:FindFirstChild("StairWell") then
-                    detectedFloor = "StairWell"
-                elseif Workspace:FindFirstChild("OutDoors") or currentRooms:FindFirstChild("OutDoors") then
-                    detectedFloor = "OutDoors"
-                elseif Workspace:FindFirstChild("BackDoor") or currentRooms:FindFirstChild("BackDoor") then
-                    detectedFloor = "BackDoor"
-                elseif Workspace:FindFirstChild("TheHollow") or currentRooms:FindFirstChild("TheHollow") then
-                    detectedFloor = "TheHollow"
-                end
-            end
-
-            for fName, container in pairs(FloorContainers) do
-                if fName == detectedFloor then
-                    container.Visible = true
-                else
-                    container.Visible = false
-                end
-            end
-
-            StatusLabel.Text = "🌐 Aktif Kat: <font color='#00E5FF'>" .. detectedFloor .. "</font>"
+            local cr = Workspace:FindFirstChild("CurrentRooms")
+            if cr then for _, v in ipairs(cr:GetDescendants()) do if v.Name == "DarkNessDamHighlight" then v:Destroy() end end end
         end)
     end
 end)
 
 -- ==========================================================
--- BİLDİRİM SİSTEMİ
+-- MINES: AUTO-STEER MINECART (MINECART OTOPILOT)
 -- ==========================================================
+
+_G.AutoSteerMinecart = _G.AutoSteerMinecart or false
+
 task.spawn(function()
-    local NotifGui = Instance.new("ScreenGui")
-    NotifGui.Name = "DarkNessNotif"
-    NotifGui.Parent = CoreGui
-
-    local NotifFrame = Instance.new("Frame")
-    NotifFrame.Size = UDim2.new(0, 340, 0, 60)
-    NotifFrame.Position = UDim2.new(1, 20, 0.85, 0)
-    NotifFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-    NotifFrame.BorderSizePixel = 0
-    NotifFrame.Parent = NotifGui
-
-    local NotifCorner = Instance.new("UICorner")
-    NotifCorner.CornerRadius = UDim.new(0, 8)
-    NotifCorner.Parent = NotifFrame
-
-    local NotifStroke = Instance.new("UIStroke")
-    NotifStroke.Color = Color3.fromRGB(0, 229, 255)
-    NotifStroke.Thickness = 1.5
-    NotifStroke.Parent = NotifFrame
-
-    local NotifText = Instance.new("TextLabel")
-    NotifText.Size = UDim2.new(1, -20, 1, 0)
-    NotifText.Position = UDim2.new(0, 20, 0, 0)
-    NotifText.BackgroundTransparency = 1
-    NotifText.Text = "⚡ <b>DarkNess Hub (Rework Edition)</b>\n<font color='#00E5FF'>Hotel Modülleri Tamamen Entegre Edildi!</font>"
-    NotifText.RichText = true
-    NotifText.TextColor3 = Color3.fromRGB(255, 255, 255)
-    NotifText.TextSize = 13
-    NotifText.Font = Enum.Font.Gotham
-    NotifText.TextXAlignment = Enum.TextXAlignment.Left
-    NotifText.Parent = NotifFrame
-
-    NotifFrame:TweenPosition(UDim2.new(1, -360, 0.85, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.5, true)
-    task.wait(4)
-    NotifFrame:TweenPosition(UDim2.new(1, 20, 0.85, 0), Enum.EasingDirection.In, Enum.EasingStyle.Quad, 0.5, true)
-    task.wait(0.5)
-    NotifGui:Destroy()
+    while true do
+        task.wait(0.1) -- Tren hızına tam uyum için optimize edilmiş hız
+        if _G.AutoSteerMinecart then
+            pcall(function()
+                local currentRooms = Workspace:FindFirstChild("CurrentRooms")
+                if not currentRooms then return end
+                
+                local character = LocalPlayer.Character
+                local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+                if not rootPart then return end
+                
+                for _, room in ipairs(currentRooms:GetChildren()) do
+                    for _, obj in ipairs(room:GetDescendants()) do
+                        if obj:IsA("BasePart") or obj:IsA("Model") then
+                            local nameLower = string.lower(obj.Name)
+                            if nameLower:find("cart") or nameLower:find("minecart") or nameLower:find("switch") or nameLower:find("lever") or nameLower:find("rail") then
+                                local prompt = obj:FindFirstChildWhichIsA("ProximityPrompt", true)
+                                if prompt and prompt.Enabled and not obj:GetAttribute("DarkNessCartSolving") then
+                                    local objPart = obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")) or obj
+                                    if objPart then
+                                        local distance = (rootPart.Position - objPart.Position).Magnitude
+                                        if distance <= 50 then -- Tren hareket halindeyken geniş menzil
+                                            obj:SetAttribute("DarkNessCartSolving", true)
+                                            if fireproximityprompt then fireproximityprompt(prompt) end
+                                            if not obj:FindFirstChild("DarkNessCartHighlight") then
+                                                local h = Instance.new("Highlight")
+                                                h.Name = "DarkNessCartHighlight"
+                                                h.Adornee = obj
+                                                h.FillColor = Color3.fromRGB(170, 0, 255)
+                                                h.FillTransparency = 0.3
+                                                h.OutlineTransparency = 0
+                                                h.Parent = obj
+                                            end
+                                            task.delay(1, function()
+                                                if obj and obj.Parent then obj:SetAttribute("DarkNessCartSolving", nil) end
+                                            end)
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
 end)
+
+CreateToggleHelper(MinesFloor, "Auto-Steer Minecart (Tren Bölümü Otomatik Sürüş ve Yol Ayrımı)", function(state)
+    _G.AutoSteerMinecart = state
+    if not state then
+        pcall(function()
+            local cr = Workspace:FindFirstChild("CurrentRooms")
+            if cr then for _, v in ipairs(cr:GetDescendants()) do if v.Name == "DarkNessCartHighlight" then v:Destroy() end end end
+        end)
+    end
+end)
+
+-- ==========================================================
+-- MINES: SEEK CHASE PATH ESP (SEEK KOŞU YOLU REHBERİ)
+-- ==========================================================
+
+_G.SeekChasePathESP = _G.SeekChasePathESP or false
+
+local function applySeekPathESP(obj)
+    if not _G.SeekChasePathESP or not obj or not obj.Parent then return end
+    pcall(function()
+        if (obj:IsA("BasePart") or obj:IsA("Model")) and not obj:FindFirstChild("DarkNessSeekPathHighlight") then
+            local n = string.lower(obj.Name)
+            if n:find("path") or n:find("guide") or n:find("route") or n:find("chase") or n:find("trigger") or n:find("next") then
+                local h = Instance.new("Highlight")
+                h.Name = "DarkNessSeekPathHighlight"
+                h.Adornee = obj
+                h.FillColor = Color3.fromRGB(0, 255, 100)
+                h.FillTransparency = 0.3
+                h.OutlineColor = Color3.fromRGB(255, 255, 255)
+                h.OutlineTransparency = 0
+                h.Parent = obj
+            end
+        end
+    end)
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.2)
+        if _G.SeekChasePathESP then
+            pcall(function()
+                local cr = Workspace:FindFirstChild("CurrentRooms")
+                if cr then for _, v in ipairs(cr:GetDescendants()) do applySeekPathESP(v) end end
+            end)
+        end
+    end
+end)
+
+CreateToggleHelper(MinesFloor, "Seek Chase Path ESP (Doğru Yolu Yeşil - Beyaz Highlight İle Gösterir)", function(state)
+    _G.SeekChasePathESP = state
+    if not state then
+        pcall(function()
+            local cr = Workspace:FindFirstChild("CurrentRooms")
+            if cr then for _, v in ipairs(cr:GetDescendants()) do if v.Name == "DarkNessSeekPathHighlight" then v:Destroy() end end end
+        end)
+    end
+end)
+
