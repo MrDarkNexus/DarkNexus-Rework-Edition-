@@ -1,10 +1,12 @@
 -- ==========================================================
--- DARKNESS HUB (REWORK EDITION) - ULTIMATE ARCHIVES & UI ENGINE
+-- DARKNESS HUB (REWORK EDITION) - ULTIMATE MASTER SUITE (HOTEL & UI)
 -- ==========================================================
 
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local SoundService = game:GetService("SoundService")
 local LocalPlayer = Players.LocalPlayer
 
 -- Eski UI varsa temizle
@@ -284,19 +286,49 @@ TabButtons["Main"].BackgroundColor3 = Color3.fromRGB(0, 229, 255)
 TabButtons["Main"].TextColor3 = Color3.fromRGB(12, 12, 16)
 
 -- ==========================================================
--- FLOORS & MAP DETECTION SYSTEM (Harita Filtreleme Mantığı)
+-- DİNAMİK KAT FİLTRELEME SİSTEMİ (FLOORS TAB & MAP CONTAINERS)
 -- ==========================================================
-local ArchivesContainer = Instance.new("Frame")
-ArchivesContainer.Size = UDim2.new(1, 0, 0, 450)
-ArchivesContainer.BackgroundTransparency = 1
-ArchivesContainer.Parent = TabFloors
+local FloorContainers = {}
 
-local ArchivesLayout = Instance.new("UIListLayout")
-ArchivesLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-ArchivesLayout.SortOrder = Enum.SortOrder.LayoutOrder
-ArchivesLayout.Padding = UDim.new(0, 8)
-ArchivesLayout.Parent = ArchivesContainer
+local function CreateFloorContainer(floorName)
+    local Frame = Instance.new("Frame")
+    Frame.Name = floorName .. "Container"
+    Frame.Size = UDim2.new(1, 0, 0, 400)
+    Frame.BackgroundTransparency = 1
+    Frame.Visible = false
+    Frame.Parent = TabFloors
 
+    local Layout = Instance.new("UIListLayout")
+    Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    Layout.SortOrder = Enum.SortOrder.LayoutOrder
+    Layout.Padding = UDim.new(0, 8)
+    Layout.Parent = Frame
+
+    FloorContainers[floorName] = Frame
+    return Frame
+end
+
+-- Kat Konteynerleri
+local HotelFloor = CreateFloorContainer("Hotel")
+local MinesFloor = CreateFloorContainer("Mines")
+local ArchivesFloor = CreateFloorContainer("Archives")
+local StairWellFloor = CreateFloorContainer("StairWell")
+local OutDoorsFloor = CreateFloorContainer("OutDoors")
+local BackDoorFloor = CreateFloorContainer("BackDoor")
+local HollowEventFloor = CreateFloorContainer("TheHollow")
+
+-- Bilgilendirme / Durum Etiketi
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.Size = UDim2.new(0, 580, 0, 30)
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Text = "🌐 Aktif Kat Algılanıyor..."
+StatusLabel.TextColor3 = Color3.fromRGB(0, 229, 255)
+StatusLabel.TextSize = 13
+StatusLabel.Font = Enum.Font.GothamBold
+StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+StatusLabel.Parent = TabFloors
+
+-- Toggle Oluşturma Yardımcısı (`CreateToggleHelper`)
 local function CreateToggleHelper(parent, text, callback)
     local ToggleBtn = Instance.new("TextButton")
     ToggleBtn.Size = UDim2.new(0, 580, 0, 38)
@@ -334,44 +366,320 @@ local function CreateToggleHelper(parent, text, callback)
     end)
 end
 
--- ARCHIVES ÖZEL MODÜLLERİ (Anti / Exploits & Misc)
-local TitleHeader = Instance.new("TextLabel")
-TitleHeader.Size = UDim2.new(0, 580, 0, 30)
-TitleHeader.BackgroundTransparency = 1
-TitleHeader.Text = "--- ARCHIVES KATINA ÖZEL ÖZELLİKLER ---"
-TitleHeader.TextColor3 = Color3.fromRGB(0, 229, 255)
-TitleHeader.TextSize = 13
-TitleHeader.Font = Enum.Font.GothamBold
-TitleHeader.Parent = ArchivesContainer
+-- ==========================================================
+-- HOTEL ÖZELLİKLERİ (HOTEL FLOOR MODÜLLERİ)
+-- ==========================================================
 
-CreateToggleHelper(ArchivesContainer, "Anti-Drone", function(state) _G.AntiDrone = state end)
-CreateToggleHelper(ArchivesContainer, "Anti-Alma", function(state) _G.AntiAlma = state end)
-CreateToggleHelper(ArchivesContainer, "Anti-ElectricPuddle", function(state) _G.AntiElectricPuddle = state end)
-CreateToggleHelper(ArchivesContainer, "Anti-Scribbles", function(state) _G.AntiScribbles = state end)
-CreateToggleHelper(ArchivesContainer, "Anti-DroneStampede", function(state) _G.AntiDroneStampede = state end)
-CreateToggleHelper(ArchivesContainer, "Anti-Ransom", function(state) _G.AntiRansom = state end)
-CreateToggleHelper(ArchivesContainer, "Honcho Box ESP | Auto Interact", function(state) _G.HonchoBoxESP = state end)
-CreateToggleHelper(ArchivesContainer, "Skip Forgot-Me-Not", function(state) _G.SkipForgotMeNot = state end)
-CreateToggleHelper(ArchivesContainer, "Guess Forgot-Me-Not", function(state) _G.GuessForgotMeNot = state end)
+-- 1. Anti-Jamming (Optimized Sound Purger)
+_G.AntiJamming = _G.AntiJamming or false
 
--- Harita Algılama Döngüsü (Sadece bulunulan katın özellikleri görünsün)
-task.spawn(mainLoop or function()
-    while true do
-        task.wait(1)
+local function purgeSound(snd)
+    if not _G.AntiJamming then return end
+    if not snd or not snd.Parent then return end
+    if not snd:IsA("Sound") then return end
+    
+    local sName = string.lower(snd.Name)
+    local sId = string.lower(tostring(snd.SoundId))
+    
+    if sName:find("jeff") or sName:find("shop") or sName:find("jamming") or sId:find("jeff") or sId:find("shop") then
         pcall(function()
-            -- Örnek Harita Algılama Mantığı: Eğer oda/harita Archives ise göster, değilse gizle
-            local currentMap = workspace:FindFirstChild("CurrentRooms")
-            local isArchives = currentMap and (workspace:FindFirstChild("Archives") or currentMap:FindFirstChild("Archives"))
-            
-            -- İstediğin mantık: Archives'deysen Mines, OutDoors vb. özellikler gözükmez, sadece Archives görünür.
-            if ArchivesContainer then
-                ArchivesContainer.Visible = true -- Şimdilik aktif kat olarak Archives gösteriliyor
+            snd.Volume = 0
+            snd:Stop()
+            snd:Destroy()
+        end)
+    end
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.2)
+        if _G.AntiJamming then
+            pcall(function()
+                for _, snd in ipairs(SoundService:GetDescendants()) do
+                    purgeSound(snd)
+                end
+                local currentRooms = Workspace:FindFirstChild("CurrentRooms")
+                if currentRooms then
+                    for _, snd in ipairs(currentRooms:GetDescendants()) do
+                        purgeSound(snd)
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+SoundService.DescendantAdded:Connect(purgeSound)
+
+local function monitorRoomsSound(roomsFolder)
+    if not roomsFolder then return end
+    roomsFolder.DescendantAdded:Connect(purgeSound)
+    for _, snd in ipairs(roomsFolder:GetDescendants()) do
+        purgeSound(snd)
+    end
+end
+
+local existingRoomsSound = Workspace:FindFirstChild("CurrentRooms")
+if existingRoomsSound then
+    monitorRoomsSound(existingRoomsSound)
+end
+
+Workspace.ChildAdded:Connect(function(child)
+    if child.Name == "CurrentRooms" then
+        monitorRoomsSound(child)
+    end
+end)
+
+CreateToggleHelper(HotelFloor, "Anti-Jamming (Jamming / Jeff Shop Sesini Kaldırır)", function(state)
+    _G.AntiJamming = state
+end)
+
+-- 2. Anti-Ransom (A-90 Purger)
+_G.AntiRansom = _G.AntiRansom or false
+
+local function purgeRansom(obj)
+    if not _G.AntiRansom then return end
+    if not obj or not obj.Parent then return end
+    
+    pcall(function()
+        local nameLower = string.lower(obj.Name)
+        if nameLower:find("ransom") or nameLower:find("a-90") or nameLower:find("jumpscare") then
+            if obj:IsA("Model") or obj:IsA("BasePart") or obj:IsA("ScreenGui") or obj:IsA("Frame") or obj:IsA("ImageLabel") then
+                obj:Destroy()
+            end
+        end
+    end)
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.2)
+        if _G.AntiRansom then
+            pcall(function()
+                local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+                local foldersToScan = {
+                    Workspace:FindFirstChild("CurrentRooms"), 
+                    Workspace:FindFirstChild("Entities"), 
+                    playerGui
+                }
+                
+                for _, folder in ipairs(foldersToScan) do
+                    if folder then
+                        for _, v in ipairs(folder:GetDescendants()) do
+                            purgeRansom(v)
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+local function monitorFolderRansom(folder)
+    if not folder then return end
+    folder.DescendantAdded:Connect(purgeRansom)
+    for _, v in ipairs(folder:GetDescendants()) do
+        purgeRansom(v)
+    end
+end
+
+if Workspace:FindFirstChild("Entities") then
+    monitorFolderRansom(Workspace.Entities)
+end
+
+local currentRoomsRansom = Workspace:FindFirstChild("CurrentRooms")
+if currentRoomsRansom then
+    monitorFolderRansom(currentRoomsRansom)
+end
+
+local playerGuiRansom = LocalPlayer:FindFirstChild("PlayerGui")
+if playerGuiRansom then
+    monitorFolderRansom(playerGuiRansom)
+end
+
+CreateToggleHelper(HotelFloor, "Anti-Ransom (Ransom / A-90'ı Siler)", function(state)
+    _G.AntiRansom = state
+end)
+
+-- 3. Seek Helper
+_G.SeekHelper = _G.SeekHelper or false
+
+local function applySeekHighlight(obj)
+    if not _G.SeekHelper then return end
+    if not obj or not obj.Parent then return end
+    
+    pcall(function()
+        if (obj:IsA("BasePart") or obj:IsA("Model")) and not obj:FindFirstChild("DarkNessSeekHighlight") then
+            local nameLower = string.lower(obj.Name)
+            if nameLower:find("path") or nameLower:find("guide") or nameLower:find("route") or nameLower:find("chase") or nameLower:find("trigger") or nameLower:find("hand") then
+                local h = Instance.new("Highlight")
+                h.Name = "DarkNessSeekHighlight"
+                h.Adornee = obj
+                h.FillColor = Color3.fromRGB(255, 69, 0)
+                h.FillTransparency = 0.35
+                h.OutlineColor = Color3.fromRGB(255, 255, 255)
+                h.OutlineTransparency = 0
+                h.Parent = obj
+            end
+        end
+    end)
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.2)
+        if _G.SeekHelper then
+            pcall(function()
+                local currentRooms = Workspace:FindFirstChild("CurrentRooms")
+                if currentRooms then
+                    for _, v in ipairs(currentRooms:GetDescendants()) do
+                        applySeekHighlight(v)
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+local function monitorRoomsSeek(roomsFolder)
+    if not roomsFolder then return end
+    roomsFolder.DescendantAdded:Connect(applySeekHighlight)
+    for _, v in ipairs(roomsFolder:GetDescendants()) do
+        applySeekHighlight(v)
+    end
+end
+
+local existingRoomsSeek = Workspace:FindFirstChild("CurrentRooms")
+if existingRoomsSeek then
+    monitorRoomsSeek(existingRoomsSeek)
+end
+
+CreateToggleHelper(HotelFloor, "Seek Helper (Seek Koşusu Rehberi ve Yolu)", function(state)
+    _G.SeekHelper = state
+    if not state then
+        pcall(function()
+            local currentRooms = Workspace:FindFirstChild("CurrentRooms")
+            if currentRooms then
+                for _, v in ipairs(currentRooms:GetDescendants()) do
+                    if v.Name == "DarkNessSeekHighlight" then
+                        v:Destroy()
+                    end
+                end
             end
         end)
     end
 end)
 
--- 3. BİLDİRİM SİSTEMİ
+-- 4. Figure God Mode
+_G.FigureGodMode = _G.FigureGodMode or false
+
+local function bypassFigure(obj)
+    if not _G.FigureGodMode then return end
+    if not obj or not obj.Parent then return end
+    
+    pcall(function()
+        local nameLower = string.lower(obj.Name)
+        if nameLower:find("figure") then
+            if obj:IsA("Model") or obj:IsA("BasePart") then
+                for _, part in ipairs(obj:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanTouch = false
+                    elseif part:IsA("Script") or part:IsA("LocalScript") then
+                        part.Disabled = true
+                    end
+                end
+                if obj:IsA("BasePart") then
+                    obj.CanTouch = false
+                end
+            end
+        end
+    end)
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.2)
+        if _G.FigureGodMode then
+            pcall(function()
+                local foldersToScan = {
+                    Workspace:FindFirstChild("CurrentRooms"), 
+                    Workspace:FindFirstChild("Entities")
+                }
+                for _, folder in ipairs(foldersToScan) do
+                    if folder then
+                        for _, v in ipairs(folder:GetDescendants()) do
+                            bypassFigure(v)
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+local function monitorFolderFigure(folder)
+    if not folder then return end
+    folder.DescendantAdded:Connect(bypassFigure)
+    for _, v in ipairs(folder:GetDescendants()) do
+        bypassFigure(v)
+    end
+end
+
+if Workspace:FindFirstChild("Entities") then
+    monitorFolderFigure(Workspace.Entities)
+end
+
+local currentRoomsFigure = Workspace:FindFirstChild("CurrentRooms")
+if currentRoomsFigure then
+    monitorFolderFigure(currentRoomsFigure)
+end
+
+CreateToggleHelper(HotelFloor, "Figure God Mode (Figure Hasar Almaz / Görmez)", function(state)
+    _G.FigureGodMode = state
+end)
+
+-- ==========================================================
+-- KAT ALGILAMA VE OTOMATİK GİZLEME DÖNGÜSÜ
+-- ==========================================================
+task.spawn(function()
+    while true do
+        task.wait(1)
+        pcall(function()
+            local currentRooms = Workspace:FindFirstChild("CurrentRooms")
+            local detectedFloor = "Hotel"
+            
+            if currentRooms then
+                if Workspace:FindFirstChild("Archives") or currentRooms:FindFirstChild("Archives") then
+                    detectedFloor = "Archives"
+                elseif Workspace:FindFirstChild("Mines") or currentRooms:FindFirstChild("Mines") then
+                    detectedFloor = "Mines"
+                elseif Workspace:FindFirstChild("StairWell") or currentRooms:FindFirstChild("StairWell") then
+                    detectedFloor = "StairWell"
+                elseif Workspace:FindFirstChild("OutDoors") or currentRooms:FindFirstChild("OutDoors") then
+                    detectedFloor = "OutDoors"
+                elseif Workspace:FindFirstChild("BackDoor") or currentRooms:FindFirstChild("BackDoor") then
+                    detectedFloor = "BackDoor"
+                elseif Workspace:FindFirstChild("TheHollow") or currentRooms:FindFirstChild("TheHollow") then
+                    detectedFloor = "TheHollow"
+                end
+            end
+
+            for fName, container in pairs(FloorContainers) do
+                if fName == detectedFloor then
+                    container.Visible = true
+                else
+                    container.Visible = false
+                end
+            end
+
+            StatusLabel.Text = "🌐 Aktif Kat: <font color='#00E5FF'>" .. detectedFloor .. "</font>"
+        end)
+    end
+end)
+
+-- ==========================================================
+-- BİLDİRİM SİSTEMİ
+-- ==========================================================
 task.spawn(function()
     local NotifGui = Instance.new("ScreenGui")
     NotifGui.Name = "DarkNessNotif"
@@ -397,7 +705,7 @@ task.spawn(function()
     NotifText.Size = UDim2.new(1, -20, 1, 0)
     NotifText.Position = UDim2.new(0, 20, 0, 0)
     NotifText.BackgroundTransparency = 1
-    NotifText.Text = "⚡ <b>DarkNess Hub (ReworkEdition)</b>\n<font color='#00E5FF'>Başarıyla Yüklendi!</font>"
+    NotifText.Text = "⚡ <b>DarkNess Hub (Rework Edition)</b>\n<font color='#00E5FF'>Hotel Modülleri Tamamen Entegre Edildi!</font>"
     NotifText.RichText = true
     NotifText.TextColor3 = Color3.fromRGB(255, 255, 255)
     NotifText.TextSize = 13
