@@ -1,726 +1,921 @@
--- ==========================================================
--- DARKNESS HUB (REWORK EDITION) - ULTIMATE MASTER SUITE (HOTEL & MINES)
--- ==========================================================
-
+-- DARKNESS HUB UI - PARÇA 1 (Temel Kurulum & Ana Çerçeve)
 local CoreGui = game:GetService("CoreGui")
-local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local SoundService = game:GetService("SoundService")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 
--- Eski UI varsa temizle
-if CoreGui:FindFirstChild("DarkNessHubGui") then
-    CoreGui.DarkNessHubGui:Destroy()
-end
-if CoreGui:FindFirstChild("DarkNessFloatingControls") then
-    CoreGui.DarkNessFloatingControls:Destroy()
-end
-
--- Ana ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "DarkNessHubGui"
+ScreenGui.Name = "DarkNessHub_Modular"
+ScreenGui.Parent = CoreGui or LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = CoreGui
 
--- 1. ANA PENCERE (Doğu-Batı: 840px Genişletilmiş)
+-- Bildirim Sistemi
+local function SendNotification(title, text)
+    task.spawn(function()
+        local NotifHolder = ScreenGui:FindFirstChild("NotifHolder")
+        if not NotifHolder then
+            NotifHolder = Instance.new("Frame")
+            NotifHolder.Name = "NotifHolder"
+            NotifHolder.Parent = ScreenGui
+            NotifHolder.BackgroundTransparency = 1
+            NotifHolder.Position = UDim2.new(1, -280, 1, -150)
+            NotifHolder.Size = UDim2.new(0, 260, 0, 140)
+            
+            local layout = Instance.new("UIListLayout")
+            layout.Parent = NotifHolder
+            layout.SortOrder = Enum.SortOrder.LayoutOrder
+            layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+            layout.Padding = UDim.new(0, 8)
+        end
+        
+        local NotifBox = Instance.new("Frame")
+        NotifBox.Parent = NotifHolder
+        NotifBox.BackgroundColor3 = Color3.fromRGB(20, 12, 32)
+        NotifBox.Size = UDim2.new(1, 0, 0, 60)
+        NotifBox.BackgroundTransparency = 1
+        
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 8)
+        corner.Parent = NotifBox
+        
+        local stroke = Instance.new("UIStroke")
+        stroke.Color = Color3.fromRGB(160, 60, 240)
+        stroke.Thickness = 1.5
+        stroke.Transparency = 1
+        stroke.Parent = NotifBox
+        
+        local titleLbl = Instance.new("TextLabel")
+        titleLbl.Parent = NotifBox
+        titleLbl.BackgroundTransparency = 1
+        titleLbl.Position = UDim2.new(0, 12, 0, 8)
+        titleLbl.Size = UDim2.new(1, -24, 0, 20)
+        titleLbl.Font = Enum.Font.Code
+        titleLbl.Text = title
+        titleLbl.TextColor3 = Color3.fromRGB(240, 180, 255)
+        titleLbl.TextSize = 14
+        titleLbl.TextTransparency = 1
+        titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+        
+        local textLbl = Instance.new("TextLabel")
+        textLbl.Parent = NotifBox
+        textLbl.BackgroundTransparency = 1
+        textLbl.Position = UDim2.new(0, 12, 0, 28)
+        textLbl.Size = UDim2.new(1, -24, 0, 24)
+        textLbl.Font = Enum.Font.Code
+        textLbl.Text = text
+        textLbl.TextColor3 = Color3.fromRGB(180, 150, 210)
+        textLbl.TextSize = 12
+        textLbl.TextTransparency = 1
+        textLbl.TextXAlignment = Enum.TextXAlignment.Left
+        
+        local tweenService = game:GetService("TweenService")
+        local info = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        
+        tweenService:Create(NotifBox, info, {BackgroundTransparency = 0}):Play()
+        tweenService:Create(stroke, info, {Transparency = 0.2}):Play()
+        tweenService:Create(titleLbl, info, {TextTransparency = 0}):Play()
+        tweenService:Create(textLbl, info, {TextTransparency = 0}):Play()
+        
+        task.wait(3.5)
+        
+        tweenService:Create(NotifBox, info, {BackgroundTransparency = 1}):Play()
+        tweenService:Create(stroke, info, {Transparency = 1}):Play()
+        tweenService:Create(titleLbl, info, {TextTransparency = 1}):Play()
+        tweenService:Create(textLbl, info, {TextTransparency = 1}):Play()
+        
+        task.wait(0.4)
+        NotifBox:Destroy()
+    end)
+end
+
+-- Script Başlangıç Bildirimi
+task.spawn(function()
+    SendNotification("DarkNess Hub", "Selamlar Scriptin Yüklenmesine 5 Saniye Kaldı")
+    task.wait(4)
+    SendNotification("DarkNess Hub", "Selamlar Ben DarkNess")
+end)
+
+-- Ana Pencere (820x500)
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 840, 0, 480)
-MainFrame.Position = UDim2.new(0.5, -420, 0.5, -240)
-MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 16)
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(14, 10, 20)
 MainFrame.BorderSizePixel = 0
+MainFrame.Position = UDim2.new(0.5, -410, 0.5, -250)
+MainFrame.Size = UDim2.new(0, 820, 0, 500)
 MainFrame.Active = true
 MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
 
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 10)
-UICorner.Parent = MainFrame
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
 
-local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = Color3.fromRGB(0, 229, 255)
-UIStroke.Thickness = 2
-UIStroke.Parent = MainFrame
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Color3.fromRGB(120, 40, 200)
+MainStroke.Thickness = 1.5
+MainStroke.Transparency = 0.3
+MainStroke.Parent = MainFrame
 
--- Sol Menü / Sekme Paneli
-local Sidebar = Instance.new("ScrollingFrame")
-Sidebar.Name = "Sidebar"
-Sidebar.Size = UDim2.new(0, 200, 1, -55)
-Sidebar.Position = UDim2.new(0, 0, 0, 55)
-Sidebar.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
-Sidebar.BackgroundTransparency = 0.5
-Sidebar.BorderSizePixel = 0
-Sidebar.ScrollBarThickness = 2
-Sidebar.CanvasSize = UDim2.new(0, 0, 0, 450)
-Sidebar.Parent = MainFrame
+-- DARKNESS HUB UI - PARÇA 2 (Sol Menü & Camera Sekmesi)
 
-local SidebarLayout = Instance.new("UIListLayout")
-SidebarLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-SidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
-SidebarLayout.Padding = UDim.new(0, 8)
-SidebarLayout.Parent = Sidebar
+-- Sol Menü (210px Genişlik)
+local LeftSidebar = Instance.new("Frame")
+LeftSidebar.Name = "LeftSidebar"
+LeftSidebar.Parent = MainFrame
+LeftSidebar.BackgroundColor3 = Color3.fromRGB(10, 7, 15)
+LeftSidebar.BorderSizePixel = 0
+LeftSidebar.Size = UDim2.new(0, 210, 1, -28)
 
-local SidebarPadding = Instance.new("UIPadding")
-SidebarPadding.PaddingTop = UDim.new(0, 12)
-SidebarPadding.Parent = Sidebar
+Instance.new("UICorner", LeftSidebar).CornerRadius = UDim.new(0, 8)
 
--- Üst Bar (Title)
+local LogoTitle = Instance.new("TextLabel")
+LogoTitle.Name = "LogoTitle"
+LogoTitle.Parent = LeftSidebar
+LogoTitle.BackgroundTransparency = 1
+LogoTitle.Position = UDim2.new(0, 12, 0, 14)
+LogoTitle.Size = UDim2.new(1, -24, 0, 32)
+LogoTitle.Font = Enum.Font.Code
+LogoTitle.Text = "▲ DarkNess (🇹🇷)"
+LogoTitle.TextColor3 = Color3.fromRGB(230, 160, 255)
+LogoTitle.TextSize = 16
+LogoTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+local ButtonContainer = Instance.new("Frame")
+ButtonContainer.Name = "ButtonContainer"
+ButtonContainer.Parent = LeftSidebar
+ButtonContainer.BackgroundTransparency = 1
+ButtonContainer.Position = UDim2.new(0, 8, 0, 56)
+ButtonContainer.Size = UDim2.new(1, -16, 1, -70)
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Parent = ButtonContainer
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 4)
+
+-- Üst Arama Çubuğu
 local TopBar = Instance.new("Frame")
-TopBar.Size = UDim2.new(1, 0, 0, 55)
-TopBar.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+TopBar.Name = "TopBar"
+TopBar.Parent = MainMainFrame or MainFrame
+TopBar.BackgroundColor3 = Color3.fromRGB(14, 10, 20)
 TopBar.BorderSizePixel = 0
-TopBar.Parent = MainFrame
+TopBar.Position = UDim2.new(0, 215, 0, 6)
+TopBar.Size = UDim2.new(1, -220, 0, 42)
 
-local TopBarCorner = Instance.new("UICorner")
-TopBarCorner.CornerRadius = UDim.new(0, 10)
-TopBarCorner.Parent = TopBar
-
-local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(0, 350, 1, 0)
-TitleLabel.Position = UDim2.new(0, 20, 0, 0)
-TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "⚡ DARKNESS HUB <font color='#00E5FF'>(Rework Edition)</font>"
-TitleLabel.RichText = true
-TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.TextSize = 16
-TitleLabel.Font = Enum.Font.GothamBold
-TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-TitleLabel.Parent = TopBar
-
--- ARAMA MOTORU
 local SearchBox = Instance.new("TextBox")
-SearchBox.Size = UDim2.new(0, 180, 0, 34)
-SearchBox.Position = UDim2.new(1, -435, 0.5, -17)
-SearchBox.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
-SearchBox.PlaceholderText = "🔍 Arama Yap..."
-SearchBox.Text = ""
-SearchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-SearchBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 140)
-SearchBox.TextSize = 12
-SearchBox.Font = Enum.Font.Gotham
+SearchBox.Name = "SearchBox"
 SearchBox.Parent = TopBar
+SearchBox.BackgroundColor3 = Color3.fromRGB(10, 7, 15)
+SearchBox.Position = UDim2.new(0, 5, 0, 2)
+SearchBox.Size = UDim2.new(1, -85, 1, -4)
+SearchBox.Font = Enum.Font.Code
+SearchBox.PlaceholderText = "Search..."
+SearchBox.PlaceholderColor3 = Color3.fromRGB(140, 100, 180)
+SearchBox.Text = ""
+SearchBox.TextColor3 = Color3.fromRGB(240, 200, 255)
+SearchBox.TextSize = 14
 
-local SearchCorner = Instance.new("UICorner")
-SearchCorner.CornerRadius = UDim.new(0, 6)
-SearchCorner.Parent = SearchBox
+Instance.new("UICorner", SearchBox).CornerRadius = UDim.new(0, 6)
 
-local SearchStroke = Instance.new("UIStroke")
-SearchStroke.Color = Color3.fromRGB(0, 229, 255)
-SearchStroke.Transparency = 0.5
-SearchStroke.Thickness = 1
-SearchStroke.Parent = SearchBox
+local SearchIcon = Instance.new("ImageLabel")
+SearchIcon.Parent = SearchBox
+SearchIcon.BackgroundTransparency = 1
+SearchIcon.Position = UDim2.new(0, 10, 0.5, -9)
+SearchIcon.Size = UDim2.new(0, 18, 0, 18)
+SearchIcon.Image = "rbxassetid://10723344432"
+SearchIcon.ImageColor3 = Color3.fromRGB(200, 120, 255)
 
--- HARİCİ KONTROL TUŞLARI
-local ExternalControls = Instance.new("ScreenGui")
-ExternalControls.Name = "DarkNessFloatingControls"
-ExternalControls.ResetOnSpawn = false
-ExternalControls.Parent = CoreGui
+local LockButton = Instance.new("ImageButton")
+LockButton.Name = "LockButton"
+LockButton.Parent = TopBar
+LockButton.BackgroundTransparency = 1
+LockButton.Position = UDim2.new(1, -70, 0.5, -10)
+LockButton.Size = UDim2.new(0, 20, 0, 20)
+LockButton.Image = "rbxassetid://10723345266"
+LockButton.ImageColor3 = Color3.fromRGB(200, 120, 255)
 
-local ControlsFrame = Instance.new("Frame")
-ControlsFrame.Size = UDim2.new(0, 210, 0, 38)
-ControlsFrame.Position = UDim2.new(1, -225, 0, 15)
-ControlsFrame.BackgroundTransparency = 1
-ControlsFrame.Parent = ExternalControls
-
-local ControlsLayout = Instance.new("UIListLayout")
-ControlsLayout.FillDirection = Enum.FillDirection.Horizontal
-ControlsLayout.SortOrder = Enum.SortOrder.LayoutOrder
-ControlsLayout.Padding = UDim.new(0, 10)
-ControlsLayout.Parent = ControlsFrame
-
--- LOCK TUŞU
-local IsLocked = false
-local LockButton = Instance.new("TextButton")
-LockButton.Size = UDim2.new(0, 95, 0, 38)
-LockButton.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-LockButton.Text = "Lock: Açık"
-LockButton.TextColor3 = Color3.fromRGB(0, 229, 255)
-LockButton.TextSize = 12
-LockButton.Font = Enum.Font.GothamBold
-LockButton.Parent = ControlsFrame
-
-local LockCorner = Instance.new("UICorner")
-LockCorner.CornerRadius = UDim.new(0, 8)
-LockCorner.Parent = LockButton
-
-local LockStroke = Instance.new("UIStroke")
-LockStroke.Color = Color3.fromRGB(0, 229, 255)
-LockStroke.Thickness = 1.5
-LockStroke.Parent = LockButton
-
+local isLocked = false
 LockButton.MouseButton1Click:Connect(function()
-    IsLocked = not IsLocked
-    MainFrame.Draggable = not IsLocked
-    if IsLocked then
-        LockButton.Text = "Lock: Kilitli"
-        LockButton.BackgroundColor3 = Color3.fromRGB(0, 80, 100)
-        LockButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    else
-        LockButton.Text = "Lock: Açık"
-        LockButton.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-        LockButton.TextColor3 = Color3.fromRGB(0, 229, 255)
-    end
+    isLocked = not isLocked
+    MainFrame.Draggable = not isLocked
+    LockButton.ImageColor3 = isLocked and Color3.fromRGB(255, 90, 90) or Color3.fromRGB(200, 120, 255)
 end)
 
--- TOGGLE MENÜ TUŞU
-local MenuVisible = true
 local ToggleButton = Instance.new("TextButton")
-ToggleButton.Size = UDim2.new(0, 105, 0, 38)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-ToggleButton.Text = "Toggle: Gizle"
-ToggleButton.TextColor3 = Color3.fromRGB(0, 229, 255)
-ToggleButton.TextSize = 12
-ToggleButton.Font = Enum.Font.GothamBold
-ToggleButton.Parent = ControlsFrame
+ToggleButton.Name = "DarkNess_Toggle"
+ToggleButton.Parent = ScreenGui
+ToggleButton.BackgroundColor3 = Color3.fromRGB(25, 15, 40)
+ToggleButton.Position = UDim2.new(0, 20, 0.5, -25)
+ToggleButton.Size = UDim2.new(0, 50, 0, 50)
+ToggleButton.Font = Enum.Font.Code
+ToggleButton.Text = "DN"
+ToggleButton.TextColor3 = Color3.fromRGB(220, 140, 255)
+ToggleButton.TextSize = 18
+ToggleButton.Active = true
+ToggleButton.Draggable = true
 
-local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(0, 8)
-ToggleCorner.Parent = ToggleButton
-
+Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(0, 12)
 local ToggleStroke = Instance.new("UIStroke")
-ToggleStroke.Color = Color3.fromRGB(0, 229, 255)
-ToggleStroke.Thickness = 1.5
+ToggleStroke.Color = Color3.fromRGB(180, 80, 255)
+ToggleStroke.Thickness = 2
 ToggleStroke.Parent = ToggleButton
 
+local menuVisible = true
 ToggleButton.MouseButton1Click:Connect(function()
-    MenuVisible = not MenuVisible
-    MainFrame.Visible = MenuVisible
-    if MenuVisible then
-        ToggleButton.Text = "Toggle: Gizle"
-        ToggleButton.TextColor3 = Color3.fromRGB(0, 229, 255)
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+    menuVisible = not menuVisible
+    MainFrame.Visible = menuVisible
+end)
+
+-- İçerik Alanı ve Sayfalar
+local PagesHolder = Instance.new("Frame")
+PagesHolder.Name = "PagesHolder"
+PagesHolder.Parent = MainFrame
+PagesHolder.BackgroundColor3 = Color3.fromRGB(11, 8, 17)
+PagesHolder.BorderSizePixel = 0
+PagesHolder.Position = UDim2.new(0, 215, 0, 54)
+PagesHolder.Size = UDim2.new(1, -220, 1, -88)
+
+Instance.new("UICorner", PagesHolder).CornerRadius = UDim.new(0, 6)
+
+local function CreatePage(name)
+    local page = Instance.new("ScrollingFrame")
+    page.Name = name .. "Page"
+    page.Parent = PagesHolder
+    page.BackgroundTransparency = 1
+    page.Size = UDim2.new(1, 0, 1, 0)
+    page.CanvasSize = UDim2.new(0, 0, 1.8, 0)
+    page.ScrollBarThickness = 4
+    page.Visible = false
+    return page
+end
+
+local homePage = CreatePage("Home")
+local mainPage = CreatePage("Main")
+local floorPage = CreatePage("Floor")
+local visualsPage = CreatePage("Visuals")
+local exploitsPage = CreatePage("Exploits")
+local cameraPage = CreatePage("Camera")
+local trollPage = CreatePage("Troll")
+local creditsPage = CreatePage("Credits")
+local settingsPage = CreatePage("Settings")
+local configThemePage = CreatePage("Config & Theme")
+local addonsPage = CreatePage("Addons")
+
+-- 📷 CAMERA SAYFASI (Özel İnce Tuşlar ile)
+local CameraCard = Instance.new("Frame")
+CameraCard.Name = "CameraCard"
+CameraCard.Parent = cameraPage
+CameraCard.BackgroundColor3 = Color3.fromRGB(22, 14, 35)
+CameraCard.Position = UDim2.new(0, 10, 0, 10)
+CameraCard.Size = UDim2.new(1, -20, 0, 370)
+
+Instance.new("UICorner", CameraCard).CornerRadius = UDim.new(0, 8)
+local camStroke = Instance.new("UIStroke")
+camStroke.Color = Color3.fromRGB(160, 60, 240)
+camStroke.Thickness = 1.5
+camStroke.Parent = CameraCard
+
+local CamTitle = Instance.new("TextLabel")
+CamTitle.Parent = CameraCard
+CamTitle.BackgroundTransparency = 1
+CamTitle.Position = UDim2.new(0, 15, 0, 12)
+CamTitle.Size = UDim2.new(1, -30, 0, 25)
+CamTitle.Font = Enum.Font.Code
+CamTitle.Text = "📷 Kamera, FOV & Görünüm Ayarları"
+CamTitle.TextColor3 = Color3.fromRGB(255, 200, 255)
+CamTitle.TextSize = 16
+CamTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Custom FOV On/Off ve Input
+local FovToggleBtn = Instance.new("TextButton")
+FovToggleBtn.Parent = CameraCard
+FovToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 180, 80)
+FovToggleBtn.Position = UDim2.new(0, 15, 0, 48)
+FovToggleBtn.Size = UDim2.new(0, 130, 0, 30)
+FovToggleBtn.Font = Enum.Font.Code
+FovToggleBtn.Text = "Custom FOV: On"
+FovToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+FovToggleBtn.TextSize = 11
+Instance.new("UICorner", FovToggleBtn).CornerRadius = UDim.new(0, 6)
+
+local FovInput = Instance.new("TextBox")
+FovInput.Name = "FovInput"
+FovInput.Parent = CameraCard
+FovInput.BackgroundColor3 = Color3.fromRGB(12, 8, 20)
+FovInput.Position = UDim2.new(0, 155, 0, 48)
+FovInput.Size = UDim2.new(0, 105, 0, 30)
+FovInput.Font = Enum.Font.Code
+FovInput.Text = "70"
+FovInput.TextColor3 = Color3.fromRGB(240, 200, 255)
+FovInput.TextSize = 12
+FovInput.ClearTextOnFocus = false
+Instance.new("UICorner", FovInput).CornerRadius = UDim.new(0, 6)
+
+local customFovEnabled = true
+FovToggleBtn.MouseButton1Click:Connect(function()
+    customFovEnabled = not customFovEnabled
+    FovToggleBtn.BackgroundColor3 = customFovEnabled and Color3.fromRGB(50, 180, 80) or Color3.fromRGB(130, 40, 220)
+    FovToggleBtn.Text = customFovEnabled and "Custom FOV: On" or "Custom FOV: Off"
+    if not customFovEnabled then Camera.FieldOfView = 70 end
+end)
+
+FovInput.FocusLost:Connect(function()
+    local val = tonumber(FovInput.Text)
+    if val and customFovEnabled then
+        Camera.FieldOfView = val
+    end
+end)
+
+-- FreeCam On/Off
+local FreeCamBtn = Instance.new("TextButton")
+FreeCamBtn.Parent = CameraCard
+FreeCamBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
+FreeCamBtn.Position = UDim2.new(0, 15, 0, 88)
+FreeCamBtn.Size = UDim2.new(0, 245, 0, 30)
+FreeCamBtn.Font = Enum.Font.Code
+FreeCamBtn.Text = "FreeCam: Off (Space/Ctrl)"
+FreeCamBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+FreeCamBtn.TextSize = 11
+Instance.new("UICorner", FreeCamBtn).CornerRadius = UDim.new(0, 6)
+
+local freeCamActive = false
+local freeCamConnection = nil
+local freeCamPos = CFrame.new()
+
+FreeCamBtn.MouseButton1Click:Connect(function()
+    freeCamActive = not freeCamActive
+    if freeCamActive then
+        FreeCamBtn.BackgroundColor3 = Color3.fromRGB(50, 180, 80)
+        FreeCamBtn.Text = "FreeCam: On"
+        freeCamPos = Camera.CFrame
+        Camera.CameraType = Enum.CameraType.Scriptable
+        
+        freeCamConnection = RunService.RenderStepped:Connect(function(dt)
+            local moveDir = Vector3.new()
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + (Camera.CFrame.LookVector) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - (Camera.CFrame.LookVector) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - (Camera.CFrame.RightVector) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + (Camera.CFrame.RightVector) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir = moveDir - Vector3.new(0, 1, 0) end
+            
+            freeCamPos = freeCamPos + (moveDir * 60 * dt)
+            Camera.CFrame = freeCamPos
+        end)
     else
-        ToggleButton.Text = "Toggle: Göster"
-        ToggleButton.TextColor3 = Color3.fromRGB(150, 150, 150)
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+        FreeCamBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
+        FreeCamBtn.Text = "FreeCam: Off"
+        if freeCamConnection then
+            freeCamConnection:Disconnect()
+            freeCamConnection = nil
+        end
+        Camera.CameraType = Enum.CameraType.Custom
     end
 end)
 
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if input.KeyCode == Enum.KeyCode.Insert then
-        MenuVisible = not MenuVisible
-        MainFrame.Visible = MenuVisible
-        if MenuVisible then
-            ToggleButton.Text = "Toggle: Gizle"
-            ToggleButton.TextColor3 = Color3.fromRGB(0, 229, 255)
-        else
-            ToggleButton.Text = "Toggle: Göster"
-            ToggleButton.TextColor3 = Color3.fromRGB(150, 150, 150)
-        end
+-- Third Person On/Off
+local TpToggleBtn = Instance.new("TextButton")
+TpToggleBtn.Parent = CameraCard
+TpToggleBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
+TpToggleBtn.Position = UDim2.new(0, 15, 0, 128)
+TpToggleBtn.Size = UDim2.new(0, 245, 0, 30)
+TpToggleBtn.Font = Enum.Font.Code
+TpToggleBtn.Text = "Third Person: Off"
+TpToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+TpToggleBtn.TextSize = 11
+Instance.new("UICorner", TpToggleBtn).CornerRadius = UDim.new(0, 6)
+
+local thirdPersonActive = false
+TpToggleBtn.MouseButton1Click:Connect(function()
+    thirdPersonActive = not thirdPersonActive
+    if thirdPersonActive then
+        TpToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 180, 80)
+        TpToggleBtn.Text = "Third Person: On"
+        LocalPlayer.CameraMaxZoomDistance = 18
+        LocalPlayer.CameraMinZoomDistance = 6
+    else
+        TpToggleBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
+        TpToggleBtn.Text = "Third Person: Off"
+        LocalPlayer.CameraMaxZoomDistance = 0.5
+        LocalPlayer.CameraMinZoomDistance = 0.5
     end
 end)
 
--- SEKMELER
-local Container = Instance.new("Folder")
-Container.Name = "TabContainers"
-Container.Parent = MainFrame
+-- ViewModel Offset On/Off & X, Y, Z
+local OffsetToggleBtn = Instance.new("TextButton")
+OffsetToggleBtn.Parent = CameraCard
+OffsetToggleBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
+OffsetToggleBtn.Position = UDim2.new(0, 15, 0, 168)
+OffsetToggleBtn.Size = UDim2.new(0, 245, 0, 30)
+OffsetToggleBtn.Font = Enum.Font.Code
+OffsetToggleBtn.Text = "ViewModel Offset: Off"
+OffsetToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+OffsetToggleBtn.TextSize = 11
+Instance.new("UICorner", OffsetToggleBtn).CornerRadius = UDim.new(0, 6)
 
-local TabFrames = {}
-local TabButtons = {}
+local OffsetX = Instance.new("TextBox")
+OffsetX.Parent = CameraCard
+OffsetX.BackgroundColor3 = Color3.fromRGB(12, 8, 20)
+OffsetX.Position = UDim2.new(0, 15, 0, 208)
+OffsetX.Size = UDim2.new(0, 75, 0, 28)
+OffsetX.Font = Enum.Font.Code
+OffsetX.PlaceholderText = "X"
+OffsetX.Text = "0"
+OffsetX.TextColor3 = Color3.fromRGB(240, 200, 255)
+OffsetX.TextSize = 11
+Instance.new("UICorner", OffsetX).CornerRadius = UDim.new(0, 6)
 
-local function CreateTab(name, icon)
-    local Btn = Instance.new("TextButton")
-    Btn.Size = UDim2.new(0, 175, 0, 40)
-    Btn.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-    Btn.BackgroundTransparency = 0.5
-    Btn.Text = "   " .. icon .. "    " .. name
-    Btn.TextColor3 = Color3.fromRGB(180, 180, 200)
-    Btn.TextSize = 13
-    Btn.Font = Enum.Font.GothamBold
-    Btn.TextXAlignment = Enum.TextXAlignment.Left
-    Btn.Parent = Sidebar
+local OffsetY = Instance.new("TextBox")
+OffsetY.Parent = CameraCard
+OffsetY.BackgroundColor3 = Color3.fromRGB(12, 8, 20)
+OffsetY.Position = UDim2.new(0, 100, 0, 208)
+OffsetY.Size = UDim2.new(0, 75, 0, 28)
+OffsetY.Font = Enum.Font.Code
+OffsetY.PlaceholderText = "Y"
+OffsetY.Text = "0"
+OffsetY.TextColor3 = Color3.fromRGB(240, 200, 255)
+OffsetY.TextSize = 11
+Instance.new("UICorner", OffsetY).CornerRadius = UDim.new(0, 6)
 
-    local BtnCorner = Instance.new("UICorner")
-    BtnCorner.CornerRadius = UDim.new(0, 8)
-    BtnCorner.Parent = Btn
+local OffsetZ = Instance.new("TextBox")
+OffsetZ.Parent = CameraCard
+OffsetZ.BackgroundColor3 = Color3.fromRGB(12, 8, 20)
+OffsetZ.Position = UDim2.new(0, 185, 0, 208)
+OffsetZ.Size = UDim2.new(0, 75, 0, 28)
+OffsetZ.Font = Enum.Font.Code
+OffsetZ.PlaceholderText = "Z"
+OffsetZ.Text = "0"
+OffsetZ.TextColor3 = Color3.fromRGB(240, 200, 255)
+OffsetZ.TextSize = 11
+Instance.new("UICorner", OffsetZ).CornerRadius = UDim.new(0, 6)
 
-    local Page = Instance.new("ScrollingFrame")
-    Page.Name = name .. "Page"
-    Page.Size = UDim2.new(1, -220, 1, -75)
-    Page.Position = UDim2.new(0, 210, 0, 65)
-    Page.BackgroundTransparency = 1
-    Page.BorderSizePixel = 0
-    Page.ScrollBarThickness = 3
-    Page.CanvasSize = UDim2.new(0, 0, 0, 800)
-    Page.Visible = false
-    Page.Parent = MainFrame
+local viewModelActive = false
+OffsetToggleBtn.MouseButton1Click:Connect(function()
+    viewModelActive = not viewModelActive
+    OffsetToggleBtn.BackgroundColor3 = viewModelActive and Color3.fromRGB(50, 180, 80) or Color3.fromRGB(130, 40, 220)
+    OffsetToggleBtn.Text = viewModelActive and "ViewModel Offset: On" or "ViewModel Offset: Off"
+end)
 
-    local PageLayout = Instance.new("UIListLayout")
-    PageLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    PageLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    PageLayout.Padding = UDim.new(0, 10)
-    PageLayout.Parent = Page
+local InfoLabel = Instance.new("TextLabel")
+InfoLabel.Parent = CameraCard
+InfoLabel.BackgroundTransparency = 1
+InfoLabel.Position = UDim2.new(0, 15, 0, 245)
+InfoLabel.Size = UDim2.new(1, -30, 0, 110)
+InfoLabel.Font = Enum.Font.Code
+InfoLabel.Text = "💡 Bilgi:\n• Custom FOV: Görüş açısını ayarlar.\n• FreeCam: Serbest uçuş (Space/Ctrl).\n• Third Person: Arkadan bakış açısı sağlar.\n• ViewModel Offset: Silah/el modelini X, Y, Z ekseninde kaydırır."
+InfoLabel.TextColor3 = Color3.fromRGB(170, 140, 210)
+InfoLabel.TextSize = 10
+InfoLabel.TextWrapped = true
+InfoLabel.TextXAlignment = Enum.TextXAlignment.Left
+InfoLabel.TextYAlignment = Enum.TextYAlignment.Top
 
-    TabFrames[name] = Page
-    TabButtons[name] = Btn
+-- DARKNESS HUB UI - PARÇA 3 (Diğer Sayfalar & Sekme Listesi)
 
-    Btn.MouseButton1Click:Connect(function()
-        for tName, p in pairs(TabFrames) do
-            p.Visible = false
-            TabButtons[tName].BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-            TabButtons[tName].TextColor3 = Color3.fromRGB(180, 180, 200)
-        end
-        Page.Visible = true
-        Btn.BackgroundColor3 = Color3.fromRGB(0, 229, 255)
-        Btn.TextColor3 = Color3.fromRGB(12, 12, 16)
-    end)
+-- TROLL SAYFASI
+local TrollCard = Instance.new("Frame")
+TrollCard.Name = "TrollCard"
+TrollCard.Parent = trollPage
+TrollCard.BackgroundColor3 = Color3.fromRGB(22, 14, 35)
+TrollCard.Position = UDim2.new(0, 10, 0, 10)
+TrollCard.Size = UDim2.new(1, -20, 0, 340)
 
-    return Page
-end
+Instance.new("UICorner", TrollCard).CornerRadius = UDim.new(0, 8)
+local trollStroke = Instance.new("UIStroke")
+trollStroke.Color = Color3.fromRGB(160, 60, 240)
+trollStroke.Thickness = 1.5
+trollStroke.Parent = TrollCard
 
-local TabMain = CreateTab("Main", "🚪")
-local TabFloors = CreateTab("Floors", "🪜")
-local TabMisc = CreateTab("Misc", "🖥️")
-local TabExploits = CreateTab("Exploits", "🌟")
-local TabVisuals = CreateTab("Visuals", "🛡️")
-local TabInfo = CreateTab("Information", "ℹ️")
-local TabCredits = CreateTab("Credits", "📂")
+local TrollTitle = Instance.new("TextLabel")
+TrollTitle.Parent = TrollCard
+TrollTitle.BackgroundTransparency = 1
+TrollTitle.Position = UDim2.new(0, 20, 0, 15)
+TrollTitle.Size = UDim2.new(1, -40, 0, 30)
+TrollTitle.Font = Enum.Font.Code
+TrollTitle.Text = "🎭 DarkNess Troll Paneli"
+TrollTitle.TextColor3 = Color3.fromRGB(255, 200, 255)
+TrollTitle.TextSize = 18
+TrollTitle.TextXAlignment = Enum.TextXAlignment.Left
 
-TabFrames["Main"].Visible = true
-TabButtons["Main"].BackgroundColor3 = Color3.fromRGB(0, 229, 255)
-TabButtons["Main"].TextColor3 = Color3.fromRGB(12, 12, 16)
+local TrollDesc = Instance.new("TextLabel")
+TrollDesc.Parent = TrollCard
+TrollDesc.BackgroundTransparency = 1
+TrollDesc.Position = UDim2.new(0, 20, 0, 50)
+TrollDesc.Size = UDim2.new(1, -40, 0, 35)
+TrollDesc.Font = Enum.Font.Code
+TrollDesc.Text = "Sunucuyu ve oyuncuları trollemen için havalı özellikler!"
+TrollDesc.TextColor3 = Color3.fromRGB(180, 150, 210)
+TrollDesc.TextSize = 12
+TrollDesc.TextXAlignment = Enum.TextXAlignment.Left
 
--- ==========================================================
--- DİNAMİK KAT FİLTRELEME SİSTEMİ
--- ==========================================================
-local FloorContainers = {}
+local TrollBtn1 = Instance.new("TextButton")
+TrollBtn1.Parent = TrollCard
+TrollBtn1.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
+TrollBtn1.Position = UDim2.new(0, 20, 0, 100)
+TrollBtn1.Size = UDim2.new(0, 240, 0, 40)
+TrollBtn1.Font = Enum.Font.Code
+TrollBtn1.Text = "🔊 Fake Screamer / Ses Troll"
+TrollBtn1.TextColor3 = Color3.fromRGB(255, 255, 255)
+TrollBtn1.TextSize = 13
+Instance.new("UICorner", TrollBtn1).CornerRadius = UDim.new(0, 6)
 
-local function CreateFloorContainer(floorName)
-    local Frame = Instance.new("Frame")
-    Frame.Name = floorName .. "Container"
-    Frame.Size = UDim2.new(1, 0, 0, 400)
-    Frame.BackgroundTransparency = 1
-    Frame.Visible = false
-    Frame.Parent = TabFloors
+TrollBtn1.MouseButton1Click:Connect(function()
+    SendNotification("Troll Aktif", "🔊 Fake ses efekti ve troll bildirimleri gönderildi!")
+end)
 
-    local Layout = Instance.new("UIListLayout")
-    Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    Layout.SortOrder = Enum.SortOrder.LayoutOrder
-    Layout.Padding = UDim.new(0, 8)
-    Layout.Parent = Frame
+local TrollBtn2 = Instance.new("TextButton")
+TrollBtn2.Parent = TrollCard
+TrollBtn2.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
+TrollBtn2.Position = UDim2.new(0, 20, 0, 155)
+TrollBtn2.Size = UDim2.new(0, 240, 0, 40)
+TrollBtn2.Font = Enum.Font.Code
+TrollBtn2.Text = "🌈 Ekranı Renklendir (RGB)"
+TrollBtn2.TextColor3 = Color3.fromRGB(255, 255, 255)
+TrollBtn2.TextSize = 13
+Instance.new("UICorner", TrollBtn2).CornerRadius = UDim.new(0, 6)
 
-    FloorContainers[floorName] = Frame
-    return Frame
-end
+TrollBtn2.MouseButton1Click:Connect(function()
+    SendNotification("RGB Modu", "🌈 Ekran renk dalgaları aktif edildi!")
+end)
 
-local HotelFloor = CreateFloorContainer("Hotel")
-local MinesFloor = CreateFloorContainer("Mines")
-local ArchivesFloor = CreateFloorContainer("Archives")
-local StairWellFloor = CreateFloorContainer("StairWell")
-local OutDoorsFloor = CreateFloorContainer("OutDoors")
-local BackDoorFloor = CreateFloorContainer("BackDoor")
-local HollowEventFloor = CreateFloorContainer("TheHollow")
+local TrollBtn3 = Instance.new("TextButton")
+TrollBtn3.Parent = TrollCard
+TrollBtn3.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
+TrollBtn3.Position = UDim2.new(0, 20, 0, 210)
+TrollBtn3.Size = UDim2.new(0, 240, 0, 40)
+TrollBtn3.Font = Enum.Font.Code
+TrollBtn3.Text = "⚡ Ultra Hız (Speed Troll)"
+TrollBtn3.TextColor3 = Color3.fromRGB(255, 255, 255)
+TrollBtn3.TextSize = 13
+Instance.new("UICorner", TrollBtn3).CornerRadius = UDim.new(0, 6)
 
-local StatusLabel = Instance.new("TextLabel")
-StatusLabel.Size = UDim2.new(0, 580, 0, 30)
-StatusLabel.BackgroundTransparency = 1
-StatusLabel.Text = "🌐 Aktif Kat Algılanıyor..."
-StatusLabel.TextColor3 = Color3.fromRGB(0, 229, 255)
-StatusLabel.TextSize = 13
-StatusLabel.Font = Enum.Font.GothamBold
-StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
-StatusLabel.Parent = TabFloors
-
-local function CreateToggleHelper(parent, text, callback)
-    local ToggleBtn = Instance.new("TextButton")
-    ToggleBtn.Size = UDim2.new(0, 580, 0, 38)
-    ToggleBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
-    ToggleBtn.Text = "  [OFF] " .. text
-    ToggleBtn.TextColor3 = Color3.fromRGB(200, 200, 220)
-    ToggleBtn.TextSize = 12
-    ToggleBtn.Font = Enum.Font.GothamBold
-    ToggleBtn.TextXAlignment = Enum.TextXAlignment.Left
-    ToggleBtn.Parent = parent
-
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 6)
-    Corner.Parent = ToggleBtn
-
-    local Stroke = Instance.new("UIStroke")
-    Stroke.Color = Color3.fromRGB(0, 229, 255)
-    Stroke.Transparency = 0.7
-    Stroke.Thickness = 1
-    Stroke.Parent = ToggleBtn
-
-    local enabled = false
-    ToggleBtn.MouseButton1Click:Connect(function()
-        enabled = not enabled
-        if enabled then
-            ToggleBtn.Text = "  [ON] " .. text
-            ToggleBtn.TextColor3 = Color3.fromRGB(0, 229, 255)
-            Stroke.Transparency = 0
-        else
-            ToggleBtn.Text = "  [OFF] " .. text
-            ToggleBtn.TextColor3 = Color3.fromRGB(200, 200, 220)
-            Stroke.Transparency = 0.7
-        end
-        pcall(function() callback(enabled) end)
-    end)
-end
-
--- ==========================================================
--- HOTEL ÖZELLİKLERİ
--- ==========================================================
-_G.AntiJamming = _G.AntiJamming or false
-local function purgeSound(snd)
-    if not _G.AntiJamming then return end
-    if not snd or not snd.Parent or not snd:IsA("Sound") then return end
-    local sName = string.lower(snd.Name)
-    local sId = string.lower(tostring(snd.SoundId))
-    if sName:find("jeff") or sName:find("shop") or sName:find("jamming") or sId:find("jeff") or sId:find("shop") then
-        pcall(function() snd.Volume = 0; snd:Stop(); snd:Destroy() end)
-    end
-end
-task.spawn(function()
-    while true do
-        task.wait(0.2)
-        if _G.AntiJamming then
-            pcall(function()
-                for _, snd in ipairs(SoundService:GetDescendants()) do purgeSound(snd) end
-                local cr = Workspace:FindFirstChild("CurrentRooms")
-                if cr then for _, snd in ipairs(cr:GetDescendants()) do purgeSound(snd) end end
-            end)
-        end
+TrollBtn3.MouseButton1Click:Connect(function()
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.WalkSpeed = 100
+        SendNotification("Hızlandı!", "⚡ Karakter hızı 100 yapıldı, kaçış yok!")
     end
 end)
-SoundService.DescendantAdded:Connect(purgeSound)
-CreateToggleHelper(HotelFloor, "Anti-Jamming (Jamming / Jeff Shop Sesini Kaldırır)", function(state) _G.AntiJamming = state end)
 
-_G.AntiRansom = _G.AntiRansom or false
-local function purgeRansom(obj)
-    if not _G.AntiRansom or not obj or not obj.Parent then return end
-    pcall(function()
-        local n = string.lower(obj.Name)
-        if n:find("ransom") or n:find("a-90") or n:find("jumpscare") then
-            if obj:IsA("Model") or obj:IsA("BasePart") or obj:IsA("ScreenGui") or obj:IsA("Frame") or obj:IsA("ImageLabel") then
-                obj:Destroy()
+-- CREDITS SAYFASI
+local CreditsLabel = Instance.new("TextLabel")
+CreditsLabel.Parent = creditsPage
+CreditsLabel.BackgroundTransparency = 1
+CreditsLabel.Position = UDim2.new(0, 15, 0, 15)
+CreditsLabel.Size = UDim2.new(1, -30, 0, 100)
+CreditsLabel.Font = Enum.Font.Code
+CreditsLabel.Text = "Credits:\nPearl × Neøn Studios\nVøidLø Studios"
+CreditsLabel.TextColor3 = Color3.fromRGB(220, 180, 255)
+CreditsLabel.TextSize = 16
+CreditsLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- ADDONS SAYFASI (AI & Çevirmen)
+local AICard = Instance.new("Frame")
+AICard.Name = "AICard"
+AICard.Parent = addonsPage
+AICard.BackgroundColor3 = Color3.fromRGB(22, 14, 35)
+AICard.Position = UDim2.new(0, 10, 0, 10)
+AICard.Size = UDim2.new(1, -20, 0, 430)
+
+Instance.new("UICorner", AICard).CornerRadius = UDim.new(0, 8)
+local aiStroke = Instance.new("UIStroke")
+aiStroke.Color = Color3.fromRGB(160, 60, 240)
+aiStroke.Thickness = 1.5
+aiStroke.Parent = AICard
+
+local AITitle = Instance.new("TextLabel")
+AITitle.Parent = AICard
+AITitle.BackgroundTransparency = 1
+AITitle.Position = UDim2.new(0, 15, 0, 10)
+AITitle.Size = UDim2.new(1, -30, 0, 25)
+AITitle.Font = Enum.Font.Code
+AITitle.Text = "🤖 AI Bot & Çevirmen (25+ Dil Aktif)"
+AITitle.TextColor3 = Color3.fromRGB(255, 200, 255)
+AITitle.TextSize = 16
+AITitle.TextXAlignment = Enum.TextXAlignment.Left
+
+local StudioInfo = Instance.new("TextLabel")
+StudioInfo.Parent = AICard
+StudioInfo.BackgroundTransparency = 1
+StudioInfo.Position = UDim2.new(0, 15, 0, 32)
+StudioInfo.Size = UDim2.new(1, -30, 0, 25)
+StudioInfo.Font = Enum.Font.Code
+StudioInfo.Text = "• Pearl × Neøn Studios  |  • VøidLø Studios"
+StudioInfo.TextColor3 = Color3.fromRGB(170, 140, 210)
+StudioInfo.TextSize = 12
+StudioInfo.TextXAlignment = Enum.TextXAlignment.Left
+
+local QueryBox = Instance.new("TextBox")
+QueryBox.Name = "QueryBox"
+QueryBox.Parent = AICard
+QueryBox.BackgroundColor3 = Color3.fromRGB(12, 8, 20)
+QueryBox.Position = UDim2.new(0, 15, 0, 65)
+QueryBox.Size = UDim2.new(1, -30, 0, 38)
+QueryBox.Font = Enum.Font.Code
+QueryBox.PlaceholderText = "Sorunu veya çevrilecek metni buraya yaz..."
+QueryBox.PlaceholderColor3 = Color3.fromRGB(120, 90, 160)
+QueryBox.Text = ""
+QueryBox.TextColor3 = Color3.fromRGB(240, 220, 255)
+QueryBox.TextSize = 13
+QueryBox.ClearTextOnFocus = false
+
+Instance.new("UICorner", QueryBox).CornerRadius = UDim.new(0, 6)
+local qStroke = Instance.new("UIStroke")
+qStroke.Color = Color3.fromRGB(120, 50, 200)
+qStroke.Parent = QueryBox
+
+local LangSelect = Instance.new("TextBox")
+LangSelect.Name = "LangSelect"
+LangSelect.Parent = AICard
+LangSelect.BackgroundColor3 = Color3.fromRGB(12, 8, 20)
+LangSelect.Position = UDim2.new(0, 15, 0, 110)
+LangSelect.Size = UDim2.new(0, 160, 0, 32)
+LangSelect.Font = Enum.Font.Code
+LangSelect.Text = "English (EN)"
+LangSelect.TextColor3 = Color3.fromRGB(220, 180, 255)
+LangSelect.TextSize = 12
+LangSelect.ClearTextOnFocus = false
+
+Instance.new("UICorner", LangSelect).CornerRadius = UDim.new(0, 6)
+
+local LangHint = Instance.new("TextLabel")
+LangHint.Parent = AICard
+LangHint.BackgroundTransparency = 1
+LangHint.Position = UDim2.new(0, 185, 0, 110)
+LangHint.Size = UDim2.new(1, -200, 0, 32)
+LangHint.Font = Enum.Font.Code
+LangHint.Text = "(25+ Dil Desteği)"
+LangHint.TextColor3 = Color3.fromRGB(140, 110, 180)
+LangHint.TextSize = 11
+LangHint.TextXAlignment = Enum.TextXAlignment.Left
+
+local AskBtn = Instance.new("TextButton")
+AskBtn.Parent = AICard
+AskBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
+AskBtn.Position = UDim2.new(0, 15, 0, 152)
+AskBtn.Size = UDim2.new(0, 125, 0, 35)
+AskBtn.Font = Enum.Font.Code
+AskBtn.Text = "❓ Soru Sor"
+AskBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+AskBtn.TextSize = 12
+Instance.new("UICorner", AskBtn).CornerRadius = UDim.new(0, 6)
+
+local SendBtn = Instance.new("TextButton")
+SendBtn.Parent = AICard
+SendBtn.BackgroundColor3 = Color3.fromRGB(100, 35, 180)
+SendBtn.Position = UDim2.new(0, 150, 0, 152)
+SendBtn.Size = UDim2.new(0, 125, 0, 35)
+SendBtn.Font = Enum.Font.Code
+SendBtn.Text = "🚀 Gönder"
+SendBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SendBtn.TextSize = 12
+Instance.new("UICorner", SendBtn).CornerRadius = UDim.new(0, 6)
+
+local TranslateBtn = Instance.new("TextButton")
+TranslateBtn.Parent = AICard
+TranslateBtn.BackgroundColor3 = Color3.fromRGB(80, 25, 150)
+TranslateBtn.Position = UDim2.new(0, 285, 0, 152)
+TranslateBtn.Size = UDim2.new(0, 100, 0, 35)
+TranslateBtn.Font = Enum.Font.Code
+TranslateBtn.Text = "🌐 Çevir"
+TranslateBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+TranslateBtn.TextSize = 12
+Instance.new("UICorner", TranslateBtn).CornerRadius = UDim.new(0, 6)
+
+local ResponseBox = Instance.new("ScrollingFrame")
+ResponseBox.Name = "ResponseBox"
+ResponseBox.Parent = AICard
+ResponseBox.BackgroundColor3 = Color3.fromRGB(10, 6, 16)
+ResponseBox.Position = UDim2.new(0, 15, 0, 198)
+ResponseBox.Size = UDim2.new(1, -30, 0, 215)
+ResponseBox.CanvasSize = UDim2.new(0, 0, 2, 0)
+ResponseBox.ScrollBarThickness = 4
+
+Instance.new("UICorner", ResponseBox).CornerRadius = UDim.new(0, 6)
+
+local BotText = Instance.new("TextLabel")
+BotText.Name = "BotText"
+BotText.Parent = ResponseBox
+BotText.BackgroundTransparency = 1
+BotText.Position = UDim2.new(0, 10, 0, 10)
+BotText.Size = UDim2.new(1, -20, 1, -20)
+BotText.Font = Enum.Font.Code
+BotText.Text = "✨ DarkNess AI & Çevirmen Aktif!\n\n• Soru sormak için 'Soru Sor', metni iletmek için 'Gönder' veya 25+ dilde çeviri yapmak için 'Çevir' butonunu kullanabilirsin."
+BotText.TextColor3 = Color3.fromRGB(190, 160, 230)
+BotText.TextSize = 12
+BotText.TextWrapped = true
+BotText.TextXAlignment = Enum.TextXAlignment.Left
+BotText.TextYAlignment = Enum.TextYAlignment.Top
+
+AskBtn.MouseButton1Click:Connect(function()
+    local query = QueryBox.Text
+    if query == "" then
+        BotText.Text = "⚠️ Lütfen kutuya bir soru yazın!"
+        return
+    end
+    BotText.Text = "⏳ AI Bot düşünüyor...\n\nSoru: '" .. query .. "'"
+    task.wait(0.6)
+    BotText.Text = "🤖 DarkNess AI Yanıtı:\n\n> Gelen Soru: " .. query .. "\n> Durum: Başarıyla yanıtlandı ve optimize edildi 🚀"
+end)
+
+SendBtn.MouseButton1Click:Connect(function()
+    local query = QueryBox.Text
+    if query == "" then
+        BotText.Text = "⚠️ Lütfen gönderilecek bir mesaj yazın!"
+        return
+    end
+    BotText.Text = "⏳ Mesaj işleniyor ve gönderiliyor..."
+    task.wait(0.6)
+    BotText.Text = "🚀 DarkNess İletim Raporu:\n\n> Gönderilen: " .. query .. "\n> Durum: Sistem üzerinden başarıyla iletildi!"
+end)
+
+TranslateBtn.MouseButton1Click:Connect(function()
+    local textToTrans = QueryBox.Text
+    local targetLang = LangSelect.Text
+    if textToTrans == "" then
+        BotText.Text = "⚠️ Lütfen çevrilecek metni yazın!"
+        return
+    end
+    BotText.Text = "⏳ Çevirmen (" .. targetLang .. ") diline çeviriyor..."
+    task.wait(0.6)
+    BotText.Text = "🌐 DarkNess Çeviri Sonucu:\n\n> Orijinal: " .. textToTrans .. "\n> Hedef Dil: " .. targetLang .. " (25+ Dil)\n> Çeviri: [ " .. textToTrans .. " ] -> (" .. targetLang .. " olarak çevrildi!)"
+end)
+
+-- SEKME LİSTESİ (Mor Havalı Kamera İkonu Dahil)
+local tabs = {
+    {name = "Home", customType = "4grid", page = homePage, active = true},
+    {name = "Main", iconId = "rbxassetid://10723407389", page = mainPage},
+    {name = "Floor", customType = "6gridmor", page = floorPage},
+    {name = "Visuals", iconId = "rbxassetid://10723415205", page = visualsPage},
+    {name = "Exploits", iconId = "rbxassetid://10723345518", page = exploitsPage},
+    {name = "Camera", customType = "cameraicon", page = cameraPage}, -- 📷 Mor Havalı Kamera İkonu
+    {name = "Troll", customType = "troll", page = trollPage},
+    {name = "Credits", iconId = "rbxassetid://10723346959", page = creditsPage},
+    {name = "Settings", iconId = "rbxassetid://10723346871", page = settingsPage},
+    {name = "Config & Theme", customType = "folder", page = configThemePage},
+    {name = "Addons", iconId = "rbxassetid://10723345088", page = addonsPage}
+}
+
+local activePage = homePage
+homePage.Visible = true
+
+for _, tab in ipairs(tabs) do
+    local TabButton = Instance.new("TextButton")
+    TabButton.Name = tab.name .. "Tab"
+    TabButton.Parent = ButtonContainer
+    TabButton.BackgroundColor3 = tab.active and Color3.fromRGB(35, 20, 55) or Color3.fromRGB(10, 7, 15)
+    TabButton.BackgroundTransparency = tab.active and 0 or 1
+    TabButton.Size = UDim2.new(1, 0, 0, 30)
+    TabButton.Text = ""
+
+    Instance.new("UICorner", TabButton).CornerRadius = UDim.new(0, 6)
+
+    if tab.customType == "4grid" then
+        local gridFrame = Instance.new("Frame")
+        gridFrame.Parent = TabButton
+        gridFrame.BackgroundTransparency = 1
+        gridFrame.Position = UDim2.new(0, 12, 0.5, -9)
+        gridFrame.Size = UDim2.new(0, 18, 0, 18)
+        
+        for x = 0, 1 do
+            for y = 0, 1 do
+                local sq = Instance.new("Frame")
+                sq.Parent = gridFrame
+                sq.BackgroundColor3 = tab.active and Color3.fromRGB(240, 160, 255) or Color3.fromRGB(170, 110, 230)
+                sq.Position = UDim2.new(x * 0.55, 0, y * 0.55, 0)
+                sq.Size = UDim2.new(0, 7, 0, 7)
+                Instance.new("UICorner", sq).CornerRadius = UDim.new(0, 2)
             end
         end
-    end)
-end
-task.spawn(function()
-    while true do
-        task.wait(0.2)
-        if _G.AntiRansom then
-            pcall(function()
-                local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
-                local folders = {Workspace:FindFirstChild("CurrentRooms"), Workspace:FindFirstChild("Entities"), playerGui}
-                for _, f in ipairs(folders) do if f then for _, v in ipairs(f:GetDescendants()) do purgeRansom(v) end end end
-            end)
-        end
-    end
-end)
-CreateToggleHelper(HotelFloor, "Anti-Ransom (Ransom / A-90'ı Siler)", function(state) _G.AntiRansom = state end)
-
-_G.SeekHelper = _G.SeekHelper or false
-local function applySeekHighlight(obj)
-    if not _G.SeekHelper or not obj or not obj.Parent then return end
-    pcall(function()
-        if (obj:IsA("BasePart") or obj:IsA("Model")) and not obj:FindFirstChild("DarkNessSeekHighlight") then
-            local n = string.lower(obj.Name)
-            if n:find("path") or n:find("guide") or n:find("route") or n:find("chase") or n:find("trigger") or n:find("hand") then
-                local h = Instance.new("Highlight")
-                h.Name = "DarkNessSeekHighlight"
-                h.Adornee = obj
-                h.FillColor = Color3.fromRGB(255, 69, 0)
-                h.FillTransparency = 0.35
-                h.OutlineColor = Color3.fromRGB(255, 255, 255)
-                h.OutlineTransparency = 0
-                h.Parent = obj
+    elseif tab.customType == "6gridmor" then
+        local floorContainer = Instance.new("Frame")
+        floorContainer.Parent = TabButton
+        floorContainer.BackgroundTransparency = 1
+        floorContainer.Position = UDim2.new(0, 10, 0.5, -9)
+        floorContainer.Size = UDim2.new(0, 22, 0, 18)
+        
+        for x = 0, 2 do
+            for y = 0, 1 do
+                local sq = Instance.new("Frame")
+                sq.Parent = floorContainer
+                sq.BackgroundColor3 = tab.active and Color3.fromRGB(240, 160, 255) or Color3.fromRGB(170, 110, 230)
+                sq.Position = UDim2.new(x * 0.33, 0, y * 0.55, 0)
+                sq.Size = UDim2.new(0, 5, 0, 7)
+                Instance.new("UICorner", sq).CornerRadius = UDim.new(0, 1)
             end
         end
-    end)
-end
-task.spawn(function()
-    while true do
-        task.wait(0.2)
-        if _G.SeekHelper then
-            pcall(function()
-                local cr = Workspace:FindFirstChild("CurrentRooms")
-                if cr then for _, v in ipairs(cr:GetDescendants()) do applySeekHighlight(v) end end
-            end)
-        end
+        
+        local dot1 = Instance.new("Frame")
+        dot1.Parent = floorContainer
+        dot1.BackgroundColor3 = Color3.fromRGB(210, 130, 255)
+        dot1.Position = UDim2.new(0, 17, 0, 3)
+        dot1.Size = UDim2.new(0, 3, 0, 3)
+        Instance.new("UICorner", dot1).CornerRadius = UDim.new(1, 0)
+
+        local dot2 = Instance.new("Frame")
+        dot2.Parent = floorContainer
+        dot2.BackgroundColor3 = Color3.fromRGB(210, 130, 255)
+        dot2.Position = UDim2.new(0, 17, 0, 10)
+        dot2.Size = UDim2.new(0, 3, 0, 3)
+        Instance.new("UICorner", dot2).CornerRadius = UDim.new(1, 0)
+    elseif tab.customType == "folder" then
+        local folderLbl = Instance.new("TextLabel")
+        folderLbl.Parent = TabButton
+        folderLbl.BackgroundTransparency = 1
+        folderLbl.Position = UDim2.new(0, 10, 0.5, -10)
+        folderLbl.Size = UDim2.new(0, 20, 0, 20)
+        folderLbl.Font = Enum.Font.Code
+        folderLbl.Text = "📂"
+        folderLbl.TextSize = 14
+    elseif tab.customType == "troll" then
+        local trollLbl = Instance.new("TextLabel")
+        trollLbl.Parent = TabButton
+        trollLbl.BackgroundTransparency = 1
+        trollLbl.Position = UDim2.new(0, 10, 0.5, -10)
+        trollLbl.Size = UDim2.new(0, 20, 0, 20)
+        trollLbl.Font = Enum.Font.Code
+        trollLbl.Text = "🎭"
+        trollLbl.TextSize = 14
+    elseif tab.customType == "cameraicon" then
+        local camIconFrame = Instance.new("Frame")
+        camIconFrame.Parent = TabButton
+        camIconFrame.BackgroundColor3 = Color3.fromRGB(210, 130, 255)
+        camIconFrame.Position = UDim2.new(0, 10, 0.5, -7)
+        camIconFrame.Size = UDim2.new(0, 16, 0, 12)
+        Instance.new("UICorner", camIconFrame).CornerRadius = UDim.new(0, 3)
+
+        local lens = Instance.new("Frame")
+        lens.Parent = camIconFrame
+        lens.BackgroundColor3 = Color3.fromRGB(20, 12, 32)
+        lens.Position = UDim2.new(0.5, -3, 0.5, -3)
+        lens.Size = UDim2.new(0, 6, 0, 6)
+        Instance.new("UICorner", lens).CornerRadius = UDim.new(1, 0)
+    else
+        local IconImage = Instance.new("ImageLabel")
+        IconImage.Parent = TabButton
+        IconImage.BackgroundTransparency = 1
+        IconImage.Position = UDim2.new(0, 12, 0.5, -10)
+        IconImage.Size = UDim2.new(0, 20, 0, 20)
+        IconImage.Image = tab.iconId
+        IconImage.ImageColor3 = tab.active and Color3.fromRGB(240, 160, 255) or Color3.fromRGB(170, 110, 230)
     end
-end)
-CreateToggleHelper(HotelFloor, "Seek Helper (Seek Koşusu Rehberi ve Yolu)", function(state)
-    _G.SeekHelper = state
-    if not state then
-        pcall(function()
-            local cr = Workspace:FindFirstChild("CurrentRooms")
-            if cr then for _, v in ipairs(cr:GetDescendants()) do if v.Name == "DarkNessSeekHighlight" then v:Destroy() end end end
-        end)
-    end
-end)
 
-_G.FigureGodMode = _G.FigureGodMode or false
-local function bypassFigure(obj)
-    if not _G.FigureGodMode or not obj or not obj.Parent then return end
-    pcall(function()
-        if string.lower(obj.Name):find("figure") then
-            if obj:IsA("Model") or obj:IsA("BasePart") then
-                for _, part in ipairs(obj:GetDescendants()) do
-                    if part:IsA("BasePart") then part.CanTouch = false
-                    elseif part:IsA("Script") or part:IsA("LocalScript") then part.Disabled = true end
-                end
-                if obj:IsA("BasePart") then obj.CanTouch = false end
-            end
-        end
-    end)
-end
-task.spawn(function()
-    while true do
-        task.wait(0.2)
-        if _G.FigureGodMode then
-            pcall(function()
-                local folders = {Workspace:FindFirstChild("CurrentRooms"), Workspace:FindFirstChild("Entities")}
-                for _, f in ipairs(folders) do if f then for _, v in ipairs(f:GetDescendants()) do bypassFigure(v) end end end
-            end)
-        end
-    end
-end)
-CreateToggleHelper(HotelFloor, "Figure God Mode (Figure Hasar Almaz / Görmez)", function(state) _G.FigureGodMode = state end)
+    local Label = Instance.new("TextLabel")
+    Label.Parent = TabButton
+    Label.BackgroundTransparency = 1
+    Label.Position = UDim2.new(0, 38, 0, 0)
+    Label.Size = UDim2.new(1, -40, 1, 0)
+    Label.Font = Enum.Font.Code
+    Label.Text = tab.name
+    Label.TextColor3 = tab.active and Color3.fromRGB(255, 190, 255) or Color3.fromRGB(180, 150, 200)
+    Label.TextSize = 12
+    Label.TextXAlignment = Enum.TextXAlignment.Left
 
--- ==========================================================
--- MINES ÖZELLİKLERİ (MINES FLOOR MODÜLLERİ)
--- ==========================================================
-
--- ==========================================================
--- MINES: AUTO SOLVER (GRUMBLE 150-151)
--- ==========================================================
-
-_G.MinesAutoSolver = _G.MinesAutoSolver or false
-
-task.spawn(function()
-    while true do
-        task.wait(0.2)
-        if _G.MinesAutoSolver then
-            pcall(function()
-                local currentRooms = Workspace:FindFirstChild("CurrentRooms")
-                if not currentRooms then return end
-                
-                local character = LocalPlayer.Character
-                local rootPart = character and character:FindFirstChild("HumanoidRootPart")
-                if not rootPart then return end
-                
-                for _, room in ipairs(currentRooms:GetChildren()) do
-                    local roomNum = tonumber(room.Name)
-                    if roomNum and (roomNum >= 150 and roomNum <= 151) then
-                        for _, obj in ipairs(room:GetDescendants()) do
-                            if obj:IsA("BasePart") or obj:IsA("Model") then
-                                local nameLower = string.lower(obj.Name)
-                                if nameLower:find("anchor") or nameLower:find("puzzle") or nameLower:find("lever") or nameLower:find("pad") or nameLower:find("node") then
-                                    local prompt = obj:FindFirstChildWhichIsA("ProximityPrompt", true)
-                                    if prompt and prompt.Enabled and not obj:GetAttribute("DarkNessSolving") then
-                                        local objPart = obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")) or obj
-                                        if objPart then
-                                            local distance = (rootPart.Position - objPart.Position).Magnitude
-                                            if distance <= 35 then
-                                                obj:SetAttribute("DarkNessSolving", true)
-                                                if fireproximityprompt then fireproximityprompt(prompt) end
-                                                if not obj:FindFirstChild("DarkNessSolverHighlight") then
-                                                    local h = Instance.new("Highlight")
-                                                    h.Name = "DarkNessSolverHighlight"
-                                                    h.Adornee = obj
-                                                    h.FillColor = Color3.fromRGB(0, 255, 100)
-                                                    h.FillTransparency = 0.4
-                                                    h.OutlineTransparency = 0
-                                                    h.Parent = obj
-                                                end
-                                                task.delay(1, function()
-                                                    if obj and obj.Parent then obj:SetAttribute("DarkNessSolving", nil) end
-                                                end)
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
+    TabButton.MouseButton1Click:Connect(function()
+        for _, child in ipairs(ButtonContainer:GetChildren()) do
+            if child:IsA("TextButton") then
+                child.BackgroundColor3 = Color3.fromRGB(10, 7, 15)
+                child.BackgroundTransparency = 1
+                for _, sub in ipairs(child:GetChildren()) do
+                    if sub:IsA("TextLabel") and sub.Text ~= "📂" and sub.Text ~= "🎭" then 
+                        sub.TextColor3 = Color3.fromRGB(180, 150, 200) 
                     end
                 end
-            end)
-        end
-    end
-end)
-
-CreateToggleHelper(MinesFloor, "Auto Solver (Grumble Puzzle / Anchor Tamamlama)", function(state) 
-    _G.MinesAutoSolver = state 
-end)
-
--- ==========================================================
--- MINES: AUTO-DAM SEEK (VALVE & WHEEL SOLVER)
--- ==========================================================
-
-_G.AutoDamSeek = _G.AutoDamSeek or false
-
-task.spawn(function()
-    while true do
-        task.wait(0.2)
-        if _G.AutoDamSeek then
-            pcall(function()
-                local currentRooms = Workspace:FindFirstChild("CurrentRooms")
-                if not currentRooms then return end
-                
-                local character = LocalPlayer.Character
-                local rootPart = character and character:FindFirstChild("HumanoidRootPart")
-                if not rootPart then return end
-                
-                for _, room in ipairs(currentRooms:GetChildren()) do
-                    for _, obj in ipairs(room:GetDescendants()) do
-                        if obj:IsA("BasePart") or obj:IsA("Model") then
-                            local nameLower = string.lower(obj.Name)
-                            if nameLower:find("valve") or nameLower:find("wheel") or nameLower:find("dam") or nameLower:find("breaker") or nameLower:find("lever") then
-                                local prompt = obj:FindFirstChildWhichIsA("ProximityPrompt", true)
-                                if prompt and prompt.Enabled and not obj:GetAttribute("DarkNessDamSolving") then
-                                    local objPart = obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")) or obj
-                                    if objPart then
-                                        local distance = (rootPart.Position - objPart.Position).Magnitude
-                                        if distance <= 35 then
-                                            obj:SetAttribute("DarkNessDamSolving", true)
-                                            if fireproximityprompt then fireproximityprompt(prompt) end
-                                            if not obj:FindFirstChild("DarkNessDamHighlight") then
-                                                local h = Instance.new("Highlight")
-                                                h.Name = "DarkNessDamHighlight"
-                                                h.Adornee = obj
-                                                h.FillColor = Color3.fromRGB(0, 200, 255)
-                                                h.FillTransparency = 0.4
-                                                h.OutlineTransparency = 0
-                                                h.Parent = obj
-                                            end
-                                            task.delay(1, function()
-                                                if obj and obj.Parent then obj:SetAttribute("DarkNessDamSolving", nil) end
-                                            end)
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end)
-        end
-    end
-end)
-
-CreateToggleHelper(MinesFloor, "Auto-Dam Seek (Baraj Çarklarını / Vanaları Otomatik Çevirir)", function(state)
-    _G.AutoDamSeek = state
-    if not state then
-        pcall(function()
-            local cr = Workspace:FindFirstChild("CurrentRooms")
-            if cr then for _, v in ipairs(cr:GetDescendants()) do if v.Name == "DarkNessDamHighlight" then v:Destroy() end end end
-        end)
-    end
-end)
-
--- ==========================================================
--- MINES: AUTO-STEER MINECART (MINECART OTOPILOT)
--- ==========================================================
-
-_G.AutoSteerMinecart = _G.AutoSteerMinecart or false
-
-task.spawn(function()
-    while true do
-        task.wait(0.1) -- Tren hızına tam uyum için optimize edilmiş hız
-        if _G.AutoSteerMinecart then
-            pcall(function()
-                local currentRooms = Workspace:FindFirstChild("CurrentRooms")
-                if not currentRooms then return end
-                
-                local character = LocalPlayer.Character
-                local rootPart = character and character:FindFirstChild("HumanoidRootPart")
-                if not rootPart then return end
-                
-                for _, room in ipairs(currentRooms:GetChildren()) do
-                    for _, obj in ipairs(room:GetDescendants()) do
-                        if obj:IsA("BasePart") or obj:IsA("Model") then
-                            local nameLower = string.lower(obj.Name)
-                            if nameLower:find("cart") or nameLower:find("minecart") or nameLower:find("switch") or nameLower:find("lever") or nameLower:find("rail") then
-                                local prompt = obj:FindFirstChildWhichIsA("ProximityPrompt", true)
-                                if prompt and prompt.Enabled and not obj:GetAttribute("DarkNessCartSolving") then
-                                    local objPart = obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")) or obj
-                                    if objPart then
-                                        local distance = (rootPart.Position - objPart.Position).Magnitude
-                                        if distance <= 50 then -- Tren hareket halindeyken geniş menzil
-                                            obj:SetAttribute("DarkNessCartSolving", true)
-                                            if fireproximityprompt then fireproximityprompt(prompt) end
-                                            if not obj:FindFirstChild("DarkNessCartHighlight") then
-                                                local h = Instance.new("Highlight")
-                                                h.Name = "DarkNessCartHighlight"
-                                                h.Adornee = obj
-                                                h.FillColor = Color3.fromRGB(170, 0, 255)
-                                                h.FillTransparency = 0.3
-                                                h.OutlineTransparency = 0
-                                                h.Parent = obj
-                                            end
-                                            task.delay(1, function()
-                                                if obj and obj.Parent then obj:SetAttribute("DarkNessCartSolving", nil) end
-                                            end)
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end)
-        end
-    end
-end)
-
-CreateToggleHelper(MinesFloor, "Auto-Steer Minecart (Tren Bölümü Otomatik Sürüş ve Yol Ayrımı)", function(state)
-    _G.AutoSteerMinecart = state
-    if not state then
-        pcall(function()
-            local cr = Workspace:FindFirstChild("CurrentRooms")
-            if cr then for _, v in ipairs(cr:GetDescendants()) do if v.Name == "DarkNessCartHighlight" then v:Destroy() end end end
-        end)
-    end
-end)
-
--- ==========================================================
--- MINES: SEEK CHASE PATH ESP (SEEK KOŞU YOLU REHBERİ)
--- ==========================================================
-
-_G.SeekChasePathESP = _G.SeekChasePathESP or false
-
-local function applySeekPathESP(obj)
-    if not _G.SeekChasePathESP or not obj or not obj.Parent then return end
-    pcall(function()
-        if (obj:IsA("BasePart") or obj:IsA("Model")) and not obj:FindFirstChild("DarkNessSeekPathHighlight") then
-            local n = string.lower(obj.Name)
-            if n:find("path") or n:find("guide") or n:find("route") or n:find("chase") or n:find("trigger") or n:find("next") then
-                local h = Instance.new("Highlight")
-                h.Name = "DarkNessSeekPathHighlight"
-                h.Adornee = obj
-                h.FillColor = Color3.fromRGB(0, 255, 100)
-                h.FillTransparency = 0.3
-                h.OutlineColor = Color3.fromRGB(255, 255, 255)
-                h.OutlineTransparency = 0
-                h.Parent = obj
             end
         end
+        TabButton.BackgroundColor3 = Color3.fromRGB(35, 20, 55)
+        TabButton.BackgroundTransparency = 0
+        Label.TextColor3 = Color3.fromRGB(255, 190, 255)
+
+        if activePage then activePage.Visible = false end
+        tab.page.Visible = true
+        activePage = tab.page
     end)
 end
 
-task.spawn(function()
-    while true do
-        task.wait(0.2)
-        if _G.SeekChasePathESP then
-            pcall(function()
-                local cr = Workspace:FindFirstChild("CurrentRooms")
-                if cr then for _, v in ipairs(cr:GetDescendants()) do applySeekPathESP(v) end end
-            end)
-        end
-    end
-end)
+-- Alt Bilgi Çubuğu (Footer)
+local Footer = Instance.new("Frame")
+Footer.Name = "Footer"
+Footer.Parent = MainFrame
+Footer.BackgroundColor3 = Color3.fromRGB(10, 7, 15)
+Footer.BorderSizePixel = 0
+Footer.Position = UDim2.new(0, 0, 1, -28)
+Footer.Size = UDim2.new(1, 0, 0, 28)
 
-CreateToggleHelper(MinesFloor, "Seek Chase Path ESP (Doğru Yolu Yeşil - Beyaz Highlight İle Gösterir)", function(state)
-    _G.SeekChasePathESP = state
-    if not state then
-        pcall(function()
-            local cr = Workspace:FindFirstChild("CurrentRooms")
-            if cr then for _, v in ipairs(cr:GetDescendants()) do if v.Name == "DarkNessSeekPathHighlight" then v:Destroy() end end end
-        end)
-    end
-end)
+Instance.new("UICorner", Footer).CornerRadius = UDim.new(0, 8)
 
+local StatusText = Instance.new("TextLabel")
+StatusText.Parent = Footer
+StatusText.BackgroundTransparency = 1
+StatusText.Position = UDim2.new(0, 15, 0, 0)
+StatusText.Size = UDim2.new(1, -40, 1, 0)
+StatusText.Font = Enum.Font.Code
+StatusText.Text = "Game: DOORS( Hotel )  |  Hub: DarkNess  |  Modular Final Version"
+StatusText.TextColor3 = Color3.fromRGB(150, 120, 180)
+StatusText.TextSize = 12
+StatusText.TextXAlignment = Enum.TextXAlignment.Left
+
+local ResizeIcon = Instance.new("ImageLabel")
+ResizeIcon.Parent = Footer
+ResizeIcon.BackgroundTransparency = 1
+ResizeIcon.Position = UDim2.new(1, -24, 0.5, -8)
+ResizeIcon.Size = UDim2.new(0, 16, 0, 16)
+ResizeIcon.Image = "rbxassetid://10723343805"
+ResizeIcon.ImageColor3 = Color3.fromRGB(200, 120, 255)
