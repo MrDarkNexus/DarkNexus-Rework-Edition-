@@ -932,78 +932,104 @@ StatusText.TextColor3 = Color3.fromRGB(150, 120, 180)
 StatusText.TextSize = 12
 StatusText.TextXAlignment = Enum.TextXAlignment.Left
 
--- // DARKNESS HUB - ENTITY & TRAP ESP MODÜLÜ //
+-- ==========================================
+-- VISUALS SAYFASI VE ESP KARTI (BUNU EKLE)
+-- ==========================================
+
+-- Visuals Sayfası için ESP Kartı
+local VisualsCard = Instance.new("Frame")
+VisualsCard.Name = "VisualsCard"
+VisualsCard.Parent = visualsPage
+VisualsCard.BackgroundColor3 = Color3.fromRGB(22, 14, 35)
+VisualsCard.Position = UDim2.new(0, 10, 0, 10)
+VisualsCard.Size = UDim2.new(1, -20, 0, 130)
+
+Instance.new("UICorner", VisualsCard).CornerRadius = UDim.new(0, 8)
+local visStroke = Instance.new("UIStroke")
+visStroke.Name = "CardStroke"
+visStroke.Color = Color3.fromRGB(160, 60, 240)
+visStroke.Thickness = 1.5
+visStroke.Parent = VisualsCard
+
+local VisTitle = Instance.new("TextLabel")
+VisTitle.Parent = VisualsCard
+VisTitle.BackgroundTransparency = 1
+VisTitle.Position = UDim2.new(0, 20, 0, 15)
+VisTitle.Size = UDim2.new(1, -40, 0, 30)
+VisTitle.Font = Enum.Font.Code
+VisTitle.Text = "👁️ Entity & Trap ESP"
+VisTitle.TextColor3 = Color3.fromRGB(255, 200, 255)
+VisTitle.TextSize = 18
+VisTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+local EspToggleBtn = Instance.new("TextButton")
+EspToggleBtn.Name = "EspToggleBtn"
+EspToggleBtn.Parent = VisualsCard
+EspToggleBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
+EspToggleBtn.Position = UDim2.new(0, 20, 0, 60)
+EspToggleBtn.Size = UDim2.new(0, 240, 0, 40)
+EspToggleBtn.Font = Enum.Font.Code
+EspToggleBtn.Text = "🔴 Entity ESP: Aktif"
+EspToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+EspToggleBtn.TextSize = 13
+Instance.new("UICorner", EspToggleBtn).CornerRadius = UDim.new(0, 6)
+
+-- Tema fonksiyonunun içine VisualsCard'ı da eklemeyi unutma (ApplyTheme fonksiyonunda renklerin değişmesi için):
+-- VisualsCard.BackgroundColor3 = cardBgCol
+-- visStroke.Color = strokeCol
+
+-- // ENTITY & TRAP ESP ÇALIŞTIRICI KODU //
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-
 local ESPEnabled = true
 
+EspToggleBtn.MouseButton1Click:Connect(function()
+    ESPEnabled = not ESPEnabled
+    EspToggleBtn.BackgroundColor3 = ESPEnabled and Color3.fromRGB(130, 40, 220) or Color3.fromRGB(60, 60, 60)
+    EspToggleBtn.Text = ESPEnabled and "🔴 Entity ESP: Aktif" or "⚪ Entity ESP: Kapalı"
+    
+    if not ESPEnabled then
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            local hl = obj:FindFirstChild("EntityHighlight")
+            if hl then hl:Destroy() end
+            local bb = obj:FindFirstChild("EntityNameTag")
+            if bb then bb:Destroy() end
+        end
+    end
+end)
+
 local ESPConfig = {
-    OutlineColor = Color3.new(1, 0, 0), -- Kırmızı Çizgi
-    TextColor = Color3.new(1, 0, 0),    -- Kırmızı İsim
-    TrapColor = Color3.new(1, 0, 0)     -- Tamamen Kırmızı (Tuzaklar için)
+    OutlineColor = Color3.new(1, 0, 0),
+    TextColor = Color3.new(1, 0, 0),
+    TrapColor = Color3.new(1, 0, 0)
 }
 
--- // Türkçe İsim Sözlüğü (İstisnalar Hariç)
 local TranslatedNames = {
-    ["Rush"] = "Acele",
-    ["Ambush"] = "Pusu",
-    ["Surge"] = "Dalga",
-    ["Blitz"] = "Yıldırım",
-    ["Bash"] = "Vurkaç",
-    ["Scribbles"] = "Karalamalar",
-    ["FrozenAmbush"] = "Donmuş Pusu",
-    ["A-60"] = "A-60",
-    ["A-120"] = "A-120",
-    ["Mandrake"] = "Adamotu",
-    ["Giggle"] = "Kıkırtı",
-    ["Grumble"] = "Grumble",
-    ["Queen Grumble"] = "Queen Grumble",
-    ["Bramble"] = "Bramble",
-    ["Honcho"] = "Honcho",
-    ["LookMan"] = "LookMan",
-    ["Eyes"] = "Gözler",
-    ["Vacuum"] = "Vacuum",
-    ["Dupe"] = "Dupe",
-    ["Snare"] = "Kapan",
-    ["Sally"] = "Sally",
-    ["Crusher"] = "Ezici",
-    ["Noise"] = "Gürültü",
-    ["Creak"] = "Gıcırtı",
-    ["Drone"] = "Drone",
-    ["Teller"] = "Anlatıcı",
-    ["DroneStampede"] = "Drone Sürüsü",
-    ["HiJack"] = "Hırsız",
-    ["CustomFigure"] = "CustomFigure",
-    ["RNIUSHCg=="] = "RNIUSHCg==",
-    ["Figure"] = "Figür"
+    ["Rush"] = "Acele", ["Ambush"] = "Pusu", ["Surge"] = "Dalga", ["Blitz"] = "Yıldırım",
+    ["Bash"] = "Vurkaç", ["Scribbles"] = "Karalamalar", ["FrozenAmbush"] = "Donmuş Pusu",
+    ["A-60"] = "A-60", ["A-120"] = "A-120", ["Mandrake"] = "Adamotu", ["Giggle"] = "Kıkırtı",
+    ["Grumble"] = "Grumble", ["Queen Grumble"] = "Queen Grumble", ["Bramble"] = "Bramble",
+    ["Honcho"] = "Honcho", ["LookMan"] = "LookMan", ["Eyes"] = "Gözler", ["Vacuum"] = "Vacuum",
+    ["Dupe"] = "Dupe", ["Snare"] = "Kapan", ["Sally"] = "Sally", ["Crusher"] = "Ezici",
+    ["Noise"] = "Gürültü", ["Creak"] = "Gıcırtı", ["Drone"] = "Drone", ["Teller"] = "Anlatıcı",
+    ["DroneStampede"] = "Drone Sürüsü", ["HiJack"] = "Hırsız", ["CustomFigure"] = "CustomFigure",
+    ["RNIUSHCg=="] = "RNIUSHCg==", ["Figure"] = "Figür"
 }
 
--- // Hariç Tutulan Liste
 local ExcludedEntities = {
-    ["CustomFigure"] = true,
-    ["Bramble"] = true,
-    ["Grumble"] = true,
-    ["Queen Grumble"] = true,
-    ["Honcho"] = true,
-    ["AR0xMBUSH"] = true,
-    ["RNIUSHCg=="] = true,
-    ["LookMan"] = true
+    ["CustomFigure"] = true, ["Bramble"] = true, ["Grumble"] = true,
+    ["Queen Grumble"] = true, ["Honcho"] = true, ["AR0xMBUSH"] = true,
+    ["RNIUSHCg=="] = true, ["LookMan"] = true
 }
 
-local TrapDoors = {
-    ["Dupe"] = true,
-    ["Vacuum"] = true
-}
+local TrapDoors = { ["Dupe"] = true, ["Vacuum"] = true }
 
--- // ESP Uygulama Fonksiyonu (Hataları Giderilmiş Güvenli Sürüm)
 local function ApplyESP(entity)
     if not ESPEnabled or not entity then return end
     if entity:FindFirstChild("EntityHighlight") then return end
     
     local entityName = entity.Name
     
-    -- 1. Tuzaklı Kapı Kontrolü (Dupe & Vacuum -> Tamamen Kırmızı)
     if TrapDoors[entityName] then
         for _, part in ipairs(entity:GetDescendants()) do
             if part:IsA("BasePart") then
@@ -1014,7 +1040,6 @@ local function ApplyESP(entity)
         return
     end
     
-    -- 2. Outline (Kırmızı Çizgi) Ekleme
     local highlight = Instance.new("Highlight")
     highlight.Name = "EntityHighlight"
     highlight.Adornee = entity
@@ -1023,15 +1048,12 @@ local function ApplyESP(entity)
     highlight.OutlineTransparency = 0
     highlight.Parent = entity
     
-    -- 3. İsimlendirme ve Türkçe Çeviri Kontrolü
     local displayName = entityName
     if not ExcludedEntities[entityName] and TranslatedNames[entityName] then
         displayName = TranslatedNames[entityName]
     end
     
-    -- Güvenli Adornee Kontrolü (Çökme Hataları Engellendi)
     local adorneePart = entity:FindFirstChild("HumanoidRootPart") or entity:FindFirstChild("PrimaryPart") or (entity:IsA("Model") and entity.PrimaryPart) or (entity:IsA("BasePart") and entity)
-    
     if adorneePart then
         local billboard = Instance.new("BillboardGui")
         billboard.Name = "EntityNameTag"
@@ -1055,7 +1077,6 @@ local function ApplyESP(entity)
     end
 end
 
--- // Lag Yaratmayan Güvenli Tarama Yapısı //
 workspace.ChildAdded:Connect(function(obj)
     if TranslatedNames[obj.Name] or TrapDoors[obj.Name] then
         task.wait(0.1)
