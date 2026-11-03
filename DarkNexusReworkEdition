@@ -933,13 +933,13 @@ StatusText.TextSize = 12
 StatusText.TextXAlignment = Enum.TextXAlignment.Left
 
 -- ==========================================
--- VISUALS SAYFASI VE ESP KARTI (BUNU EKLE)
+-- VISUALS SAYFASI VE ESP BUTONU (KUSURSUZ ENTEGRASYON)
 -- ==========================================
 
--- Visuals Sayfası için ESP Kartı
+-- Visuals Sayfası için Kart Oluşturma
 local VisualsCard = Instance.new("Frame")
 VisualsCard.Name = "VisualsCard"
-VisualsCard.Parent = visualsPage
+VisualsCard.Parent = visualsPage -- Doğrudan Visuals sayfasına bağlanır
 VisualsCard.BackgroundColor3 = Color3.fromRGB(22, 14, 35)
 VisualsCard.Position = UDim2.new(0, 10, 0, 10)
 VisualsCard.Size = UDim2.new(1, -20, 0, 130)
@@ -974,11 +974,7 @@ EspToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 EspToggleBtn.TextSize = 13
 Instance.new("UICorner", EspToggleBtn).CornerRadius = UDim.new(0, 6)
 
--- Tema fonksiyonunun içine VisualsCard'ı da eklemeyi unutma (ApplyTheme fonksiyonunda renklerin değişmesi için):
--- VisualsCard.BackgroundColor3 = cardBgCol
--- visStroke.Color = strokeCol
-
--- // ENTITY & TRAP ESP ÇALIŞTIRICI KODU //
+-- // ENTITY & TRAP ESP ÇALIŞTIRICI SİSTEMİ //
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local ESPEnabled = true
