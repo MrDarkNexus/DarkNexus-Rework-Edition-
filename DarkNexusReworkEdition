@@ -1,10 +1,7 @@
--- DARKNESS HUB UI - PARÇA 1 (Temel Kurulum & Ana Çerçeve)
+-- DARKNESS HUB UI - 1. PARÇA (Kurulum & İskelet)
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "DarkNessHub_Modular"
@@ -90,7 +87,7 @@ local function SendNotification(title, text)
     end)
 end
 
--- Script Başlangıç Bildirimi
+-- Script Başlangıç Bildirimleri
 task.spawn(function()
     SendNotification("DarkNess Hub", "Selamlar Scriptin Yüklenmesine 5 Saniye Kaldı")
     task.wait(4)
@@ -111,12 +108,11 @@ MainFrame.Draggable = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
 
 local MainStroke = Instance.new("UIStroke")
+MainStroke.Name = "MainStroke"
 MainStroke.Color = Color3.fromRGB(120, 40, 200)
 MainStroke.Thickness = 1.5
 MainStroke.Transparency = 0.3
 MainStroke.Parent = MainFrame
-
--- DARKNESS HUB UI - PARÇA 2 (Sol Menü & Camera Sekmesi)
 
 -- Sol Menü (210px Genişlik)
 local LeftSidebar = Instance.new("Frame")
@@ -155,7 +151,7 @@ UIListLayout.Padding = UDim.new(0, 4)
 -- Üst Arama Çubuğu
 local TopBar = Instance.new("Frame")
 TopBar.Name = "TopBar"
-TopBar.Parent = MainMainFrame or MainFrame
+TopBar.Parent = MainFrame
 TopBar.BackgroundColor3 = Color3.fromRGB(14, 10, 20)
 TopBar.BorderSizePixel = 0
 TopBar.Position = UDim2.new(0, 215, 0, 6)
@@ -225,7 +221,7 @@ ToggleButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = menuVisible
 end)
 
--- İçerik Alanı ve Sayfalar
+-- DARKNESS HUB UI - 2. PARÇA (Sayfalar ve Tema Yönetimi)
 local PagesHolder = Instance.new("Frame")
 PagesHolder.Name = "PagesHolder"
 PagesHolder.Parent = MainFrame
@@ -253,306 +249,58 @@ local mainPage = CreatePage("Main")
 local floorPage = CreatePage("Floor")
 local visualsPage = CreatePage("Visuals")
 local exploitsPage = CreatePage("Exploits")
-local cameraPage = CreatePage("Camera")
-local trollPage = CreatePage("Troll")
 local creditsPage = CreatePage("Credits")
 local settingsPage = CreatePage("Settings")
 local configThemePage = CreatePage("Config & Theme")
 local addonsPage = CreatePage("Addons")
 
--- 📷 CAMERA SAYFASI (Özel İnce Tuşlar ile)
-local CameraCard = Instance.new("Frame")
-CameraCard.Name = "CameraCard"
-CameraCard.Parent = cameraPage
-CameraCard.BackgroundColor3 = Color3.fromRGB(22, 14, 35)
-CameraCard.Position = UDim2.new(0, 10, 0, 10)
-CameraCard.Size = UDim2.new(1, -20, 0, 370)
+-- HOME SAYFASI
+local WelcomeCard = Instance.new("Frame")
+WelcomeCard.Name = "WelcomeCard"
+WelcomeCard.Parent = homePage
+WelcomeCard.BackgroundColor3 = Color3.fromRGB(22, 14, 35)
+WelcomeCard.Position = UDim2.new(0, 10, 0, 10)
+WelcomeCard.Size = UDim2.new(1, -20, 0, 160)
 
-Instance.new("UICorner", CameraCard).CornerRadius = UDim.new(0, 8)
-local camStroke = Instance.new("UIStroke")
-camStroke.Color = Color3.fromRGB(160, 60, 240)
-camStroke.Thickness = 1.5
-camStroke.Parent = CameraCard
+Instance.new("UICorner", WelcomeCard).CornerRadius = UDim.new(0, 8)
+local wcStroke = Instance.new("UIStroke")
+wcStroke.Name = "CardStroke"
+wcStroke.Color = Color3.fromRGB(160, 60, 240)
+wcStroke.Thickness = 1.5
+wcStroke.Parent = WelcomeCard
 
-local CamTitle = Instance.new("TextLabel")
-CamTitle.Parent = CameraCard
-CamTitle.BackgroundTransparency = 1
-CamTitle.Position = UDim2.new(0, 15, 0, 12)
-CamTitle.Size = UDim2.new(1, -30, 0, 25)
-CamTitle.Font = Enum.Font.Code
-CamTitle.Text = "📷 Kamera, FOV & Görünüm Ayarları"
-CamTitle.TextColor3 = Color3.fromRGB(255, 200, 255)
-CamTitle.TextSize = 16
-CamTitle.TextXAlignment = Enum.TextXAlignment.Left
+local WelcomeTitle = Instance.new("TextLabel")
+WelcomeTitle.Parent = WelcomeCard
+WelcomeTitle.BackgroundTransparency = 1
+WelcomeTitle.Position = UDim2.new(0, 20, 0, 15)
+WelcomeTitle.Size = UDim2.new(1, -40, 0, 30)
+WelcomeTitle.Font = Enum.Font.Code
+WelcomeTitle.Text = "👋 Welcome Guys!"
+WelcomeTitle.TextColor3 = Color3.fromRGB(255, 200, 255)
+WelcomeTitle.TextSize = 22
+WelcomeTitle.TextXAlignment = Enum.TextXAlignment.Left
 
--- Custom FOV On/Off ve Input
-local FovToggleBtn = Instance.new("TextButton")
-FovToggleBtn.Parent = CameraCard
-FovToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 180, 80)
-FovToggleBtn.Position = UDim2.new(0, 15, 0, 48)
-FovToggleBtn.Size = UDim2.new(0, 130, 0, 30)
-FovToggleBtn.Font = Enum.Font.Code
-FovToggleBtn.Text = "Custom FOV: On"
-FovToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-FovToggleBtn.TextSize = 11
-Instance.new("UICorner", FovToggleBtn).CornerRadius = UDim.new(0, 6)
+local WelcomeDesc = Instance.new("TextLabel")
+WelcomeDesc.Parent = WelcomeCard
+WelcomeDesc.BackgroundTransparency = 1
+WelcomeDesc.Position = UDim2.new(0, 20, 0, 50)
+WelcomeDesc.Size = UDim2.new(1, -40, 0, 45)
+WelcomeDesc.Font = Enum.Font.Code
+WelcomeDesc.Text = "Selamlar Scriptin Yüklenmesine 5 Dakika Kaldı..."
+WelcomeDesc.TextColor3 = Color3.fromRGB(200, 160, 240)
+WelcomeDesc.TextSize = 13
+WelcomeDesc.TextXAlignment = Enum.TextXAlignment.Left
 
-local FovInput = Instance.new("TextBox")
-FovInput.Name = "FovInput"
-FovInput.Parent = CameraCard
-FovInput.BackgroundColor3 = Color3.fromRGB(12, 8, 20)
-FovInput.Position = UDim2.new(0, 155, 0, 48)
-FovInput.Size = UDim2.new(0, 105, 0, 30)
-FovInput.Font = Enum.Font.Code
-FovInput.Text = "70"
-FovInput.TextColor3 = Color3.fromRGB(240, 200, 255)
-FovInput.TextSize = 12
-FovInput.ClearTextOnFocus = false
-Instance.new("UICorner", FovInput).CornerRadius = UDim.new(0, 6)
-
-local customFovEnabled = true
-FovToggleBtn.MouseButton1Click:Connect(function()
-    customFovEnabled = not customFovEnabled
-    FovToggleBtn.BackgroundColor3 = customFovEnabled and Color3.fromRGB(50, 180, 80) or Color3.fromRGB(130, 40, 220)
-    FovToggleBtn.Text = customFovEnabled and "Custom FOV: On" or "Custom FOV: Off"
-    if not customFovEnabled then Camera.FieldOfView = 70 end
-end)
-
-FovInput.FocusLost:Connect(function()
-    local val = tonumber(FovInput.Text)
-    if val and customFovEnabled then
-        Camera.FieldOfView = val
-    end
-end)
-
--- FreeCam On/Off
-local FreeCamBtn = Instance.new("TextButton")
-FreeCamBtn.Parent = CameraCard
-FreeCamBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
-FreeCamBtn.Position = UDim2.new(0, 15, 0, 88)
-FreeCamBtn.Size = UDim2.new(0, 245, 0, 30)
-FreeCamBtn.Font = Enum.Font.Code
-FreeCamBtn.Text = "FreeCam: Off (Space/Ctrl)"
-FreeCamBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-FreeCamBtn.TextSize = 11
-Instance.new("UICorner", FreeCamBtn).CornerRadius = UDim.new(0, 6)
-
-local freeCamActive = false
-local freeCamConnection = nil
-local freeCamPos = CFrame.new()
-
-FreeCamBtn.MouseButton1Click:Connect(function()
-    freeCamActive = not freeCamActive
-    if freeCamActive then
-        FreeCamBtn.BackgroundColor3 = Color3.fromRGB(50, 180, 80)
-        FreeCamBtn.Text = "FreeCam: On"
-        freeCamPos = Camera.CFrame
-        Camera.CameraType = Enum.CameraType.Scriptable
-        
-        freeCamConnection = RunService.RenderStepped:Connect(function(dt)
-            local moveDir = Vector3.new()
-            if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + (Camera.CFrame.LookVector) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - (Camera.CFrame.LookVector) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - (Camera.CFrame.RightVector) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + (Camera.CFrame.RightVector) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir = moveDir - Vector3.new(0, 1, 0) end
-            
-            freeCamPos = freeCamPos + (moveDir * 60 * dt)
-            Camera.CFrame = freeCamPos
-        end)
-    else
-        FreeCamBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
-        FreeCamBtn.Text = "FreeCam: Off"
-        if freeCamConnection then
-            freeCamConnection:Disconnect()
-            freeCamConnection = nil
-        end
-        Camera.CameraType = Enum.CameraType.Custom
-    end
-end)
-
--- Third Person On/Off
-local TpToggleBtn = Instance.new("TextButton")
-TpToggleBtn.Parent = CameraCard
-TpToggleBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
-TpToggleBtn.Position = UDim2.new(0, 15, 0, 128)
-TpToggleBtn.Size = UDim2.new(0, 245, 0, 30)
-TpToggleBtn.Font = Enum.Font.Code
-TpToggleBtn.Text = "Third Person: Off"
-TpToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-TpToggleBtn.TextSize = 11
-Instance.new("UICorner", TpToggleBtn).CornerRadius = UDim.new(0, 6)
-
-local thirdPersonActive = false
-TpToggleBtn.MouseButton1Click:Connect(function()
-    thirdPersonActive = not thirdPersonActive
-    if thirdPersonActive then
-        TpToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 180, 80)
-        TpToggleBtn.Text = "Third Person: On"
-        LocalPlayer.CameraMaxZoomDistance = 18
-        LocalPlayer.CameraMinZoomDistance = 6
-    else
-        TpToggleBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
-        TpToggleBtn.Text = "Third Person: Off"
-        LocalPlayer.CameraMaxZoomDistance = 0.5
-        LocalPlayer.CameraMinZoomDistance = 0.5
-    end
-end)
-
--- ViewModel Offset On/Off & X, Y, Z
-local OffsetToggleBtn = Instance.new("TextButton")
-OffsetToggleBtn.Parent = CameraCard
-OffsetToggleBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
-OffsetToggleBtn.Position = UDim2.new(0, 15, 0, 168)
-OffsetToggleBtn.Size = UDim2.new(0, 245, 0, 30)
-OffsetToggleBtn.Font = Enum.Font.Code
-OffsetToggleBtn.Text = "ViewModel Offset: Off"
-OffsetToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-OffsetToggleBtn.TextSize = 11
-Instance.new("UICorner", OffsetToggleBtn).CornerRadius = UDim.new(0, 6)
-
-local OffsetX = Instance.new("TextBox")
-OffsetX.Parent = CameraCard
-OffsetX.BackgroundColor3 = Color3.fromRGB(12, 8, 20)
-OffsetX.Position = UDim2.new(0, 15, 0, 208)
-OffsetX.Size = UDim2.new(0, 75, 0, 28)
-OffsetX.Font = Enum.Font.Code
-OffsetX.PlaceholderText = "X"
-OffsetX.Text = "0"
-OffsetX.TextColor3 = Color3.fromRGB(240, 200, 255)
-OffsetX.TextSize = 11
-Instance.new("UICorner", OffsetX).CornerRadius = UDim.new(0, 6)
-
-local OffsetY = Instance.new("TextBox")
-OffsetY.Parent = CameraCard
-OffsetY.BackgroundColor3 = Color3.fromRGB(12, 8, 20)
-OffsetY.Position = UDim2.new(0, 100, 0, 208)
-OffsetY.Size = UDim2.new(0, 75, 0, 28)
-OffsetY.Font = Enum.Font.Code
-OffsetY.PlaceholderText = "Y"
-OffsetY.Text = "0"
-OffsetY.TextColor3 = Color3.fromRGB(240, 200, 255)
-OffsetY.TextSize = 11
-Instance.new("UICorner", OffsetY).CornerRadius = UDim.new(0, 6)
-
-local OffsetZ = Instance.new("TextBox")
-OffsetZ.Parent = CameraCard
-OffsetZ.BackgroundColor3 = Color3.fromRGB(12, 8, 20)
-OffsetZ.Position = UDim2.new(0, 185, 0, 208)
-OffsetZ.Size = UDim2.new(0, 75, 0, 28)
-OffsetZ.Font = Enum.Font.Code
-OffsetZ.PlaceholderText = "Z"
-OffsetZ.Text = "0"
-OffsetZ.TextColor3 = Color3.fromRGB(240, 200, 255)
-OffsetZ.TextSize = 11
-Instance.new("UICorner", OffsetZ).CornerRadius = UDim.new(0, 6)
-
-local viewModelActive = false
-OffsetToggleBtn.MouseButton1Click:Connect(function()
-    viewModelActive = not viewModelActive
-    OffsetToggleBtn.BackgroundColor3 = viewModelActive and Color3.fromRGB(50, 180, 80) or Color3.fromRGB(130, 40, 220)
-    OffsetToggleBtn.Text = viewModelActive and "ViewModel Offset: On" or "ViewModel Offset: Off"
-end)
-
-local InfoLabel = Instance.new("TextLabel")
-InfoLabel.Parent = CameraCard
-InfoLabel.BackgroundTransparency = 1
-InfoLabel.Position = UDim2.new(0, 15, 0, 245)
-InfoLabel.Size = UDim2.new(1, -30, 0, 110)
-InfoLabel.Font = Enum.Font.Code
-InfoLabel.Text = "💡 Bilgi:\n• Custom FOV: Görüş açısını ayarlar.\n• FreeCam: Serbest uçuş (Space/Ctrl).\n• Third Person: Arkadan bakış açısı sağlar.\n• ViewModel Offset: Silah/el modelini X, Y, Z ekseninde kaydırır."
-InfoLabel.TextColor3 = Color3.fromRGB(170, 140, 210)
-InfoLabel.TextSize = 10
-InfoLabel.TextWrapped = true
-InfoLabel.TextXAlignment = Enum.TextXAlignment.Left
-InfoLabel.TextYAlignment = Enum.TextYAlignment.Top
-
--- DARKNESS HUB UI - PARÇA 3 (Diğer Sayfalar & Sekme Listesi)
-
--- TROLL SAYFASI
-local TrollCard = Instance.new("Frame")
-TrollCard.Name = "TrollCard"
-TrollCard.Parent = trollPage
-TrollCard.BackgroundColor3 = Color3.fromRGB(22, 14, 35)
-TrollCard.Position = UDim2.new(0, 10, 0, 10)
-TrollCard.Size = UDim2.new(1, -20, 0, 340)
-
-Instance.new("UICorner", TrollCard).CornerRadius = UDim.new(0, 8)
-local trollStroke = Instance.new("UIStroke")
-trollStroke.Color = Color3.fromRGB(160, 60, 240)
-trollStroke.Thickness = 1.5
-trollStroke.Parent = TrollCard
-
-local TrollTitle = Instance.new("TextLabel")
-TrollTitle.Parent = TrollCard
-TrollTitle.BackgroundTransparency = 1
-TrollTitle.Position = UDim2.new(0, 20, 0, 15)
-TrollTitle.Size = UDim2.new(1, -40, 0, 30)
-TrollTitle.Font = Enum.Font.Code
-TrollTitle.Text = "🎭 DarkNess Troll Paneli"
-TrollTitle.TextColor3 = Color3.fromRGB(255, 200, 255)
-TrollTitle.TextSize = 18
-TrollTitle.TextXAlignment = Enum.TextXAlignment.Left
-
-local TrollDesc = Instance.new("TextLabel")
-TrollDesc.Parent = TrollCard
-TrollDesc.BackgroundTransparency = 1
-TrollDesc.Position = UDim2.new(0, 20, 0, 50)
-TrollDesc.Size = UDim2.new(1, -40, 0, 35)
-TrollDesc.Font = Enum.Font.Code
-TrollDesc.Text = "Sunucuyu ve oyuncuları trollemen için havalı özellikler!"
-TrollDesc.TextColor3 = Color3.fromRGB(180, 150, 210)
-TrollDesc.TextSize = 12
-TrollDesc.TextXAlignment = Enum.TextXAlignment.Left
-
-local TrollBtn1 = Instance.new("TextButton")
-TrollBtn1.Parent = TrollCard
-TrollBtn1.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
-TrollBtn1.Position = UDim2.new(0, 20, 0, 100)
-TrollBtn1.Size = UDim2.new(0, 240, 0, 40)
-TrollBtn1.Font = Enum.Font.Code
-TrollBtn1.Text = "🔊 Fake Screamer / Ses Troll"
-TrollBtn1.TextColor3 = Color3.fromRGB(255, 255, 255)
-TrollBtn1.TextSize = 13
-Instance.new("UICorner", TrollBtn1).CornerRadius = UDim.new(0, 6)
-
-TrollBtn1.MouseButton1Click:Connect(function()
-    SendNotification("Troll Aktif", "🔊 Fake ses efekti ve troll bildirimleri gönderildi!")
-end)
-
-local TrollBtn2 = Instance.new("TextButton")
-TrollBtn2.Parent = TrollCard
-TrollBtn2.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
-TrollBtn2.Position = UDim2.new(0, 20, 0, 155)
-TrollBtn2.Size = UDim2.new(0, 240, 0, 40)
-TrollBtn2.Font = Enum.Font.Code
-TrollBtn2.Text = "🌈 Ekranı Renklendir (RGB)"
-TrollBtn2.TextColor3 = Color3.fromRGB(255, 255, 255)
-TrollBtn2.TextSize = 13
-Instance.new("UICorner", TrollBtn2).CornerRadius = UDim.new(0, 6)
-
-TrollBtn2.MouseButton1Click:Connect(function()
-    SendNotification("RGB Modu", "🌈 Ekran renk dalgaları aktif edildi!")
-end)
-
-local TrollBtn3 = Instance.new("TextButton")
-TrollBtn3.Parent = TrollCard
-TrollBtn3.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
-TrollBtn3.Position = UDim2.new(0, 20, 0, 210)
-TrollBtn3.Size = UDim2.new(0, 240, 0, 40)
-TrollBtn3.Font = Enum.Font.Code
-TrollBtn3.Text = "⚡ Ultra Hız (Speed Troll)"
-TrollBtn3.TextColor3 = Color3.fromRGB(255, 255, 255)
-TrollBtn3.TextSize = 13
-Instance.new("UICorner", TrollBtn3).CornerRadius = UDim.new(0, 6)
-
-TrollBtn3.MouseButton1Click:Connect(function()
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.WalkSpeed = 100
-        SendNotification("Hızlandı!", "⚡ Karakter hızı 100 yapıldı, kaçış yok!")
-    end
-end)
+local WelcomeSubDesc = Instance.new("TextLabel")
+WelcomeSubDesc.Parent = WelcomeCard
+WelcomeSubDesc.BackgroundTransparency = 1
+WelcomeSubDesc.Position = UDim2.new(0, 20, 0, 95)
+WelcomeSubDesc.Size = UDim2.new(1, -40, 0, 45)
+WelcomeSubDesc.Font = Enum.Font.Code
+WelcomeSubDesc.Text = "Selamlar Ben DarkNess - DarkNess Hub"
+WelcomeSubDesc.TextColor3 = Color3.fromRGB(180, 150, 210)
+WelcomeSubDesc.TextSize = 13
+WelcomeSubDesc.TextXAlignment = Enum.TextXAlignment.Left
 
 -- CREDITS SAYFASI
 local CreditsLabel = Instance.new("TextLabel")
@@ -566,7 +314,95 @@ CreditsLabel.TextColor3 = Color3.fromRGB(220, 180, 255)
 CreditsLabel.TextSize = 16
 CreditsLabel.TextXAlignment = Enum.TextXAlignment.Left
 
--- ADDONS SAYFASI (AI & Çevirmen)
+-- CONFIG & THEME SAYFASI
+local ConfigThemeCard = Instance.new("Frame")
+ConfigThemeCard.Name = "ConfigThemeCard"
+ConfigThemeCard.Parent = configThemePage
+ConfigThemeCard.BackgroundColor3 = Color3.fromRGB(16, 12, 24)
+ConfigThemeCard.Position = UDim2.new(0, 10, 0, 10)
+ConfigThemeCard.Size = UDim2.new(1, -20, 0, 460)
+
+Instance.new("UICorner", ConfigThemeCard).CornerRadius = UDim.new(0, 8)
+local cfgStroke = Instance.new("UIStroke")
+cfgStroke.Name = "CardStroke"
+cfgStroke.Color = Color3.fromRGB(160, 60, 240)
+cfgStroke.Thickness = 1.5
+cfgStroke.Parent = ConfigThemeCard
+
+local CfgTitle = Instance.new("TextLabel")
+CfgTitle.Parent = ConfigThemeCard
+CfgTitle.BackgroundTransparency = 1
+CfgTitle.Position = UDim2.new(0, 15, 0, 15)
+CfgTitle.Size = UDim2.new(1, -30, 0, 25)
+CfgTitle.Font = Enum.Font.Code
+CfgTitle.Text = "🎨 Config & Themes Manager (All-in-One)"
+CfgTitle.TextColor3 = Color3.fromRGB(240, 180, 255)
+CfgTitle.TextSize = 15
+CfgTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+local CfgDesc = Instance.new("TextLabel")
+CfgDesc.Parent = ConfigThemeCard
+CfgDesc.BackgroundTransparency = 1
+CfgDesc.Position = UDim2.new(0, 15, 0, 45)
+CfgDesc.Size = UDim2.new(1, -30, 0, 35)
+CfgDesc.Font = Enum.Font.Code
+CfgDesc.Text = "Mor, Aqua (🌊), Christmas (🎄) veya Halloween (🎃) temalarını yönet!"
+CfgDesc.TextColor3 = Color3.fromRGB(180, 150, 210)
+CfgDesc.TextSize = 11
+CfgDesc.TextWrapped = true
+CfgDesc.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Tema Butonları
+local MorThemeBtn = Instance.new("TextButton")
+MorThemeBtn.Parent = ConfigThemeCard
+MorThemeBtn.BackgroundColor3 = Color3.fromRGB(50, 180, 80)
+MorThemeBtn.Position = UDim2.new(0, 15, 0, 90)
+MorThemeBtn.Size = UDim2.new(0, 245, 0, 30)
+MorThemeBtn.Font = Enum.Font.Code
+MorThemeBtn.Text = "▲ Mor Theme: Açık"
+MorThemeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MorThemeBtn.TextSize = 11
+Instance.new("UICorner", MorThemeBtn).CornerRadius = UDim.new(0, 6)
+
+local AquaThemeBtn = Instance.new("TextButton")
+AquaThemeBtn.Parent = ConfigThemeCard
+AquaThemeBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 220)
+AquaThemeBtn.Position = UDim2.new(0, 15, 0, 128)
+AquaThemeBtn.Size = UDim2.new(0, 245, 0, 30)
+AquaThemeBtn.Font = Enum.Font.Code
+AquaThemeBtn.Text = "🌊 Aqua Theme: Kapalı"
+AquaThemeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+AquaThemeBtn.TextSize = 11
+Instance.new("UICorner", AquaThemeBtn).CornerRadius = UDim.new(0, 6)
+
+local ChristmasThemeBtn = Instance.new("TextButton")
+ChristmasThemeBtn.Parent = ConfigThemeCard
+ChristmasThemeBtn.BackgroundColor3 = Color3.fromRGB(100, 140, 220)
+ChristmasThemeBtn.Position = UDim2.new(0, 15, 0, 166)
+ChristmasThemeBtn.Size = UDim2.new(0, 245, 0, 30)
+ChristmasThemeBtn.Font = Enum.Font.Code
+ChristmasThemeBtn.Text = "🎄 Christmas Theme: Kapalı"
+ChristmasThemeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ChristmasThemeBtn.TextSize = 11
+Instance.new("UICorner", ChristmasThemeBtn).CornerRadius = UDim.new(0, 6)
+
+local HalloweenThemeBtn = Instance.new("TextButton")
+HalloweenThemeBtn.Parent = ConfigThemeCard
+HalloweenThemeBtn.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
+HalloweenThemeBtn.Position = UDim2.new(0, 15, 0, 204)
+HalloweenThemeBtn.Size = UDim2.new(0, 245, 0, 30)
+HalloweenThemeBtn.Font = Enum.Font.Code
+HalloweenThemeBtn.Text = "🎃 Halloween Theme: Kapalı"
+HalloweenThemeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+HalloweenThemeBtn.TextSize = 11
+Instance.new("UICorner", HalloweenThemeBtn).CornerRadius = UDim.new(0, 6)
+
+local morActive = true
+local aquaActive = false
+local christmasActive = false
+local halloweenActive = false
+
+-- ADDONS SAYFASI (AI Bot & Çevirmen)
 local AICard = Instance.new("Frame")
 AICard.Name = "AICard"
 AICard.Parent = addonsPage
@@ -576,6 +412,7 @@ AICard.Size = UDim2.new(1, -20, 0, 430)
 
 Instance.new("UICorner", AICard).CornerRadius = UDim.new(0, 8)
 local aiStroke = Instance.new("UIStroke")
+aiStroke.Name = "CardStroke"
 aiStroke.Color = Color3.fromRGB(160, 60, 240)
 aiStroke.Thickness = 1.5
 aiStroke.Parent = AICard
@@ -738,15 +575,216 @@ TranslateBtn.MouseButton1Click:Connect(function()
     BotText.Text = "🌐 DarkNess Çeviri Sonucu:\n\n> Orijinal: " .. textToTrans .. "\n> Hedef Dil: " .. targetLang .. " (25+ Dil)\n> Çeviri: [ " .. textToTrans .. " ] -> (" .. targetLang .. " olarak çevrildi!)"
 end)
 
--- SEKME LİSTESİ (Mor Havalı Kamera İkonu Dahil)
+-- DARKNESS HUB UI - 3. PARÇA (Sekmeler ve Tema Mantığı - FİNAL)
+
+-- TÜM ARAYÜZÜ, SEKMELERİ VE İKONLARI TEMAYA GÖRE GÜNCELLEYEN FONKSİYON
+local function ApplyTheme(bgCol, strokeCol, sidebarCol, topbarCol, cardBgCol, textCol, logoText, activeTabBgCol, normalTextCol, activeTextCol)
+    MainFrame.BackgroundColor3 = bgCol
+    MainStroke.Color = strokeCol
+    LeftSidebar.BackgroundColor3 = sidebarCol
+    TopBar.BackgroundColor3 = bgCol
+    SearchBox.BackgroundColor3 = topbarCol
+    LogoTitle.Text = logoText
+    LogoTitle.TextColor3 = textCol
+
+    -- Kartlar
+    WelcomeCard.BackgroundColor3 = cardBgCol
+    wcStroke.Color = strokeCol
+    ConfigThemeCard.BackgroundColor3 = cardBgCol
+    cfgStroke.Color = strokeCol
+    
+    local aiCard = addonsPage:FindFirstChild("AICard")
+    if aiCard then
+        aiCard.BackgroundColor3 = cardBgCol
+        local st = aiCard:FindFirstChildOfClass("UIStroke")
+        if st then st.Color = strokeCol end
+    end
+
+    -- Sol Menü Sekmelerini Dinamik Güncelle
+    for _, child in ipairs(ButtonContainer:GetChildren()) do
+        if child:IsA("TextButton") then
+            local lbl = child:FindFirstChildOfClass("TextLabel")
+            if child.BackgroundTransparency == 0 then
+                child.BackgroundColor3 = activeTabBgCol
+                if lbl then lbl.TextColor3 = activeTextCol end
+            else
+                if lbl then lbl.TextColor3 = normalTextCol end
+            end
+        end
+    end
+end
+
+MorThemeBtn.MouseButton1Click:Connect(function()
+    morActive = true
+    aquaActive = false
+    christmasActive = false
+    halloweenActive = false
+    
+    MorThemeBtn.BackgroundColor3 = Color3.fromRGB(50, 180, 80)
+    MorThemeBtn.Text = "▲ Mor Theme: Açık"
+    AquaThemeBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 220)
+    AquaThemeBtn.Text = "🌊 Aqua Theme: Kapalı"
+    ChristmasThemeBtn.BackgroundColor3 = Color3.fromRGB(100, 140, 220)
+    ChristmasThemeBtn.Text = "🎄 Christmas Theme: Kapalı"
+    HalloweenThemeBtn.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
+    HalloweenThemeBtn.Text = "🎃 Halloween Theme: Kapalı"
+    
+    ApplyTheme(
+        Color3.fromRGB(14, 10, 20), 
+        Color3.fromRGB(120, 40, 200), 
+        Color3.fromRGB(10, 7, 15), 
+        Color3.fromRGB(14, 10, 20), 
+        Color3.fromRGB(22, 14, 35), 
+        Color3.fromRGB(230, 160, 255), 
+        "▲ DarkNess (🇹🇷)",
+        Color3.fromRGB(35, 20, 55),
+        Color3.fromRGB(180, 150, 200),
+        Color3.fromRGB(255, 190, 255)
+    )
+    SendNotification("Theme", "▲ Orijinal Mor tema aktif!")
+end)
+
+AquaThemeBtn.MouseButton1Click:Connect(function()
+    aquaActive = true
+    morActive = false
+    christmasActive = false
+    halloweenActive = false
+    
+    MorThemeBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
+    MorThemeBtn.Text = "▲ Mor Theme: Kapalı"
+    AquaThemeBtn.BackgroundColor3 = Color3.fromRGB(50, 180, 80)
+    AquaThemeBtn.Text = "🌊 Aqua Theme: Açık"
+    ChristmasThemeBtn.BackgroundColor3 = Color3.fromRGB(100, 140, 220)
+    ChristmasThemeBtn.Text = "🎄 Christmas Theme: Kapalı"
+    HalloweenThemeBtn.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
+    HalloweenThemeBtn.Text = "🎃 Halloween Theme: Kapalı"
+    
+    ApplyTheme(
+        Color3.fromRGB(6, 16, 26), 
+        Color3.fromRGB(0, 220, 255), 
+        Color3.fromRGB(4, 11, 18), 
+        Color3.fromRGB(4, 11, 18), 
+        Color3.fromRGB(10, 24, 38), 
+        Color3.fromRGB(120, 235, 255), 
+        "🌊 DarkNess (Aqua)",
+        Color3.fromRGB(0, 60, 90),
+        Color3.fromRGB(120, 190, 220),
+        Color3.fromRGB(200, 245, 255)
+    )
+    SendNotification("Theme", "🌊 Aqua teması ve Dalga logosu aktif!")
+end)
+
+ChristmasThemeBtn.MouseButton1Click:Connect(function()
+    christmasActive = true
+    morActive = false
+    aquaActive = false
+    halloweenActive = false
+    
+    MorThemeBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
+    MorThemeBtn.Text = "▲ Mor Theme: Kapalı"
+    AquaThemeBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 220)
+    AquaThemeBtn.Text = "🌊 Aqua Theme: Kapalı"
+    ChristmasThemeBtn.BackgroundColor3 = Color3.fromRGB(50, 180, 80)
+    ChristmasThemeBtn.Text = "🎄 Christmas Theme: Açık"
+    HalloweenThemeBtn.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
+    HalloweenThemeBtn.Text = "🎃 Halloween Theme: Kapalı"
+    
+    ApplyTheme(
+        Color3.fromRGB(10, 15, 25), 
+        Color3.fromRGB(200, 230, 255), 
+        Color3.fromRGB(6, 10, 18), 
+        Color3.fromRGB(6, 10, 18), 
+        Color3.fromRGB(16, 24, 38), 
+        Color3.fromRGB(210, 240, 255), 
+        "🎄 DarkNess (Christmas)",
+        Color3.fromRGB(30, 50, 80),
+        Color3.fromRGB(150, 180, 210),
+        Color3.fromRGB(220, 240, 255)
+    )
+    SendNotification("Theme", "🎄 Christmas teması ve Yılbaşı Ağacı aktif!")
+end)
+
+HalloweenThemeBtn.MouseButton1Click:Connect(function()
+    halloweenActive = true
+    morActive = false
+    aquaActive = false
+    christmasActive = false
+    
+    MorThemeBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
+    MorThemeBtn.Text = "▲ Mor Theme: Kapalı"
+    AquaThemeBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 220)
+    AquaThemeBtn.Text = "🌊 Aqua Theme: Kapalı"
+    ChristmasThemeBtn.BackgroundColor3 = Color3.fromRGB(100, 140, 220)
+    ChristmasThemeBtn.Text = "🎄 Christmas Theme: Kapalı"
+    HalloweenThemeBtn.BackgroundColor3 = Color3.fromRGB(50, 180, 80)
+    HalloweenThemeBtn.Text = "🎃 Halloween Theme: Açık"
+    
+    ApplyTheme(
+        Color3.fromRGB(18, 10, 5), 
+        Color3.fromRGB(255, 128, 0), 
+        Color3.fromRGB(12, 6, 2), 
+        Color3.fromRGB(18, 10, 5), 
+        Color3.fromRGB(28, 16, 8), 
+        Color3.fromRGB(255, 140, 0), 
+        "🎃 DarkNess (Halloween)",
+        Color3.fromRGB(70, 30, 5),
+        Color3.fromRGB(200, 140, 90),
+        Color3.fromRGB(255, 200, 150)
+    )
+    SendNotification("Theme", "🎃 Halloween teması ve Balkabağı logosu aktif!")
+end)
+
+-- Config Kaydet / Yükle Butonları
+local SaveCfgBtn = Instance.new("TextButton")
+SaveCfgBtn.Parent = ConfigThemeCard
+SaveCfgBtn.BackgroundColor3 = Color3.fromRGB(90, 50, 160)
+SaveCfgBtn.Position = UDim2.new(0, 15, 0, 248)
+SaveCfgBtn.Size = UDim2.new(0, 115, 0, 30)
+SaveCfgBtn.Font = Enum.Font.Code
+SaveCfgBtn.Text = "💾 Config Kaydet"
+SaveCfgBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SaveCfgBtn.TextSize = 11
+Instance.new("UICorner", SaveCfgBtn).CornerRadius = UDim.new(0, 6)
+
+SaveCfgBtn.MouseButton1Click:Connect(function()
+    SendNotification("Config", "💾 Mevcut tema ayarlarınız kaydedildi!")
+end)
+
+local LoadCfgBtn = Instance.new("TextButton")
+LoadCfgBtn.Parent = ConfigThemeCard
+LoadCfgBtn.BackgroundColor3 = Color3.fromRGB(70, 35, 130)
+LoadCfgBtn.Position = UDim2.new(0, 145, 0, 248)
+LoadCfgBtn.Size = UDim2.new(0, 115, 0, 30)
+LoadCfgBtn.Font = Enum.Font.Code
+LoadCfgBtn.Text = "📂 Config Yükle"
+LoadCfgBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoadCfgBtn.TextSize = 11
+Instance.new("UICorner", LoadCfgBtn).CornerRadius = UDim.new(0, 6)
+
+LoadCfgBtn.MouseButton1Click:Connect(function()
+    SendNotification("Config", "📂 Kayıtlı konfigürasyon yüklendi!")
+end)
+
+local CfgInfo = Instance.new("TextLabel")
+CfgInfo.Parent = ConfigThemeCard
+CfgInfo.BackgroundTransparency = 1
+CfgInfo.Position = UDim2.new(0, 15, 0, 290)
+CfgInfo.Size = UDim2.new(1, -30, 0, 155)
+CfgInfo.Font = Enum.Font.Code
+CfgInfo.Text = "✨ Tema Detayları:\n• Mor, Aqua, Christmas, Halloween tam senkronize.\n• Tüm sekmeler ve paneller seçilen temaya göre renk alır."
+CfgInfo.TextColor3 = Color3.fromRGB(170, 140, 210)
+CfgInfo.TextSize = 11
+CfgInfo.TextWrapped = true
+CfgInfo.TextXAlignment = Enum.TextXAlignment.Left
+CfgInfo.TextYAlignment = Enum.TextYAlignment.Top
+
+-- SEKME LİSTESİ (Troll Panelsiz Güncel Liste)
 local tabs = {
     {name = "Home", customType = "4grid", page = homePage, active = true},
     {name = "Main", iconId = "rbxassetid://10723407389", page = mainPage},
     {name = "Floor", customType = "6gridmor", page = floorPage},
     {name = "Visuals", iconId = "rbxassetid://10723415205", page = visualsPage},
     {name = "Exploits", iconId = "rbxassetid://10723345518", page = exploitsPage},
-    {name = "Camera", customType = "cameraicon", page = cameraPage}, -- 📷 Mor Havalı Kamera İkonu
-    {name = "Troll", customType = "troll", page = trollPage},
     {name = "Credits", iconId = "rbxassetid://10723346959", page = creditsPage},
     {name = "Settings", iconId = "rbxassetid://10723346871", page = settingsPage},
     {name = "Config & Theme", customType = "folder", page = configThemePage},
@@ -801,20 +839,6 @@ for _, tab in ipairs(tabs) do
                 Instance.new("UICorner", sq).CornerRadius = UDim.new(0, 1)
             end
         end
-        
-        local dot1 = Instance.new("Frame")
-        dot1.Parent = floorContainer
-        dot1.BackgroundColor3 = Color3.fromRGB(210, 130, 255)
-        dot1.Position = UDim2.new(0, 17, 0, 3)
-        dot1.Size = UDim2.new(0, 3, 0, 3)
-        Instance.new("UICorner", dot1).CornerRadius = UDim.new(1, 0)
-
-        local dot2 = Instance.new("Frame")
-        dot2.Parent = floorContainer
-        dot2.BackgroundColor3 = Color3.fromRGB(210, 130, 255)
-        dot2.Position = UDim2.new(0, 17, 0, 10)
-        dot2.Size = UDim2.new(0, 3, 0, 3)
-        Instance.new("UICorner", dot2).CornerRadius = UDim.new(1, 0)
     elseif tab.customType == "folder" then
         local folderLbl = Instance.new("TextLabel")
         folderLbl.Parent = TabButton
@@ -824,29 +848,6 @@ for _, tab in ipairs(tabs) do
         folderLbl.Font = Enum.Font.Code
         folderLbl.Text = "📂"
         folderLbl.TextSize = 14
-    elseif tab.customType == "troll" then
-        local trollLbl = Instance.new("TextLabel")
-        trollLbl.Parent = TabButton
-        trollLbl.BackgroundTransparency = 1
-        trollLbl.Position = UDim2.new(0, 10, 0.5, -10)
-        trollLbl.Size = UDim2.new(0, 20, 0, 20)
-        trollLbl.Font = Enum.Font.Code
-        trollLbl.Text = "🎭"
-        trollLbl.TextSize = 14
-    elseif tab.customType == "cameraicon" then
-        local camIconFrame = Instance.new("Frame")
-        camIconFrame.Parent = TabButton
-        camIconFrame.BackgroundColor3 = Color3.fromRGB(210, 130, 255)
-        camIconFrame.Position = UDim2.new(0, 10, 0.5, -7)
-        camIconFrame.Size = UDim2.new(0, 16, 0, 12)
-        Instance.new("UICorner", camIconFrame).CornerRadius = UDim.new(0, 3)
-
-        local lens = Instance.new("Frame")
-        lens.Parent = camIconFrame
-        lens.BackgroundColor3 = Color3.fromRGB(20, 12, 32)
-        lens.Position = UDim2.new(0.5, -3, 0.5, -3)
-        lens.Size = UDim2.new(0, 6, 0, 6)
-        Instance.new("UICorner", lens).CornerRadius = UDim.new(1, 0)
     else
         local IconImage = Instance.new("ImageLabel")
         IconImage.Parent = TabButton
@@ -873,16 +874,35 @@ for _, tab in ipairs(tabs) do
             if child:IsA("TextButton") then
                 child.BackgroundColor3 = Color3.fromRGB(10, 7, 15)
                 child.BackgroundTransparency = 1
-                for _, sub in ipairs(child:GetChildren()) do
-                    if sub:IsA("TextLabel") and sub.Text ~= "📂" and sub.Text ~= "🎭" then 
-                        sub.TextColor3 = Color3.fromRGB(180, 150, 200) 
+                local lbl = child:FindFirstChildOfClass("TextLabel")
+                if lbl then
+                    if aquaActive then
+                        lbl.TextColor3 = Color3.fromRGB(120, 190, 220)
+                    elseif christmasActive then
+                        lbl.TextColor3 = Color3.fromRGB(150, 180, 210)
+                    elseif halloweenActive then
+                        lbl.TextColor3 = Color3.fromRGB(200, 140, 90)
+                    else
+                        lbl.TextColor3 = Color3.fromRGB(180, 150, 200)
                     end
                 end
             end
         end
-        TabButton.BackgroundColor3 = Color3.fromRGB(35, 20, 55)
+        
+        if aquaActive then
+            TabButton.BackgroundColor3 = Color3.fromRGB(0, 60, 90)
+            Label.TextColor3 = Color3.fromRGB(200, 245, 255)
+        elseif christmasActive then
+            TabButton.BackgroundColor3 = Color3.fromRGB(30, 50, 80)
+            Label.TextColor3 = Color3.fromRGB(220, 240, 255)
+        elseif halloweenActive then
+            TabButton.BackgroundColor3 = Color3.fromRGB(70, 30, 5)
+            Label.TextColor3 = Color3.fromRGB(255, 200, 150)
+        else
+            TabButton.BackgroundColor3 = Color3.fromRGB(35, 20, 55)
+            Label.TextColor3 = Color3.fromRGB(255, 190, 255)
+        end
         TabButton.BackgroundTransparency = 0
-        Label.TextColor3 = Color3.fromRGB(255, 190, 255)
 
         if activePage then activePage.Visible = false end
         tab.page.Visible = true
@@ -907,15 +927,144 @@ StatusText.BackgroundTransparency = 1
 StatusText.Position = UDim2.new(0, 15, 0, 0)
 StatusText.Size = UDim2.new(1, -40, 1, 0)
 StatusText.Font = Enum.Font.Code
-StatusText.Text = "Game: DOORS( Hotel )  |  Hub: DarkNess  |  Modular Final Version"
+StatusText.Text = "Game: DOORS( Hotel )  |  Hub: DarkNess  |  Modular No-Troll Final"
 StatusText.TextColor3 = Color3.fromRGB(150, 120, 180)
 StatusText.TextSize = 12
 StatusText.TextXAlignment = Enum.TextXAlignment.Left
 
-local ResizeIcon = Instance.new("ImageLabel")
-ResizeIcon.Parent = Footer
-ResizeIcon.BackgroundTransparency = 1
-ResizeIcon.Position = UDim2.new(1, -24, 0.5, -8)
-ResizeIcon.Size = UDim2.new(0, 16, 0, 16)
-ResizeIcon.Image = "rbxassetid://10723343805"
-ResizeIcon.ImageColor3 = Color3.fromRGB(200, 120, 255)
+-- // DARKNESS HUB - ENTITY & TRAP ESP MODÜLÜ //
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local ESPEnabled = true
+
+local ESPConfig = {
+    OutlineColor = Color3.new(1, 0, 0), -- Kırmızı Çizgi
+    TextColor = Color3.new(1, 0, 0),    -- Kırmızı İsim
+    TrapColor = Color3.new(1, 0, 0)     -- Tamamen Kırmızı (Tuzaklar için)
+}
+
+-- // Türkçe İsim Sözlüğü (İstisnalar Hariç)
+local TranslatedNames = {
+    ["Rush"] = "Acele",
+    ["Ambush"] = "Pusu",
+    ["Surge"] = "Dalga",
+    ["Blitz"] = "Yıldırım",
+    ["Bash"] = "Vurkaç",
+    ["Scribbles"] = "Karalamalar",
+    ["FrozenAmbush"] = "Donmuş Pusu",
+    ["A-60"] = "A-60",
+    ["A-120"] = "A-120",
+    ["Mandrake"] = "Adamotu",
+    ["Giggle"] = "Kıkırtı",
+    ["Grumble"] = "Grumble",
+    ["Queen Grumble"] = "Queen Grumble",
+    ["Bramble"] = "Bramble",
+    ["Honcho"] = "Honcho",
+    ["LookMan"] = "LookMan",
+    ["Eyes"] = "Gözler",
+    ["Vacuum"] = "Vacuum",
+    ["Dupe"] = "Dupe",
+    ["Snare"] = "Kapan",
+    ["Sally"] = "Sally",
+    ["Crusher"] = "Ezici",
+    ["Noise"] = "Gürültü",
+    ["Creak"] = "Gıcırtı",
+    ["Drone"] = "Drone",
+    ["Teller"] = "Anlatıcı",
+    ["DroneStampede"] = "Drone Sürüsü",
+    ["HiJack"] = "Hırsız",
+    ["CustomFigure"] = "CustomFigure",
+    ["RNIUSHCg=="] = "RNIUSHCg==",
+    ["Figure"] = "Figür"
+}
+
+-- // Hariç Tutulan Liste
+local ExcludedEntities = {
+    ["CustomFigure"] = true,
+    ["Bramble"] = true,
+    ["Grumble"] = true,
+    ["Queen Grumble"] = true,
+    ["Honcho"] = true,
+    ["AR0xMBUSH"] = true,
+    ["RNIUSHCg=="] = true,
+    ["LookMan"] = true
+}
+
+local TrapDoors = {
+    ["Dupe"] = true,
+    ["Vacuum"] = true
+}
+
+-- // ESP Uygulama Fonksiyonu (Hataları Giderilmiş Güvenli Sürüm)
+local function ApplyESP(entity)
+    if not ESPEnabled or not entity then return end
+    if entity:FindFirstChild("EntityHighlight") then return end
+    
+    local entityName = entity.Name
+    
+    -- 1. Tuzaklı Kapı Kontrolü (Dupe & Vacuum -> Tamamen Kırmızı)
+    if TrapDoors[entityName] then
+        for _, part in ipairs(entity:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Color = ESPConfig.TrapColor
+                part.Material = Enum.Material.Neon
+            end
+        end
+        return
+    end
+    
+    -- 2. Outline (Kırmızı Çizgi) Ekleme
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "EntityHighlight"
+    highlight.Adornee = entity
+    highlight.FillTransparency = 1
+    highlight.OutlineColor = ESPConfig.OutlineColor
+    highlight.OutlineTransparency = 0
+    highlight.Parent = entity
+    
+    -- 3. İsimlendirme ve Türkçe Çeviri Kontrolü
+    local displayName = entityName
+    if not ExcludedEntities[entityName] and TranslatedNames[entityName] then
+        displayName = TranslatedNames[entityName]
+    end
+    
+    -- Güvenli Adornee Kontrolü (Çökme Hataları Engellendi)
+    local adorneePart = entity:FindFirstChild("HumanoidRootPart") or entity:FindFirstChild("PrimaryPart") or (entity:IsA("Model") and entity.PrimaryPart) or (entity:IsA("BasePart") and entity)
+    
+    if adorneePart then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "EntityNameTag"
+        billboard.Size = UDim2.new(0, 200, 0, 50)
+        billboard.StudsOffset = Vector3.new(0, 3, 0)
+        billboard.AlwaysOnTop = true
+        billboard.Adornee = adorneePart
+        
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.BackgroundTransparency = 1
+        textLabel.Text = displayName
+        textLabel.TextColor3 = ESPConfig.TextColor
+        textLabel.TextScaled = true
+        textLabel.Font = Enum.Font.SourceSansBold
+        textLabel.TextStrokeTransparency = 0
+        textLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+        
+        textLabel.Parent = billboard
+        billboard.Parent = entity
+    end
+end
+
+-- // Lag Yaratmayan Güvenli Tarama Yapısı //
+workspace.ChildAdded:Connect(function(obj)
+    if TranslatedNames[obj.Name] or TrapDoors[obj.Name] then
+        task.wait(0.1)
+        ApplyESP(obj)
+    end
+end)
+
+for _, obj in ipairs(workspace:GetChildren()) do
+    if TranslatedNames[obj.Name] or TrapDoors[obj.Name] then
+        ApplyESP(obj)
+    end
+end
