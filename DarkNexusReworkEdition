@@ -933,155 +933,188 @@ StatusText.TextSize = 12
 StatusText.TextXAlignment = Enum.TextXAlignment.Left
 
 -- ==========================================
--- VISUALS SAYFASI VE ESP BUTONU (KUSURSUZ ENTEGRASYON)
+-- DARKNESS HUB - FULL ENTITY & TRAP ESP SİSTEMİ (OPTİMİZE)
 -- ==========================================
-
--- Visuals Sayfası için Kart Oluşturma
-local VisualsCard = Instance.new("Frame")
-VisualsCard.Name = "VisualsCard"
-VisualsCard.Parent = visualsPage -- Doğrudan Visuals sayfasına bağlanır
-VisualsCard.BackgroundColor3 = Color3.fromRGB(22, 14, 35)
-VisualsCard.Position = UDim2.new(0, 10, 0, 10)
-VisualsCard.Size = UDim2.new(1, -20, 0, 130)
-
-Instance.new("UICorner", VisualsCard).CornerRadius = UDim.new(0, 8)
-local visStroke = Instance.new("UIStroke")
-visStroke.Name = "CardStroke"
-visStroke.Color = Color3.fromRGB(160, 60, 240)
-visStroke.Thickness = 1.5
-visStroke.Parent = VisualsCard
-
-local VisTitle = Instance.new("TextLabel")
-VisTitle.Parent = VisualsCard
-VisTitle.BackgroundTransparency = 1
-VisTitle.Position = UDim2.new(0, 20, 0, 15)
-VisTitle.Size = UDim2.new(1, -40, 0, 30)
-VisTitle.Font = Enum.Font.Code
-VisTitle.Text = "👁️ Entity & Trap ESP"
-VisTitle.TextColor3 = Color3.fromRGB(255, 200, 255)
-VisTitle.TextSize = 18
-VisTitle.TextXAlignment = Enum.TextXAlignment.Left
-
-local EspToggleBtn = Instance.new("TextButton")
-EspToggleBtn.Name = "EspToggleBtn"
-EspToggleBtn.Parent = VisualsCard
-EspToggleBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
-EspToggleBtn.Position = UDim2.new(0, 20, 0, 60)
-EspToggleBtn.Size = UDim2.new(0, 240, 0, 40)
-EspToggleBtn.Font = Enum.Font.Code
-EspToggleBtn.Text = "🔴 Entity ESP: Aktif"
-EspToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-EspToggleBtn.TextSize = 13
-Instance.new("UICorner", EspToggleBtn).CornerRadius = UDim.new(0, 6)
-
--- // ENTITY & TRAP ESP ÇALIŞTIRICI SİSTEMİ //
 local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
+
+local ESPColor = Color3.fromRGB(255, 0, 0)
 local ESPEnabled = true
 
-EspToggleBtn.MouseButton1Click:Connect(function()
-    ESPEnabled = not ESPEnabled
-    EspToggleBtn.BackgroundColor3 = ESPEnabled and Color3.fromRGB(130, 40, 220) or Color3.fromRGB(60, 60, 60)
-    EspToggleBtn.Text = ESPEnabled and "🔴 Entity ESP: Aktif" or "⚪ Entity ESP: Kapalı"
+-- // 1. Bütün Entity ve Tuzak Listesi (Hızlı Arama için Dictionary Yapıldı) //
+local EntityList = {
+    -- Klasik & Yeni Varlıklar
+    ["RushMoving"] = true, ["AmbushMoving"] = true, ["Eyes"] = true, ["A60"] = true, 
+    ["A120"] = true, ["Figure"] = true, ["Seek"] = true, ["Snare"] = true, ["Glitch"] = true,
+    ["Honcho"] = true, ["Bramble"] = true, ["CustomFigure"] = true, ["AR0xMBUSH"] = true, 
+    ["RNIUSHCg=="] = true, ["Queen Grumble"] = true, ["Grumble"] = true, ["LookMan"] = true, 
+    ["Blitz"] = true, ["DroneStampede"] = true, ["Drones"] = true, ["Alma"] = true, 
+    ["Bash"] = true, ["Scribbles"] = true, ["Crusher"] = true, ["Noise"] = true, 
+    ["Noise_Tv"] = true, ["Creak"] = true, ["Stem"] = true, ["Sally"] = true, 
+    ["HiJack"] = true, ["Teller"] = true, ["Mandrake"] = true, ["Surge"] = true,
+    ["The GroundSpekker"] = true, ["Giggle"] = true, ["FrozenAmbush"] = true, ["CustomRush"] = true,
     
-    if not ESPEnabled then
-        for _, obj in ipairs(workspace:GetDescendants()) do
-            local hl = obj:FindFirstChild("EntityHighlight")
-            if hl then hl:Destroy() end
-            local bb = obj:FindFirstChild("EntityNameTag")
-            if bb then bb:Destroy() end
-        end
-    end
-end)
-
-local ESPConfig = {
-    OutlineColor = Color3.new(1, 0, 0),
-    TextColor = Color3.new(1, 0, 0),
-    TrapColor = Color3.new(1, 0, 0)
+    -- Tuzaklar / Kapılar
+    ["Vacuum"] = true, ["Dupe"] = true
 }
 
+-- // Türkçe İsim Sözlüğü //
 local TranslatedNames = {
-    ["Rush"] = "Acele", ["Ambush"] = "Pusu", ["Surge"] = "Dalga", ["Blitz"] = "Yıldırım",
-    ["Bash"] = "Vurkaç", ["Scribbles"] = "Karalamalar", ["FrozenAmbush"] = "Donmuş Pusu",
-    ["A-60"] = "A-60", ["A-120"] = "A-120", ["Mandrake"] = "Adamotu", ["Giggle"] = "Kıkırtı",
-    ["Grumble"] = "Grumble", ["Queen Grumble"] = "Queen Grumble", ["Bramble"] = "Bramble",
-    ["Honcho"] = "Honcho", ["LookMan"] = "LookMan", ["Eyes"] = "Gözler", ["Vacuum"] = "Vacuum",
-    ["Dupe"] = "Dupe", ["Snare"] = "Kapan", ["Sally"] = "Sally", ["Crusher"] = "Ezici",
-    ["Noise"] = "Gürültü", ["Creak"] = "Gıcırtı", ["Drone"] = "Drone", ["Teller"] = "Anlatıcı",
-    ["DroneStampede"] = "Drone Sürüsü", ["HiJack"] = "Hırsız", ["CustomFigure"] = "CustomFigure",
-    ["RNIUSHCg=="] = "RNIUSHCg==", ["Figure"] = "Figür"
+    ["RushMoving"] = "Acele",
+    ["AmbushMoving"] = "Pusu",
+    ["Surge"] = "Dalga",
+    ["Blitz"] = "Yıldırım",
+    ["Bash"] = "Vurkaç",
+    ["Scribbles"] = "Karalamalar",
+    ["FrozenAmbush"] = "Donmuş Pusu",
+    ["A60"] = "A-60",
+    ["A120"] = "A-120",
+    ["Mandrake"] = "Adamotu",
+    ["Giggle"] = "Kıkırtı",
+    ["Eyes"] = "Gözler",
+    ["Snare"] = "Kapan",
+    ["Sally"] = "Sally",
+    ["Crusher"] = "Ezici",
+    ["Noise"] = "Gürültü",
+    ["Noise_Tv"] = "Gürültü TV",
+    ["Creak"] = "Gıcırtı",
+    ["Drone"] = "Drone",
+    ["Teller"] = "Anlatıcı",
+    ["DroneStampede"] = "Drone Sürüsü",
+    ["HiJack"] = "Hırsız",
+    ["Figure"] = "Figür",
+    ["Alma"] = "Alma",
+    ["Stem"] = "Stem",
+    ["The GroundSpekker"] = "Toprak Gezgini"
 }
 
+-- // Orijinal Kalacaklar (İstisnalar) //
 local ExcludedEntities = {
-    ["CustomFigure"] = true, ["Bramble"] = true, ["Grumble"] = true,
-    ["Queen Grumble"] = true, ["Honcho"] = true, ["AR0xMBUSH"] = true,
-    ["RNIUSHCg=="] = true, ["LookMan"] = true
+    ["CustomFigure"] = true,
+    ["Bramble"] = true,
+    ["Grumble"] = true,
+    ["Queen Grumble"] = true,
+    ["Honcho"] = true,
+    ["AR0xMBUSH"] = true,
+    ["RNIUSHCg=="] = true,
+    ["LookMan"] = true,
+    ["CustomRush"] = true
 }
 
-local TrapDoors = { ["Dupe"] = true, ["Vacuum"] = true }
+-- // Tuzak Kapılar (Tamamen Kırmızı Neon Olacaklar) //
+local TrapDoors = {
+    ["Dupe"] = true,
+    ["Vacuum"] = true
+}
 
-local function ApplyESP(entity)
-    if not ESPEnabled or not entity then return end
-    if entity:FindFirstChild("EntityHighlight") then return end
+-- // ESP Temizleme Fonksiyonu //
+local function RemoveEntityESP(obj)
+    local hl = obj:FindFirstChild("Cheesy_EntityESP")
+    if hl then hl:Destroy() end
+    local bb = obj:FindFirstChild("Cheesy_NameTag")
+    if bb then bb:Destroy() end
+end
+
+local function ClearAllESP()
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        RemoveEntityESP(obj)
+    end
+end
+
+-- // ESP Uygulama Fonksiyonu //
+local function AddEntityESP(obj)
+    if not ESPEnabled or not obj then return end
+    if obj:FindFirstChild("Cheesy_EntityESP") or obj:FindFirstChild("Cheesy_NameTag") then return end
     
-    local entityName = entity.Name
-    
-    if TrapDoors[entityName] then
-        for _, part in ipairs(entity:GetDescendants()) do
+    local objName = obj.Name
+
+    -- Tuzak Kapı Kontrolü (Dupe & Vacuum -> Tamamen Kırmızı Neon)
+    if TrapDoors[objName] then
+        for _, part in ipairs(obj:GetDescendants()) do
             if part:IsA("BasePart") then
-                part.Color = ESPConfig.TrapColor
+                part.Color = ESPColor
                 part.Material = Enum.Material.Neon
             end
         end
         return
     end
-    
+
+    -- Normal Varlıklar İçin Highlight (Kırmızı Çizgi)
     local highlight = Instance.new("Highlight")
-    highlight.Name = "EntityHighlight"
-    highlight.Adornee = entity
-    highlight.FillTransparency = 1
-    highlight.OutlineColor = ESPConfig.OutlineColor
+    highlight.Name = "Cheesy_EntityESP"
+    highlight.Adornee = obj
+    highlight.FillColor = ESPColor
+    highlight.FillTransparency = 0.5
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
     highlight.OutlineTransparency = 0
-    highlight.Parent = entity
-    
-    local displayName = entityName
-    if not ExcludedEntities[entityName] and TranslatedNames[entityName] then
-        displayName = TranslatedNames[entityName]
+    highlight.Parent = obj
+
+    -- Türkçe Çeviri İsmi Belirleme
+    local displayName = objName
+    if not ExcludedEntities[objName] and TranslatedNames[objName] then
+        displayName = TranslatedNames[objName]
     end
-    
-    local adorneePart = entity:FindFirstChild("HumanoidRootPart") or entity:FindFirstChild("PrimaryPart") or (entity:IsA("Model") and entity.PrimaryPart) or (entity:IsA("BasePart") and entity)
-    if adorneePart then
-        local billboard = Instance.new("BillboardGui")
-        billboard.Name = "EntityNameTag"
-        billboard.Size = UDim2.new(0, 200, 0, 50)
-        billboard.StudsOffset = Vector3.new(0, 3, 0)
-        billboard.AlwaysOnTop = true
-        billboard.Adornee = adorneePart
-        
-        local textLabel = Instance.new("TextLabel")
-        textLabel.Size = UDim2.new(1, 0, 1, 0)
-        textLabel.BackgroundTransparency = 1
-        textLabel.Text = displayName
-        textLabel.TextColor3 = ESPConfig.TextColor
-        textLabel.TextScaled = true
-        textLabel.Font = Enum.Font.SourceSansBold
-        textLabel.TextStrokeTransparency = 0
-        textLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-        
-        textLabel.Parent = billboard
-        billboard.Parent = entity
-    end
+
+    -- BillboardGui (Kırmızı İsim Etiketi)
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "Cheesy_NameTag"
+    billboard.Size = UDim2.new(0, 200, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Adornee = obj
+    billboard.Parent = obj
+
+    local text = Instance.new("TextLabel")
+    text.Size = UDim2.new(1, 0, 1, 0)
+    text.BackgroundTransparency = 1
+    text.TextColor3 = ESPColor
+    text.TextScaled = true
+    text.TextStrokeTransparency = 0
+    text.Font = Enum.Font.SourceSansBold
+    text.Text = displayName
+    text.Parent = billboard
 end
 
-workspace.ChildAdded:Connect(function(obj)
-    if TranslatedNames[obj.Name] or TrapDoors[obj.Name] then
-        task.wait(0.1)
-        ApplyESP(obj)
+-- // Visuals Sekmesindeki Butona Güvenli Bağlantı //
+pcall(function()
+    local visualsCard = visualsPage:FindFirstChild("VisualsCard")
+    local EspToggleBtn = visualsCard and visualsCard:FindFirstChild("EspToggleBtn")
+
+    if EspToggleBtn then
+        EspToggleBtn.MouseButton1Click:Connect(function()
+            ESPEnabled = not ESPEnabled
+            EspToggleBtn.BackgroundColor3 = ESPEnabled and Color3.fromRGB(130, 40, 220) or Color3.fromRGB(60, 60, 60)
+            EspToggleBtn.Text = ESPEnabled and "🔴 Entity ESP: Aktif" or "⚪ Entity ESP: Kapalı"
+            
+            if not ESPEnabled then
+                ClearAllESP()
+            else
+                for _, obj in ipairs(Workspace:GetDescendants()) do
+                    if EntityList[obj.Name] then
+                        AddEntityESP(obj)
+                    end
+                end
+            end
+        end)
     end
 end)
 
-for _, obj in ipairs(workspace:GetChildren()) do
-    if TranslatedNames[obj.Name] or TrapDoors[obj.Name] then
-        ApplyESP(obj)
+-- // İlk Tarama //
+for _, obj in ipairs(Workspace:GetDescendants()) do
+    if EntityList[obj.Name] then
+        AddEntityESP(obj)
     end
 end
+
+-- // Dinamik Ekleme Dinleyicisi //
+Workspace.DescendantAdded:Connect(function(obj)
+    if ESPEnabled and EntityList[obj.Name] then
+        -- Varlığın tamamen yüklenmesi için küçük bir gecikme (isteğe bağlı ama güvenlidir)
+        task.defer(function()
+            if obj and obj.Parent then
+                AddEntityESP(obj)
+            end
+        end)
+    end
+end)
