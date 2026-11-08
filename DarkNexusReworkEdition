@@ -220,8 +220,7 @@ ToggleButton.MouseButton1Click:Connect(function()
     menuVisible = not menuVisible
     MainFrame.Visible = menuVisible
 end)
-
--- DARKNESS HUB UI - 2. PARÇA (Sayfalar ve Tema Yönetimi)
+-- DARKNESS HUB UI - 2. PARÇA (Sayfalar ve İçerikler)
 local PagesHolder = Instance.new("Frame")
 PagesHolder.Name = "PagesHolder"
 PagesHolder.Parent = MainFrame
@@ -574,10 +573,7 @@ TranslateBtn.MouseButton1Click:Connect(function()
     task.wait(0.6)
     BotText.Text = "🌐 DarkNess Çeviri Sonucu:\n\n> Orijinal: " .. textToTrans .. "\n> Hedef Dil: " .. targetLang .. " (25+ Dil)\n> Çeviri: [ " .. textToTrans .. " ] -> (" .. targetLang .. " olarak çevrildi!)"
 end)
-
--- DARKNESS HUB UI - 3. PARÇA (Sekmeler ve Tema Mantığı - FİNAL)
-
--- TÜM ARAYÜZÜ, SEKMELERİ VE İKONLARI TEMAYA GÖRE GÜNCELLEYEN FONKSİYON
+-- DARKNESS HUB UI - 3. PARÇA (Tema Mantığı, Sekmeler ve Footer)
 local function ApplyTheme(bgCol, strokeCol, sidebarCol, topbarCol, cardBgCol, textCol, logoText, activeTabBgCol, normalTextCol, activeTextCol)
     MainFrame.BackgroundColor3 = bgCol
     MainStroke.Color = strokeCol
@@ -587,7 +583,6 @@ local function ApplyTheme(bgCol, strokeCol, sidebarCol, topbarCol, cardBgCol, te
     LogoTitle.Text = logoText
     LogoTitle.TextColor3 = textCol
 
-    -- Kartlar
     WelcomeCard.BackgroundColor3 = cardBgCol
     wcStroke.Color = strokeCol
     ConfigThemeCard.BackgroundColor3 = cardBgCol
@@ -600,7 +595,6 @@ local function ApplyTheme(bgCol, strokeCol, sidebarCol, topbarCol, cardBgCol, te
         if st then st.Color = strokeCol end
     end
 
-    -- Sol Menü Sekmelerini Dinamik Güncelle
     for _, child in ipairs(ButtonContainer:GetChildren()) do
         if child:IsA("TextButton") then
             local lbl = child:FindFirstChildOfClass("TextLabel")
@@ -734,7 +728,6 @@ HalloweenThemeBtn.MouseButton1Click:Connect(function()
     SendNotification("Theme", "🎃 Halloween teması ve Balkabağı logosu aktif!")
 end)
 
--- Config Kaydet / Yükle Butonları
 local SaveCfgBtn = Instance.new("TextButton")
 SaveCfgBtn.Parent = ConfigThemeCard
 SaveCfgBtn.BackgroundColor3 = Color3.fromRGB(90, 50, 160)
@@ -778,7 +771,6 @@ CfgInfo.TextWrapped = true
 CfgInfo.TextXAlignment = Enum.TextXAlignment.Left
 CfgInfo.TextYAlignment = Enum.TextYAlignment.Top
 
--- SEKME LİSTESİ (Troll Panelsiz Güncel Liste)
 local tabs = {
     {name = "Home", customType = "4grid", page = homePage, active = true},
     {name = "Main", iconId = "rbxassetid://10723407389", page = mainPage},
@@ -931,190 +923,124 @@ StatusText.Text = "Game: DOORS( Hotel )  |  Hub: DarkNess  |  Modular No-Troll F
 StatusText.TextColor3 = Color3.fromRGB(150, 120, 180)
 StatusText.TextSize = 12
 StatusText.TextXAlignment = Enum.TextXAlignment.Left
-
 -- ==========================================
--- DARKNESS HUB - FULL ENTITY & TRAP ESP SİSTEMİ (OPTİMİZE)
+-- DARKNESS HUB - GENİŞLETİLMİŞ KAT FİLTRELEME MOTORU
 -- ==========================================
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local LocalPlayer = Players.LocalPlayer
 
-local ESPColor = Color3.fromRGB(255, 0, 0)
-local ESPEnabled = true
+-- Floor Sayfası İçin Ana Kart
+local FloorFilterCard = Instance.new("Frame")
+FloorFilterCard.Name = "FloorFilterCard"
+FloorFilterCard.Parent = floorPage
+FloorFilterCard.BackgroundColor3 = Color3.fromRGB(16, 12, 24)
+FloorFilterCard.Position = UDim2.new(0, 10, 0, 10)
+FloorFilterCard.Size = UDim2.new(1, -20, 0, 460)
 
--- // 1. Bütün Entity ve Tuzak Listesi (Hızlı Arama için Dictionary Yapıldı) //
-local EntityList = {
-    -- Klasik & Yeni Varlıklar
-    ["RushMoving"] = true, ["AmbushMoving"] = true, ["Eyes"] = true, ["A60"] = true, 
-    ["A120"] = true, ["Figure"] = true, ["Seek"] = true, ["Snare"] = true, ["Glitch"] = true,
-    ["Honcho"] = true, ["Bramble"] = true, ["CustomFigure"] = true, ["AR0xMBUSH"] = true, 
-    ["RNIUSHCg=="] = true, ["Queen Grumble"] = true, ["Grumble"] = true, ["LookMan"] = true, 
-    ["Blitz"] = true, ["DroneStampede"] = true, ["Drones"] = true, ["Alma"] = true, 
-    ["Bash"] = true, ["Scribbles"] = true, ["Crusher"] = true, ["Noise"] = true, 
-    ["Noise_Tv"] = true, ["Creak"] = true, ["Stem"] = true, ["Sally"] = true, 
-    ["HiJack"] = true, ["Teller"] = true, ["Mandrake"] = true, ["Surge"] = true,
-    ["The GroundSpekker"] = true, ["Giggle"] = true, ["FrozenAmbush"] = true, ["CustomRush"] = true,
+Instance.new("UICorner", FloorFilterCard).CornerRadius = UDim.new(0, 8)
+local floorStroke = Instance.new("UIStroke")
+floorStroke.Name = "CardStroke"
+floorStroke.Color = Color3.fromRGB(160, 60, 240)
+floorStroke.Thickness = 1.5
+floorStroke.Parent = FloorFilterCard
+
+local FloorTitle = Instance.new("TextLabel")
+FloorTitle.Parent = FloorFilterCard
+FloorTitle.BackgroundTransparency = 1
+FloorTitle.Position = UDim2.new(0, 15, 0, 15)
+FloorTitle.Size = UDim2.new(1, -30, 0, 25)
+FloorTitle.Font = Enum.Font.Code
+FloorTitle.Text = "🏢 Genişletilmiş Kat Filtreleme Motoru"
+FloorTitle.TextColor3 = Color3.fromRGB(240, 180, 255)
+FloorTitle.TextSize = 15
+FloorTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+local FloorDesc = Instance.new("TextLabel")
+FloorDesc.Parent = FloorFilterCard
+FloorDesc.BackgroundTransparency = 1
+FloorDesc.Position = UDim2.new(0, 15, 0, 42)
+FloorDesc.Size = UDim2.new(1, -30, 0, 30)
+FloorDesc.Font = Enum.Font.Code
+FloorDesc.Text = "Tüm Doors katları ve alternatif modlar arasında temiz geçiş yap."
+FloorDesc.TextColor3 = Color3.fromRGB(180, 150, 210)
+FloorDesc.TextSize = 11
+FloorDesc.TextWrapped = true
+FloorDesc.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Kat Listesi ve Butonlar (ScrollingFrame ile kolay yönetim)
+local FilterScroll = Instance.new("ScrollingFrame")
+FilterScroll.Parent = FloorFilterCard
+FilterScroll.BackgroundTransparency = 1
+FilterScroll.Position = UDim2.new(0, 15, 0, 80)
+FilterScroll.Size = UDim2.new(0, 245, 0, 365)
+FilterScroll.CanvasSize = UDim2.new(0, 0, 0, 255)
+FilterScroll.ScrollBarThickness = 3
+
+local floorsList = {
+    {name = "🏨 Hotel", key = "Hotel"},
+    {name = "⛏️ Mines", key = "Mines"},
+    {name = "📚 Archives", key = "Archives"},
+    {name = "🪜 StairWell", key = "StairWell"},
+    {name = "🚪 BackDoors", key = "BackDoors"},
+    {name = "🌲 OutDoors", key = "OutDoors"}
+}
+
+local filterButtons = {}
+local activeFilterBtn = nil
+
+-- İçerik Paneli
+local ContentHolder = Instance.new("Frame")
+ContentHolder.Parent = FloorFilterCard
+ContentHolder.BackgroundColor3 = Color3.fromRGB(12, 8, 20)
+ContentHolder.Position = UDim2.new(0, 275, 0, 80)
+ContentHolder.Size = UDim2.new(1, -290, 0, 365)
+Instance.new("UICorner", ContentHolder).CornerRadius = UDim.new(0, 6)
+local chStroke = Instance.new("UIStroke")
+chStroke.Color = Color3.fromRGB(120, 50, 200)
+chStroke.Parent = ContentHolder
+
+local ContentTitle = Instance.new("TextLabel")
+ContentTitle.Parent = ContentHolder
+ContentTitle.BackgroundTransparency = 1
+ContentTitle.Position = UDim2.new(0, 15, 0, 15)
+ContentTitle.Size = UDim2.new(1, -30, 0, 25)
+ContentTitle.Font = Enum.Font.Code
+ContentTitle.Text = "✨ Hotel Modu Aktif"
+ContentTitle.TextColor3 = Color3.fromRGB(240, 180, 255)
+ContentTitle.TextSize = 13
+ContentTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Dinamik Buton Oluşturucu
+for i, floorData in ipairs(floorsList) do
+    local fBtn = Instance.new("TextButton")
+    fBtn.Parent = FilterScroll
+    fBtn.BackgroundColor3 = (i == 1) and Color3.fromRGB(130, 40, 220) or Color3.fromRGB(60, 40, 90)
+    fBtn.Position = UDim2.new(0, 0, 0, (i - 1) * 40)
+    fBtn.Size = UDim2.new(1, -5, 0, 34)
+    fBtn.Font = Enum.Font.Code
+    fBtn.Text = floorData.name .. (i == 1 and " (Aktif)" or "")
+    fBtn.TextColor3 = (i == 1) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(200, 180, 230)
+    fBtn.TextSize = 11
+    Instance.new("UICorner", fBtn).CornerRadius = UDim.new(0, 6)
     
-    -- Tuzaklar / Kapılar
-    ["Vacuum"] = true, ["Dupe"] = true
-}
-
--- // Türkçe İsim Sözlüğü //
-local TranslatedNames = {
-    ["RushMoving"] = "Acele",
-    ["AmbushMoving"] = "Pusu",
-    ["Surge"] = "Dalga",
-    ["Blitz"] = "Yıldırım",
-    ["Bash"] = "Vurkaç",
-    ["Scribbles"] = "Karalamalar",
-    ["FrozenAmbush"] = "Donmuş Pusu",
-    ["A60"] = "A-60",
-    ["A120"] = "A-120",
-    ["Mandrake"] = "Adamotu",
-    ["Giggle"] = "Kıkırtı",
-    ["Eyes"] = "Gözler",
-    ["Snare"] = "Kapan",
-    ["Sally"] = "Sally",
-    ["Crusher"] = "Ezici",
-    ["Noise"] = "Gürültü",
-    ["Noise_Tv"] = "Gürültü TV",
-    ["Creak"] = "Gıcırtı",
-    ["Drone"] = "Drone",
-    ["Teller"] = "Anlatıcı",
-    ["DroneStampede"] = "Drone Sürüsü",
-    ["HiJack"] = "Hırsız",
-    ["Figure"] = "Figür",
-    ["Alma"] = "Alma",
-    ["Stem"] = "Stem",
-    ["The GroundSpekker"] = "Toprak Gezgini"
-}
-
--- // Orijinal Kalacaklar (İstisnalar) //
-local ExcludedEntities = {
-    ["CustomFigure"] = true,
-    ["Bramble"] = true,
-    ["Grumble"] = true,
-    ["Queen Grumble"] = true,
-    ["Honcho"] = true,
-    ["AR0xMBUSH"] = true,
-    ["RNIUSHCg=="] = true,
-    ["LookMan"] = true,
-    ["CustomRush"] = true
-}
-
--- // Tuzak Kapılar (Tamamen Kırmızı Neon Olacaklar) //
-local TrapDoors = {
-    ["Dupe"] = true,
-    ["Vacuum"] = true
-}
-
--- // ESP Temizleme Fonksiyonu //
-local function RemoveEntityESP(obj)
-    local hl = obj:FindFirstChild("Cheesy_EntityESP")
-    if hl then hl:Destroy() end
-    local bb = obj:FindFirstChild("Cheesy_NameTag")
-    if bb then bb:Destroy() end
-end
-
-local function ClearAllESP()
-    for _, obj in ipairs(Workspace:GetDescendants()) do
-        RemoveEntityESP(obj)
-    end
-end
-
--- // ESP Uygulama Fonksiyonu //
-local function AddEntityESP(obj)
-    if not ESPEnabled or not obj then return end
-    if obj:FindFirstChild("Cheesy_EntityESP") or obj:FindFirstChild("Cheesy_NameTag") then return end
+    if i == 1 then activeFilterBtn = fBtn end
+    filterButtons[floorData.key] = fBtn
     
-    local objName = obj.Name
-
-    -- Tuzak Kapı Kontrolü (Dupe & Vacuum -> Tamamen Kırmızı Neon)
-    if TrapDoors[objName] then
-        for _, part in ipairs(obj:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.Color = ESPColor
-                part.Material = Enum.Material.Neon
-            end
-        end
-        return
-    end
-
-    -- Normal Varlıklar İçin Highlight (Kırmızı Çizgi)
-    local highlight = Instance.new("Highlight")
-    highlight.Name = "Cheesy_EntityESP"
-    highlight.Adornee = obj
-    highlight.FillColor = ESPColor
-    highlight.FillTransparency = 0.5
-    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-    highlight.OutlineTransparency = 0
-    highlight.Parent = obj
-
-    -- Türkçe Çeviri İsmi Belirleme
-    local displayName = objName
-    if not ExcludedEntities[objName] and TranslatedNames[objName] then
-        displayName = TranslatedNames[objName]
-    end
-
-    -- BillboardGui (Kırmızı İsim Etiketi)
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "Cheesy_NameTag"
-    billboard.Size = UDim2.new(0, 200, 0, 50)
-    billboard.StudsOffset = Vector3.new(0, 3, 0)
-    billboard.AlwaysOnTop = true
-    billboard.Adornee = obj
-    billboard.Parent = obj
-
-    local text = Instance.new("TextLabel")
-    text.Size = UDim2.new(1, 0, 1, 0)
-    text.BackgroundTransparency = 1
-    text.TextColor3 = ESPColor
-    text.TextScaled = true
-    text.TextStrokeTransparency = 0
-    text.Font = Enum.Font.SourceSansBold
-    text.Text = displayName
-    text.Parent = billboard
-end
-
--- // Visuals Sekmesindeki Butona Güvenli Bağlantı //
-pcall(function()
-    local visualsCard = visualsPage:FindFirstChild("VisualsCard")
-    local EspToggleBtn = visualsCard and visualsCard:FindFirstChild("EspToggleBtn")
-
-    if EspToggleBtn then
-        EspToggleBtn.MouseButton1Click:Connect(function()
-            ESPEnabled = not ESPEnabled
-            EspToggleBtn.BackgroundColor3 = ESPEnabled and Color3.fromRGB(130, 40, 220) or Color3.fromRGB(60, 60, 60)
-            EspToggleBtn.Text = ESPEnabled and "🔴 Entity ESP: Aktif" or "⚪ Entity ESP: Kapalı"
-            
-            if not ESPEnabled then
-                ClearAllESP()
-            else
-                for _, obj in ipairs(Workspace:GetDescendants()) do
-                    if EntityList[obj.Name] then
-                        AddEntityESP(obj)
-                    end
+    fBtn.MouseButton1Click:Connect(function()
+        for _, btn in pairs(filterButtons) do
+            btn.BackgroundColor3 = Color3.fromRGB(60, 40, 90)
+            btn.TextColor3 = Color3.fromRGB(200, 180, 230)
+            -- Aktif ibaresini temizle
+            for _, f in ipairs(floorsList) do
+                if btn == filterButtons[f.key] then
+                    btn.Text = f.name
                 end
             end
-        end)
-    end
-end)
-
--- // İlk Tarama //
-for _, obj in ipairs(Workspace:GetDescendants()) do
-    if EntityList[obj.Name] then
-        AddEntityESP(obj)
-    end
+        end
+        
+        fBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
+        fBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        fBtn.Text = floorData.name .. " (Aktif)"
+        
+        ContentTitle.Text = "✨ " .. floorData.name .. " Modu Aktif"
+        SendNotification("Floor Filter", floorData.name .. " katına geçildi.")
+    end)
 end
-
--- // Dinamik Ekleme Dinleyicisi //
-Workspace.DescendantAdded:Connect(function(obj)
-    if ESPEnabled and EntityList[obj.Name] then
-        -- Varlığın tamamen yüklenmesi için küçük bir gecikme (isteğe bağlı ama güvenlidir)
-        task.defer(function()
-            if obj and obj.Parent then
-                AddEntityESP(obj)
-            end
-        end)
-    end
-end)
