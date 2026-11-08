@@ -1008,8 +1008,7 @@ ContentTitle.TextColor3 = Color3.fromRGB(240, 180, 255)
 ContentTitle.TextSize = 13
 ContentTitle.TextXAlignment = Enum.TextXAlignment.Left
 
-                
-        --[==[ 
+            
   XK DOORS - Özel Yaratık ve Tuzak Bypass Modulü
   * Belirtilen liste için özel korumalar ve bypasslar
 ]==]
