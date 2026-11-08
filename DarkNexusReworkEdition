@@ -1008,51 +1008,48 @@ ContentTitle.TextColor3 = Color3.fromRGB(240, 180, 255)
 ContentTitle.TextSize = 13
 ContentTitle.TextXAlignment = Enum.TextXAlignment.Left
 
+                        --------------------------------------------------
+-- EXPLOITS SAYFASI: BYPASS & KORUMA ÖZELLİKLERİ (FİNAL DÜZENLEME)
 --------------------------------------------------
--- EXPLOITS SAYfASI: BYPASS & KORUMA ÖZELLİKLERİ
---------------------------------------------------
 
--- Exploits sayfasının kaydırma alanını genişletiyoruz
-exploitsPage.CanvasSize = UDim2.new(0, 0, 0, 520)
+-- Exploits sayfasına özel bir ScrollingFrame (Kaydırma Alanı) oluşturuyoruz
+local ExploitsScroll = Instance.new("ScrollingFrame")
+ExploitsScroll.Name = "ExploitsScroll"
+ExploitsScroll.Parent = exploitsPage
+ExploitsScroll.BackgroundTransparency = 1
+ExploitsScroll.Position = UDim2.new(0, 10, 0, 10)
+ExploitsScroll.Size = UDim2.new(1, -20, 1, -20)
+ExploitsScroll.CanvasSize = UDim2.new(0, 0, 0, 520)
+ExploitsScroll.ScrollBarThickness = 4
 
-local ExploitsCard = Instance.new("Frame")
-ExploitsCard.Name = "ExploitsCard"
-ExploitsCard.Parent = exploitsPage
-ExploitsCard.BackgroundColor3 = Color3.fromRGB(22, 14, 35)
-ExploitsCard.Position = UDim2.new(0, 10, 0, 10)
-ExploitsCard.Size = UDim2.new(1, -20, 0, 500)
+local expLayout = Instance.new("UIListLayout")
+expLayout.Parent = ExploitsScroll
+expLayout.SortOrder = Enum.SortOrder.LayoutOrder
+expLayout.Padding = UDim.new(0, 8)
 
-Instance.new("UICorner", ExploitsCard).CornerRadius = UDim.new(0, 8)
+-- Başlık Kartı
+local ExpHeaderCard = Instance.new("Frame")
+ExpHeaderCard.Name = "ExpHeaderCard"
+ExpHeaderCard.Parent = ExploitsScroll
+ExpHeaderCard.BackgroundColor3 = Color3.fromRGB(22, 14, 35)
+ExpHeaderCard.Size = UDim2.new(1, 0, 0, 40)
+
+Instance.new("UICorner", ExpHeaderCard).CornerRadius = UDim.new(0, 8)
 local expStroke = Instance.new("UIStroke")
-expStroke.Name = "CardStroke"
 expStroke.Color = Color3.fromRGB(160, 60, 240)
 expStroke.Thickness = 1.5
-expStroke.Parent = ExploitsCard
+expStroke.Parent = ExpHeaderCard
 
 local ExpTitle = Instance.new("TextLabel")
-ExpTitle.Parent = ExploitsCard
+ExpTitle.Parent = ExpHeaderCard
 ExpTitle.BackgroundTransparency = 1
-ExpTitle.Position = UDim2.new(0, 15, 0, 12)
-ExpTitle.Size = UDim2.new(1, -30, 0, 25)
+ExpTitle.Position = UDim2.new(0, 15, 0, 0)
+ExpTitle.Size = UDim2.new(1, -30, 1, 0)
 ExpTitle.Font = Enum.Font.Code
-ExpTitle.Text = "🛡️ Bypass & Koruma Bölümü"
+ExpTitle.Text = "🛡️ Bypass & Koruma Bölümü (Tüm Özellikler)"
 ExpTitle.TextColor3 = Color3.fromRGB(255, 200, 255)
-ExpTitle.TextSize = 16
+ExpTitle.TextSize = 14
 ExpTitle.TextXAlignment = Enum.TextXAlignment.Left
-
--- Toggle'ları liste halinde tutacak alt kaydırma alanı
-local ToggleContainer = Instance.new("ScrollingFrame")
-ToggleContainer.Parent = ExploitsCard
-ToggleContainer.BackgroundTransparency = 1
-ToggleContainer.Position = UDim2.new(0, 10, 0, 45)
-ToggleContainer.Size = UDim2.new(1, -20, 1, -55)
-ToggleContainer.CanvasSize = UDim2.new(0, 0, 0, 480)
-ToggleContainer.ScrollBarThickness = 3
-
-local tLayout = Instance.new("UIListLayout")
-tLayout.Parent = ToggleContainer
-tLayout.SortOrder = Enum.SortOrder.LayoutOrder
-tLayout.Padding = UDim.new(0, 6)
 
 local bypassStates = {}
 
@@ -1061,9 +1058,9 @@ local function CreateBypassToggle(name, text)
     
     local btn = Instance.new("TextButton")
     btn.Name = name .. "Btn"
-    btn.Parent = ToggleContainer
+    btn.Parent = ExploitsScroll
     btn.BackgroundColor3 = Color3.fromRGB(14, 9, 24)
-    btn.Size = UDim2.new(1, 0, 0, 34)
+    btn.Size = UDim2.new(1, 0, 0, 36)
     btn.Font = Enum.Font.Code
     btn.Text = "  [❌] " .. text
     btn.TextColor3 = Color3.fromRGB(200, 160, 230)
@@ -1160,14 +1157,14 @@ local function CreateBypassToggle(name, text)
     end)
 end
 
--- Tüm Bypass Özelliklerini Sayfaya Ekliyoruz
+-- Tüm Bypass Özelliklerini Sıralı Şekilde Ekliyoruz
 CreateBypassToggle("BypassGiggle", "防 Giggle (Giggle Koruması)")
 CreateBypassToggle("BypassDupe", "防假门 (Dupe / Sahte Kapı Koruması)")
 CreateBypassToggle("BypassEyes", "防 Eyes (Eyes Göz Koruması)")
 CreateBypassToggle("BypassLookman", "防 Lookman (Lookman Koruması)")
 CreateBypassToggle("BypassGloombatEggs", "防 Gloombat 蛋 (Yumurta Koruması)")
 CreateBypassToggle("BypassSeekObstructions", "防 Seek 障碍物 (Seek Engel Koruması)")
-CreateBypassToggle("BypassVacuum", "防 Vacuum (Vacuum Boşluk Koruması)")
+CreateBypasstoggle("BypassVacuum", "防 Vacuum (Vacuum Boşluk Koruması)")
 CreateBypassToggle("BypassKillbricks", "防致死方块 (Ölümcül Blok / Lav)")
 CreateBypassToggle("BypassSeekingWall", "防 Seek 墙 (Seek Duvar Koruması)")
 CreateBypassToggle("BypassSnare", "防 Snare (Kapan Koruması)")
