@@ -1008,178 +1008,168 @@ ContentTitle.TextColor3 = Color3.fromRGB(240, 180, 255)
 ContentTitle.TextSize = 13
 ContentTitle.TextXAlignment = Enum.TextXAlignment.Left
 
--- Dinamik Buton Oluşturucu
-for i, floorData in ipairs(floorsList) do
-    local fBtn = Instance.new("TextButton")
-    fBtn.Parent = FilterScroll
-    fBtn.BackgroundColor3 = (i == 1) and Color3.fromRGB(130, 40, 220) or Color3.fromRGB(60, 40, 90)
-    fBtn.Position = UDim2.new(0, 0, 0, (i - 1) * 40)
-    fBtn.Size = UDim2.new(1, -5, 0, 34)
-    fBtn.Font = Enum.Font.Code
-    fBtn.Text = floorData.name .. (i == 1 and " (Aktif)" or "")
-    fBtn.TextColor3 = (i == 1) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(200, 180, 230)
-    fBtn.TextSize = 11
-    Instance.new("UICorner", fBtn).CornerRadius = UDim.new(0, 6)
+--------------------------------------------------
+-- EXPLOITS SAYfASI: BYPASS & KORUMA ÖZELLİKLERİ
+--------------------------------------------------
+
+-- Exploits sayfasının kaydırma alanını genişletiyoruz
+exploitsPage.CanvasSize = UDim2.new(0, 0, 0, 520)
+
+local ExploitsCard = Instance.new("Frame")
+ExploitsCard.Name = "ExploitsCard"
+ExploitsCard.Parent = exploitsPage
+ExploitsCard.BackgroundColor3 = Color3.fromRGB(22, 14, 35)
+ExploitsCard.Position = UDim2.new(0, 10, 0, 10)
+ExploitsCard.Size = UDim2.new(1, -20, 0, 500)
+
+Instance.new("UICorner", ExploitsCard).CornerRadius = UDim.new(0, 8)
+local expStroke = Instance.new("UIStroke")
+expStroke.Name = "CardStroke"
+expStroke.Color = Color3.fromRGB(160, 60, 240)
+expStroke.Thickness = 1.5
+expStroke.Parent = ExploitsCard
+
+local ExpTitle = Instance.new("TextLabel")
+ExpTitle.Parent = ExploitsCard
+ExpTitle.BackgroundTransparency = 1
+ExpTitle.Position = UDim2.new(0, 15, 0, 12)
+ExpTitle.Size = UDim2.new(1, -30, 0, 25)
+ExpTitle.Font = Enum.Font.Code
+ExpTitle.Text = "🛡️ Bypass & Koruma Bölümü"
+ExpTitle.TextColor3 = Color3.fromRGB(255, 200, 255)
+ExpTitle.TextSize = 16
+ExpTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Toggle'ları liste halinde tutacak alt kaydırma alanı
+local ToggleContainer = Instance.new("ScrollingFrame")
+ToggleContainer.Parent = ExploitsCard
+ToggleContainer.BackgroundTransparency = 1
+ToggleContainer.Position = UDim2.new(0, 10, 0, 45)
+ToggleContainer.Size = UDim2.new(1, -20, 1, -55)
+ToggleContainer.CanvasSize = UDim2.new(0, 0, 0, 480)
+ToggleContainer.ScrollBarThickness = 3
+
+local tLayout = Instance.new("UIListLayout")
+tLayout.Parent = ToggleContainer
+tLayout.SortOrder = Enum.SortOrder.LayoutOrder
+tLayout.Padding = UDim.new(0, 6)
+
+local bypassStates = {}
+
+local function CreateBypassToggle(name, text)
+    bypassStates[name] = false
     
-    if i == 1 then activeFilterBtn = fBtn end
-    filterButtons[floorData.key] = fBtn
+    local btn = Instance.new("TextButton")
+    btn.Name = name .. "Btn"
+    btn.Parent = ToggleContainer
+    btn.BackgroundColor3 = Color3.fromRGB(14, 9, 24)
+    btn.Size = UDim2.new(1, 0, 0, 34)
+    btn.Font = Enum.Font.Code
+    btn.Text = "  [❌] " .. text
+    btn.TextColor3 = Color3.fromRGB(200, 160, 230)
+    btn.TextSize = 12
+    btn.TextXAlignment = Enum.TextXAlignment.Left
     
-    fBtn.MouseButton1Click:Connect(function()
-        for _, btn in pairs(filterButtons) do
-            btn.BackgroundColor3 = Color3.fromRGB(60, 40, 90)
-            btn.TextColor3 = Color3.fromRGB(200, 180, 230)
-            -- Aktif ibaresini temizle
-            for _, f in ipairs(floorsList) do
-                if btn == filterButtons[f.key] then
-                    btn.Text = f.name
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(100, 40, 160)
+    stroke.Thickness = 1
+    stroke.Parent = btn
+    
+    btn.MouseButton1Click:Connect(function()
+        bypassStates[name] = not bypassStates[name]
+        local active = bypassStates[name]
+        
+        btn.BackgroundColor3 = active and Color3.fromRGB(50, 180, 80) or Color3.fromRGB(14, 9, 24)
+        btn.TextColor3 = active and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(200, 160, 230)
+        btn.Text = active and ("  [✔] " .. text) or ("  [❌] " .. text)
+        
+        -- Fonksiyon Mantıkları
+        pcall(function()
+            if name == "BypassGiggle" then
+                for _, Object in ipairs(Workspace:GetDescendants()) do
+                    if Object.Name == "GiggleCeiling" and Object:FindFirstChild("Hitbox") then
+                        Object.Hitbox.CanTouch = not active
+                    end
+                end
+            elseif name == "BypassDupe" then
+                for _, Object in ipairs(Workspace:GetDescendants()) do
+                    if Object.Name == "DoorFake" or Object.Name == "FakeDoor" then
+                        if Object:FindFirstChild("Hidden") then Object.Hidden.CanTouch = not active end
+                        if Object:FindFirstChild("Lock") and Object.Lock:FindFirstChild("UnlockPrompt") then
+                            Object.Lock.UnlockPrompt.Enabled = not active
+                        end
+                    end
+                end
+            elseif name == "BypassGloombatEggs" then
+                for _, Object in ipairs(Workspace:GetDescendants()) do
+                    if Object.Name == "GloombatEgg" or Object.Name:find("Gloombat") then
+                        for _, Part in ipairs(Object:GetDescendants()) do
+                            if Part:IsA("BasePart") then Part.CanTouch = not active end
+                        end
+                    end
+                end
+            elseif name == "BypassVacuum" then
+                for _, Object in ipairs(Workspace:GetDescendants()) do
+                    if Object.Name == "SideroomSpace" and Object:FindFirstChild("Collision") then
+                        Object.Collision.CanCollide = active
+                        Object.Collision.CanTouch = not active
+                    end
+                end
+            elseif name == "BypassKillbricks" then
+                for _, Object in ipairs(Workspace:GetDescendants()) do
+                    if Object.Name == "Lava" then Object.CanTouch = not active end
+                end
+            elseif name == "BypassSeekingWall" then
+                for _, Object in ipairs(Workspace:GetDescendants()) do
+                    if Object.Name == "ScaryWall" then
+                        for _, Part in ipairs(Object:GetDescendants()) do
+                            if Part:IsA("BasePart") then
+                                Part.CanTouch = not active
+                                Part.CanCollide = not active
+                            end
+                        end
+                    end
+                end
+            elseif name == "BypassSnare" then
+                for _, Object in ipairs(Workspace:GetDescendants()) do
+                    if Object.Name == "Snare" then
+                        for _, Part in ipairs(Object:GetDescendants()) do
+                            if Part:IsA("BasePart") then Part.CanTouch = not active end
+                        end
+                    end
+                end
+            elseif name == "BypassBanana" then
+                for _, Object in ipairs(Workspace:GetDescendants()) do
+                    if Object.Name == "BananaPeel" then Object.CanTouch = not active end
+                end
+            elseif name == "BypassJeff" then
+                for _, Object in ipairs(Workspace:GetDescendants()) do
+                    if Object.Name == "JeffTheKiller" then
+                        for _, Part in ipairs(Object:GetDescendants()) do
+                            if Part:IsA("BasePart") then
+                                Part.CanCollide = not active
+                                Part.CanTouch = not active
+                            end
+                        end
+                        if Object:FindFirstChild("Humanoid") then Object.Humanoid.Health = 0 end
+                    end
                 end
             end
-        end
-        
-        fBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 220)
-        fBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        fBtn.Text = floorData.name .. " (Aktif)"
-        
-        ContentTitle.Text = "✨ " .. floorData.name .. " Modu Aktif"
-        SendNotification("Floor Filter", floorData.name .. " katına geçildi.")
+        end)
     end)
 end
 
---------------------------------------------------
--- EXPLOITS: BYPASS / 破解专区
---------------------------------------------------
-Groupboxes.Exploits_Bypass = Tabs.Exploits:AddLeftGroupbox("绕过 / 破解")
-
-Groupboxes.Exploits_Bypass:AddToggle("BypassGiggle",         { Text = "防 Giggle",           Default = false, Tooltip = "防止 Giggle 攻击你。" })
-Groupboxes.Exploits_Bypass:AddToggle("BypassDupe",           { Text = "防假门",             Default = false, Tooltip = "防止打开 Dupe 假门。" })
-Groupboxes.Exploits_Bypass:AddToggle("BypassEyes",           { Text = "防 Eyes",             Default = false, Tooltip = "防止 Eyes 伤害你。" })
-Groupboxes.Exploits_Bypass:AddToggle("BypassLookman",        { Text = "防 Lookman",          Default = false, Tooltip = "防止 Lookman 伤害你。" })
-Groupboxes.Exploits_Bypass:AddToggle("BypassGloombatEggs",   { Text = "防 Gloombat 蛋",    Default = false, Tooltip = "防止踩到 Gloombat 蛋受伤。" })
-Groupboxes.Exploits_Bypass:AddToggle("BypassSeekObstructions", { Text = "防 Seek 障碍物", Default = false, Tooltip = "防止 Seek 追逐中的障碍物伤到你。" })
-Groupboxes.Exploits_Bypass:AddToggle("BypassVacuum",         { Text = "防 Vacuum",           Default = false, Tooltip = "防止掉入 Vacuum 假门。" })
-Groupboxes.Exploits_Bypass:AddToggle("BypassKillbricks",     { Text = "防致死方块",       Default = false, Tooltip = "防止岩浆伤害你。" })
-Groupboxes.Exploits_Bypass:AddToggle("BypassSeekingWall",    { Text = "防 Seek 墙",     Default = false, Tooltip = "防止 ScaryWall 伤害你。" })
-Groupboxes.Exploits_Bypass:AddToggle("BypassSnare",          { Text = "防 Snare",            Default = false, Tooltip = "防止被 Snare 困住。" })
-Groupboxes.Exploits_Bypass:AddToggle("BypassBanana",         { Text = "防香蕉皮",           Default = false, Tooltip = "防止被香蕉皮滑倒（有时无效）。" })
-Groupboxes.Exploits_Bypass:AddToggle("BypassJeff",           { Text = "防 Jeff",             Default = false, Tooltip = "防止被杀人狂 Jeff 捅伤（有时无效）。" })
-
--- Bypass Fonksiyonları ve Tetikleyicileri (OnChanged)
-Toggles.BypassGiggle:OnChanged(function(Value)
-	for _, Object in Objects.Entities do
-		if Object.Name == "GiggleCeiling" then
-			Object:WaitForChild("Hitbox").CanTouch = not Value
-		end
-	end
-end)
-
-Toggles.BypassDupe:OnChanged(function(Value)
-	for _, Object in Objects.Entities do
-		if Object.Name == "DoorFake" or Object.Name == "FakeDoor" then
-			Object:WaitForChild("Hidden").CanTouch = not Value
-			if Object:FindFirstChild("Lock") then
-				Object.Lock.UnlockPrompt.Enabled = not Value
-			end
-		end
-	end
-end)
-
-Toggles.BypassEyes:OnChanged(function(Value)
-	if Value and Globals.IsEyes then
-		if Floor == "Fools" or Floor == "OldHotel" then
-			RemotesFolder.MotorReplication:FireServer(0, (Globals.SpoofOffset == 200 and 65 or -65), 0, false)
-		else
-			RemotesFolder.MotorReplication:FireServer(-650)
-		end
-	end
-end)
-
-Toggles.BypassLookman:OnChanged(function(Value)
-	if Value and Globals.IsLookman then
-		if Floor == "Fools" or Floor == "OldHotel" then
-			RemotesFolder.MotorReplication:FireServer(0, (Globals.SpoofOffset == 200 and 65 or -65), 0, false)
-		else
-			RemotesFolder.MotorReplication:FireServer(-650)
-		end
-	end
-end)
-
-Toggles.BypassGloombatEggs:OnChanged(function(Value)
-	for _, Object in Objects.Entities do
-		for _, Part in Object:GetDescendants() do
-			if Part:IsA("BasePart") then
-				Part.CanTouch = not Value
-			end
-		end
-	end
-end)
-
-Toggles.BypassSeekObstructions:OnChanged(function(Value)
-	for _, Object in Objects.SeekObstructions do
-		Object.CanTouch = not Value
-		if Object.Name == "SeekFloodline" then
-			Object.CanCollide = Value
-		end
-	end
-	for _, Object in Objects.SeekBridges do
-		Object.CanCollide = Value
-		Object.Transparency = Value and 0 or 1
-	end
-end)
-
-Toggles.BypassVacuum:OnChanged(function(Value)
-	for _, Object in Objects.Entities do
-		if Object.Name == "SideroomSpace" then
-			Object:WaitForChild("Collision").CanCollide = Value
-			Object:WaitForChild("Collision").CanTouch = not Value
-		end
-	end
-end)
-
-Toggles.BypassKillbricks:OnChanged(function(Value)
-	for _, Object in Objects.Obstructions do
-		if Object.Name == "Lava" then Object.CanTouch = not Value end
-	end
-end)
-
-Toggles.BypassSeekingWall:OnChanged(function(Value)
-	for _, Object in Objects.Obstructions do
-		if Object.Name == "ScaryWall" then
-			for _, Part in Object:GetDescendants() do
-				if Part:IsA("BasePart") then
-					Part.CanTouch = not Value
-					Part.CanCollide = not Value
-				end
-			end
-		end
-	end
-end)
-
-Toggles.BypassSnare:OnChanged(function(Value)
-	for _, Object in Objects.Entities do
-		if Object.Name == "Snare" then
-			for _, Part in Object:GetDescendants() do
-				if Part:IsA("BasePart") then Part.CanTouch = not Value end
-			end
-		end
-	end
-end)
-
-Toggles.BypassBanana:OnChanged(function(Value)
-	for _, Object in Objects.Entities do
-		if Object.Name == "BananaPeel" then Object.CanTouch = not Value end
-	end
-end)
-
-Toggles.BypassJeff:OnChanged(function(Value)
-	for _, Object in Objects.Entities do
-		if Object.Name == "JeffTheKiller" then
-			for _, Part in Object:GetDescendants() do
-				if Part:IsA("BasePart") then
-					Part.CanCollide = not Value
-					Part.CanTouch = not Value
-				end
-			end
-			Object:WaitForChild("Humanoid").Health = 0
-		end
-	end
-end)
+-- Tüm Bypass Özelliklerini Sayfaya Ekliyoruz
+CreateBypassToggle("BypassGiggle", "防 Giggle (Giggle Koruması)")
+CreateBypassToggle("BypassDupe", "防假门 (Dupe / Sahte Kapı Koruması)")
+CreateBypassToggle("BypassEyes", "防 Eyes (Eyes Göz Koruması)")
+CreateBypassToggle("BypassLookman", "防 Lookman (Lookman Koruması)")
+CreateBypassToggle("BypassGloombatEggs", "防 Gloombat 蛋 (Yumurta Koruması)")
+CreateBypassToggle("BypassSeekObstructions", "防 Seek 障碍物 (Seek Engel Koruması)")
+CreateBypassToggle("BypassVacuum", "防 Vacuum (Vacuum Boşluk Koruması)")
+CreateBypassToggle("BypassKillbricks", "防致死方块 (Ölümcül Blok / Lav)")
+CreateBypassToggle("BypassSeekingWall", "防 Seek 墙 (Seek Duvar Koruması)")
+CreateBypassToggle("BypassSnare", "防 Snare (Kapan Koruması)")
+CreateBypassToggle("BypassBanana", "防香蕉皮 (Muz Kabuğu Koruması)")
+CreateBypassToggle("BypassJeff", "防 Jeff (Jeff Koruması)")
