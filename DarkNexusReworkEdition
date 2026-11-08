@@ -1044,3 +1044,142 @@ for i, floorData in ipairs(floorsList) do
         SendNotification("Floor Filter", floorData.name .. " katına geçildi.")
     end)
 end
+
+--------------------------------------------------
+-- EXPLOITS: BYPASS / 破解专区
+--------------------------------------------------
+Groupboxes.Exploits_Bypass = Tabs.Exploits:AddLeftGroupbox("绕过 / 破解")
+
+Groupboxes.Exploits_Bypass:AddToggle("BypassGiggle",         { Text = "防 Giggle",           Default = false, Tooltip = "防止 Giggle 攻击你。" })
+Groupboxes.Exploits_Bypass:AddToggle("BypassDupe",           { Text = "防假门",             Default = false, Tooltip = "防止打开 Dupe 假门。" })
+Groupboxes.Exploits_Bypass:AddToggle("BypassEyes",           { Text = "防 Eyes",             Default = false, Tooltip = "防止 Eyes 伤害你。" })
+Groupboxes.Exploits_Bypass:AddToggle("BypassLookman",        { Text = "防 Lookman",          Default = false, Tooltip = "防止 Lookman 伤害你。" })
+Groupboxes.Exploits_Bypass:AddToggle("BypassGloombatEggs",   { Text = "防 Gloombat 蛋",    Default = false, Tooltip = "防止踩到 Gloombat 蛋受伤。" })
+Groupboxes.Exploits_Bypass:AddToggle("BypassSeekObstructions", { Text = "防 Seek 障碍物", Default = false, Tooltip = "防止 Seek 追逐中的障碍物伤到你。" })
+Groupboxes.Exploits_Bypass:AddToggle("BypassVacuum",         { Text = "防 Vacuum",           Default = false, Tooltip = "防止掉入 Vacuum 假门。" })
+Groupboxes.Exploits_Bypass:AddToggle("BypassKillbricks",     { Text = "防致死方块",       Default = false, Tooltip = "防止岩浆伤害你。" })
+Groupboxes.Exploits_Bypass:AddToggle("BypassSeekingWall",    { Text = "防 Seek 墙",     Default = false, Tooltip = "防止 ScaryWall 伤害你。" })
+Groupboxes.Exploits_Bypass:AddToggle("BypassSnare",          { Text = "防 Snare",            Default = false, Tooltip = "防止被 Snare 困住。" })
+Groupboxes.Exploits_Bypass:AddToggle("BypassBanana",         { Text = "防香蕉皮",           Default = false, Tooltip = "防止被香蕉皮滑倒（有时无效）。" })
+Groupboxes.Exploits_Bypass:AddToggle("BypassJeff",           { Text = "防 Jeff",             Default = false, Tooltip = "防止被杀人狂 Jeff 捅伤（有时无效）。" })
+
+-- Bypass Fonksiyonları ve Tetikleyicileri (OnChanged)
+Toggles.BypassGiggle:OnChanged(function(Value)
+	for _, Object in Objects.Entities do
+		if Object.Name == "GiggleCeiling" then
+			Object:WaitForChild("Hitbox").CanTouch = not Value
+		end
+	end
+end)
+
+Toggles.BypassDupe:OnChanged(function(Value)
+	for _, Object in Objects.Entities do
+		if Object.Name == "DoorFake" or Object.Name == "FakeDoor" then
+			Object:WaitForChild("Hidden").CanTouch = not Value
+			if Object:FindFirstChild("Lock") then
+				Object.Lock.UnlockPrompt.Enabled = not Value
+			end
+		end
+	end
+end)
+
+Toggles.BypassEyes:OnChanged(function(Value)
+	if Value and Globals.IsEyes then
+		if Floor == "Fools" or Floor == "OldHotel" then
+			RemotesFolder.MotorReplication:FireServer(0, (Globals.SpoofOffset == 200 and 65 or -65), 0, false)
+		else
+			RemotesFolder.MotorReplication:FireServer(-650)
+		end
+	end
+end)
+
+Toggles.BypassLookman:OnChanged(function(Value)
+	if Value and Globals.IsLookman then
+		if Floor == "Fools" or Floor == "OldHotel" then
+			RemotesFolder.MotorReplication:FireServer(0, (Globals.SpoofOffset == 200 and 65 or -65), 0, false)
+		else
+			RemotesFolder.MotorReplication:FireServer(-650)
+		end
+	end
+end)
+
+Toggles.BypassGloombatEggs:OnChanged(function(Value)
+	for _, Object in Objects.Entities do
+		for _, Part in Object:GetDescendants() do
+			if Part:IsA("BasePart") then
+				Part.CanTouch = not Value
+			end
+		end
+	end
+end)
+
+Toggles.BypassSeekObstructions:OnChanged(function(Value)
+	for _, Object in Objects.SeekObstructions do
+		Object.CanTouch = not Value
+		if Object.Name == "SeekFloodline" then
+			Object.CanCollide = Value
+		end
+	end
+	for _, Object in Objects.SeekBridges do
+		Object.CanCollide = Value
+		Object.Transparency = Value and 0 or 1
+	end
+end)
+
+Toggles.BypassVacuum:OnChanged(function(Value)
+	for _, Object in Objects.Entities do
+		if Object.Name == "SideroomSpace" then
+			Object:WaitForChild("Collision").CanCollide = Value
+			Object:WaitForChild("Collision").CanTouch = not Value
+		end
+	end
+end)
+
+Toggles.BypassKillbricks:OnChanged(function(Value)
+	for _, Object in Objects.Obstructions do
+		if Object.Name == "Lava" then Object.CanTouch = not Value end
+	end
+end)
+
+Toggles.BypassSeekingWall:OnChanged(function(Value)
+	for _, Object in Objects.Obstructions do
+		if Object.Name == "ScaryWall" then
+			for _, Part in Object:GetDescendants() do
+				if Part:IsA("BasePart") then
+					Part.CanTouch = not Value
+					Part.CanCollide = not Value
+				end
+			end
+		end
+	end
+end)
+
+Toggles.BypassSnare:OnChanged(function(Value)
+	for _, Object in Objects.Entities do
+		if Object.Name == "Snare" then
+			for _, Part in Object:GetDescendants() do
+				if Part:IsA("BasePart") then Part.CanTouch = not Value end
+			end
+		end
+	end
+end)
+
+Toggles.BypassBanana:OnChanged(function(Value)
+	for _, Object in Objects.Entities do
+		if Object.Name == "BananaPeel" then Object.CanTouch = not Value end
+	end
+end)
+
+Toggles.BypassJeff:OnChanged(function(Value)
+	for _, Object in Objects.Entities do
+		if Object.Name == "JeffTheKiller" then
+			for _, Part in Object:GetDescendants() do
+				if Part:IsA("BasePart") then
+					Part.CanCollide = not Value
+					Part.CanTouch = not Value
+				end
+			end
+			Object:WaitForChild("Humanoid").Health = 0
+		end
+	end
+end)
