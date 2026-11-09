@@ -1620,3 +1620,165 @@ Toggles.DroppedItemValue:OnChanged(function(DroppedItemValue)
 		end
 	end)
 end)
+
+Toggles.ObjectiveESPToggle:OnChanged(function(Value)
+	for _, Object in Objects.Objectives do
+		if Value then
+			local Label = ObjectiveLabels[Object.Name]
+			if Object.Name == "TimerLever" then
+				Label = "时间拉杆 [+" .. Object:GetAttribute("AddTime") .. "s]"
+			elseif Object.Name == "MinesAnchor" then
+				Label = "锚点 [" .. Object:WaitForChild("Sign").TextLabel.Text .. "]"
+			elseif Object.Name == "WaterPump" then
+				Functions.AddESP({ Object = Object.Wheel, Text = "水泵", Color = Options.ObjectiveESPColor.Value }, true)
+			elseif Object.Name == "VineGuillotine" then
+				Functions.AddESP({ Object = Object.Lever, Text = "藤蔓拉杆", Color = Options.ObjectiveESPColor.Value }, true)
+			end
+			if Label then
+				Functions.AddESP({ Object = Object, Text = Label, Color = Options.ObjectiveESPColor.Value }, true)
+			end
+		else
+			Functions.RemoveESP(Object)
+		end
+	end
+end)
+
+Toggles.DoorESPToggle:OnChanged(function(Value)
+	for _, Object in Objects.Doors do
+		if Value then Functions.AddESP({ Object = Object, Text = "门 " .. Functions.GetDoorNumber(Object), Color = Options.DoorESPColor.Value }, true)
+		else Functions.RemoveESP(Object) end
+	end
+end)
+
+Toggles.HidingSpotESPToggle:OnChanged(function(Value)
+	for _, Object in Objects.HidingSpots do
+		local Label = HidingSpotLabels[Object.Name]
+		if Value and Label then Functions.AddESP({ Object = Object, Text = Label, Color = Options.HidingSpotESPColor.Value }, true)
+		elseif not Value then Functions.RemoveESP(Object) end
+	end
+end)
+
+Toggles.PlayerESPToggle:OnChanged(function(Value)
+	task.wait()
+	for _, Player in Services.Players:GetPlayers() do
+		if Player.Character and Player ~= LocalPlayer then
+			if Value and Player:GetAttribute("Alive") == true then
+				Functions.AddESP({ Object = Player.Character, Text = Player.Name, Color = Options.PlayerESPColor.Value })
+			else
+				Functions.RemoveESP(Player.Character)
+			end
+		end
+	end
+end)
+
+Toggles.ChestESPToggle:OnChanged(function(Value)
+	for _, Object in Objects.Chests do
+		if Value then
+			local Label
+			if Object.Name == "ChestBox" or Object.Name == "ChestBoxLocked" then
+				Label = Object:GetAttribute("Locked") and "上锁箱子" or "Chest"
+			elseif Object.Name == "Toolbox" or Object.Name == "Toolbox_Locked" then
+				Label = Object:GetAttribute("Locked") and "上锁工具箱" or "Toolbox"
+			elseif ChestLabels[Object.Name] and ChestLabels[Object.Name] ~= true then
+				Label = ChestLabels[Object.Name]
+			end
+			if Label then Functions.AddESP({ Object = Object, Text = Label, Color = Options.ChestESPColor.Value }, true) end
+		else
+			Functions.RemoveESP(Object)
+		end
+	end
+end)
+
+Toggles.ItemESPToggle:OnChanged(function(Value)
+	for _, Object in Objects.Items do
+		if Value then
+			local Label = ItemNames[Object.Name] or (Object.Name == "Green_Herb" and "绿草")
+			if Label then
+				Functions.AddESP({ Object = Object, Text = Label, Color = Options.ItemESPColor.Value }, Object:GetAttribute("ParentRoom") ~= nil)
+			end
+		else
+			Functions.RemoveESP(Object)
+		end
+	end
+end)
+
+Toggles.CurrencyESPToggle:OnChanged(function(Value)
+	for _, Object in Objects.Currency do
+		if Value then
+			local Label
+			if Object.Name == "GoldPile" and Object:GetAttribute("GoldValue") then
+				Label = "金币堆 [" .. Object:GetAttribute("GoldValue") .. "]"
+			elseif Object.Name == "StardustPickup" then
+				Label = "星尘堆"
+			end
+			if Label then Functions.AddESP({ Object = Object, Text = Label, Color = Options.CurrencyESPColor.Value }, true) end
+		else
+			Functions.RemoveESP(Object)
+		end
+	end
+end)
+
+Toggles.LadderESPToggle:OnChanged(function(Value)
+	for _, Object in Objects.Ladders do
+		if Value then Functions.AddESP({ Object = Object, Text = "梯子", Color = Options.LadderESPColor.Value }, true)
+		else Functions.RemoveESP(Object) end
+	end
+end)
+
+Toggles.MiscESPToggle:OnChanged(function(Value)
+	for _, Object in Objects.Misc do
+		if Value then
+			local Label = Object.Name
+			if Object.Name == "StairwellLockpickDoor" or Object.Name == "StiarwellLockpickDoor" then
+				Label = "车库门"
+			elseif Object.Name == "StairwellFireAlarm" then
+				Label = "火警"
+			elseif Object.Name == "ShoppingCart" then
+				Label = "购物车"
+			elseif Object.Name == "ArchivesFihTank" or Object.Name == "ArchivesFishTank" then
+				Label = "鱼缸"
+			end
+			Functions.AddESP({ Object = Object, Text = Label, Color = Options.MiscESPColor.Value }, true)
+		else
+			Functions.RemoveESP(Object)
+		end
+	end
+end)
+
+Toggles.EntityESPToggle:OnChanged(function(Value)
+	for _, Object in Objects.Entities do
+		if Value then
+			local Label = EntityESPLabels[Object.Name]
+			if not Label and Entities[Object.Name] then Label = Entities[Object.Name].Alias end
+			if Label and Options.EntityESPOptions.Value[Label] then
+				Functions.AddESP({ Object = Object, Text = Label, Color = Options.EntityESPColor.Value }, NodeEntities[Label] ~= true)
+			else
+				Functions.RemoveESP(Object)
+			end
+		else
+			Functions.RemoveESP(Object)
+		end
+	end
+end)
+
+Toggles.PositionSpoof:OnChanged(function(Value)
+	if Floor ~= "Fools" and Floor ~= "OldHotel" then
+		if Value then
+			RootPart.CFrame = RootPart.CFrame * CFrame.new(0, -2.346, 0)
+			Humanoid.HipHeight = 0.05
+			RemotesFolder.Crouch:FireServer(true, true)
+		else
+			RootPart.CFrame = RootPart.CFrame * CFrame.new(0, 2.346, 0)
+			Humanoid.HipHeight = 2.396
+		end
+	end
+end)
+Toggles.PositionSpoof:AddKeyPicker("PositionSpoof", {
+	Text = "无敌", Default = "B", Mode = "Toggle", SyncToggleState = true
+})
+
+Toggles.CrouchSpoof:OnChanged(function(Value)
+	if RemotesFolder:FindFirstChild("Crouch") then
+		RemotesFolder.Crouch:FireServer(Value and true or Functions.IsCrouching(), true)
+	end
+end)
