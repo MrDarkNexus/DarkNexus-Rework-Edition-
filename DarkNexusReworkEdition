@@ -220,6 +220,7 @@ ToggleButton.MouseButton1Click:Connect(function()
     menuVisible = not menuVisible
     MainFrame.Visible = menuVisible
 end)
+
 -- DARKNESS HUB UI - 2. PARÇA (Sayfalar ve İçerikler)
 local PagesHolder = Instance.new("Frame")
 PagesHolder.Name = "PagesHolder"
@@ -573,6 +574,7 @@ TranslateBtn.MouseButton1Click:Connect(function()
     task.wait(0.6)
     BotText.Text = "🌐 DarkNess Çeviri Sonucu:\n\n> Orijinal: " .. textToTrans .. "\n> Hedef Dil: " .. targetLang .. " (25+ Dil)\n> Çeviri: [ " .. textToTrans .. " ] -> (" .. targetLang .. " olarak çevrildi!)"
 end)
+
 -- DARKNESS HUB UI - 3. PARÇA (Tema Mantığı, Sekmeler ve Footer)
 local function ApplyTheme(bgCol, strokeCol, sidebarCol, topbarCol, cardBgCol, textCol, logoText, activeTabBgCol, normalTextCol, activeTextCol)
     MainFrame.BackgroundColor3 = bgCol
@@ -923,259 +925,698 @@ StatusText.Text = "Game: DOORS( Hotel )  |  Hub: DarkNess  |  Modular No-Troll F
 StatusText.TextColor3 = Color3.fromRGB(150, 120, 180)
 StatusText.TextSize = 12
 StatusText.TextXAlignment = Enum.TextXAlignment.Left
--- ==========================================
--- DARKNESS HUB - GENİŞLETİLMİŞ KAT FİLTRELEME MOTORU
--- ==========================================
 
--- Floor Sayfası İçin Ana Kart
-local FloorFilterCard = Instance.new("Frame")
-FloorFilterCard.Name = "FloorFilterCard"
-FloorFilterCard.Parent = floorPage
-FloorFilterCard.BackgroundColor3 = Color3.fromRGB(16, 12, 24)
-FloorFilterCard.Position = UDim2.new(0, 10, 0, 10)
-FloorFilterCard.Size = UDim2.new(1, -20, 0, 460)
+-- ==========================================
+-- DARKNESS HUB - ÖZEL KAT FİLTRELEME SİSTEMİ
+-- ==========================================
+local SelectedFloor = "Hotel" -- Varsayılan Kat
 
-Instance.new("UICorner", FloorFilterCard).CornerRadius = UDim.new(0, 8)
+local FloorCard = Instance.new("Frame")
+FloorCard.Name = "FloorCard"
+FloorCard.Parent = floorPage
+FloorCard.BackgroundColor3 = Color3.fromRGB(16, 12, 24)
+FloorCard.Position = UDim2.new(0, 10, 0, 10)
+FloorCard.Size = UDim2.new(1, -20, 0, 420)
+
+Instance.new("UICorner", FloorCard).CornerRadius = UDim.new(0, 8)
 local floorStroke = Instance.new("UIStroke")
-floorStroke.Name = "CardStroke"
 floorStroke.Color = Color3.fromRGB(160, 60, 240)
 floorStroke.Thickness = 1.5
-floorStroke.Parent = FloorFilterCard
+floorStroke.Parent = FloorCard
 
 local FloorTitle = Instance.new("TextLabel")
-FloorTitle.Parent = FloorFilterCard
+FloorTitle.Parent = FloorCard
 FloorTitle.BackgroundTransparency = 1
 FloorTitle.Position = UDim2.new(0, 15, 0, 15)
 FloorTitle.Size = UDim2.new(1, -30, 0, 25)
 FloorTitle.Font = Enum.Font.Code
-FloorTitle.Text = "🏢 Genişletilmiş Kat Filtreleme Motoru"
+FloorTitle.Text = "🏢 Özel Kat Filtreleme Sistemi"
 FloorTitle.TextColor3 = Color3.fromRGB(240, 180, 255)
 FloorTitle.TextSize = 15
 FloorTitle.TextXAlignment = Enum.TextXAlignment.Left
 
 local FloorDesc = Instance.new("TextLabel")
-FloorDesc.Parent = FloorFilterCard
+FloorDesc.Parent = FloorCard
 FloorDesc.BackgroundTransparency = 1
-FloorDesc.Position = UDim2.new(0, 15, 0, 42)
-FloorDesc.Size = UDim2.new(1, -30, 0, 30)
+FloorDesc.Position = UDim2.new(0, 15, 0, 45)
+FloorDesc.Size = UDim2.new(1, -30, 0, 35)
 FloorDesc.Font = Enum.Font.Code
-FloorDesc.Text = "Tüm Doors katları ve alternatif modlar arasında temiz geçiş yap."
+FloorDesc.Text = "İstediğiniz Katı Seçin (Seçilen kat haricindeki diğer katların özellikleri devre dışı kalır):"
 FloorDesc.TextColor3 = Color3.fromRGB(180, 150, 210)
 FloorDesc.TextSize = 11
 FloorDesc.TextWrapped = true
 FloorDesc.TextXAlignment = Enum.TextXAlignment.Left
 
--- Kat Listesi ve Butonlar (ScrollingFrame ile kolay yönetim)
-local FilterScroll = Instance.new("ScrollingFrame")
-FilterScroll.Parent = FloorFilterCard
-FilterScroll.BackgroundTransparency = 1
-FilterScroll.Position = UDim2.new(0, 15, 0, 80)
-FilterScroll.Size = UDim2.new(0, 245, 0, 365)
-FilterScroll.CanvasSize = UDim2.new(0, 0, 0, 255)
-FilterScroll.ScrollBarThickness = 3
+local floors = {"Hotel", "Mines", "BackDoors", "OutDoors", "Archives", "StairWell"}
+local floorButtons = {}
 
-local floorsList = {
-    {name = "🏨 Hotel", key = "Hotel"},
-    {name = "⛏️ Mines", key = "Mines"},
-    {name = "📚 Archives", key = "Archives"},
-    {name = "🪜 StairWell", key = "StairWell"},
-    {name = "🚪 BackDoors", key = "BackDoors"},
-    {name = "🌲 OutDoors", key = "OutDoors"}
-}
-
-local filterButtons = {}
-local activeFilterBtn = nil
-
--- İçerik Paneli
-local ContentHolder = Instance.new("Frame")
-ContentHolder.Parent = FloorFilterCard
-ContentHolder.BackgroundColor3 = Color3.fromRGB(12, 8, 20)
-ContentHolder.Position = UDim2.new(0, 275, 0, 80)
-ContentHolder.Size = UDim2.new(1, -290, 0, 365)
-Instance.new("UICorner", ContentHolder).CornerRadius = UDim.new(0, 6)
-local chStroke = Instance.new("UIStroke")
-chStroke.Color = Color3.fromRGB(120, 50, 200)
-chStroke.Parent = ContentHolder
-
-local ContentTitle = Instance.new("TextLabel")
-ContentTitle.Parent = ContentHolder
-ContentTitle.BackgroundTransparency = 1
-ContentTitle.Position = UDim2.new(0, 15, 0, 15)
-ContentTitle.Size = UDim2.new(1, -30, 0, 25)
-ContentTitle.Font = Enum.Font.Code
-ContentTitle.Text = "✨ Hotel Modu Aktif"
-ContentTitle.TextColor3 = Color3.fromRGB(240, 180, 255)
-ContentTitle.TextSize = 13
-ContentTitle.TextXAlignment = Enum.TextXAlignment.Left
-
-            
-  XK DOORS - Özel Yaratık ve Tuzak Bypass Modulü
-  * Belirtilen liste için özel korumalar ve bypasslar
-]==]
-
-local Services = {
-    Players = game:GetService("Players"),
-    ReplicatedStorage = game:GetService("ReplicatedStorage"),
-    RunService = game:GetService("RunService")
-)
-local LocalPlayer = Services.Players.LocalPlayer
-
--- 1. Giggle Bypass (Tavana asılı olanlar / üstünüze düşenler)
-task.spawn(function()
-    while task.wait(0.5) do
-        pcall(function()
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v.Name == "Giggle" or v.Name == "Giggles" then
-                    -- Hitbox veya tetikleyicilerini kapatır
-                    local hitbox = v:FindFirstChild("Hitbox") or v:FindFirstChild("Trigger")
-                    if hitbox then
-                        hitbox.CanTouch = false
-                    end
-                end
+local startY = 90
+for _, floorName in ipairs(floors) do
+    local FBtn = Instance.new("TextButton")
+    FBtn.Parent = FloorCard
+    FBtn.BackgroundColor3 = (floorName == SelectedFloor) and Color3.fromRGB(50, 180, 80) or Color3.fromRGB(90, 50, 160)
+    FBtn.Position = UDim2.new(0, 15, 0, startY)
+    FBtn.Size = UDim2.new(0, 245, 0, 32)
+    FBtn.Font = Enum.Font.Code
+    FBtn.Text = (floorName == SelectedFloor) and ("🟢 Kat: " .. floorName .." (Aktif)") else ("⚪ Kat: " .. floorName)
+    FBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    FBtn.TextSize = 12
+    Instance.new("UICorner", FBtn).CornerRadius = UDim.new(0, 6)
+    
+    floorButtons[floorName] = FBtn
+    
+    FBtn.MouseButton1Click:Connect(function()
+        SelectedFloor = floorName
+        
+        -- Tüm butonların renklerini ve yazarlarını güncelle
+        for name, btn in pairs(floorButtons) do
+            if name == SelectedFloor then
+                btn.BackgroundColor3 = Color3.fromRGB(50, 180, 80)
+                btn.Text = "🟢 Kat: " .. name .. " (Aktif)"
+            else
+                btn.BackgroundColor3 = Color3.fromRGB(90, 50, 160)
+                btn.Text = "⚪ Kat: " .. name
             end
-        end)
-    end
-end)
-
--- 2. Eyes & LookMan Bypass (Bakınca can alanlar)
-task.spawn(function()
-    while task.wait(0.1) do
+        end
+        
+        SendNotification("Kat Filtresi", "📌 Aktif Kat Değiştirildi: " .. SelectedFloor)
+        
+        -- Alt bilgi çubuğundaki (Footer) oyun durumunu güncelle
         pcall(function()
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v.Name == "Eyes" or v.Name == "Lookman" or v.Name == "BackdoorLookman" then
-                    local part = v:FindFirstChild("Core") or v:FindFirstChild("Hitbox") or v:IsA("BasePart") and v
-                    if part then
-                        -- Görüş veya dokunma algısını devre dışı bırakır
-                        part.CanTouch = false
-                    end
-                end
-            end
-        end)
-    end
-end)
-
--- 3. Dupe Bypass (Sahte kapılar)
-task.spawn(function()
-    while task.wait(1) do
-        pcall(function()
-            for _, room in pairs(workspace.Rooms:GetChildren()) do
-                local door = room:FindFirstChild("Door")
-                if door and door:FindFirstChild("Lock") then
-                    -- Sahte kapılardaki numaraları veya etiketleri açığa çıkarır / çarpışmayı kapatır
-                    local doorModel = door:FindFirstChild("Door")
-                    if doorModel and doorModel:FindFirstChild("Number") then
-                        -- Sahte kapı tespiti için görsel uyarı veya geçiş izni
-                    end
-                end
-            end
-        end)
-    end
-end)
-
--- 4. Snare Bypass (Yerdeki ayı kapanları)
-task.spawn(function()
-    while task.wait(0.2) do
-        pcall(function()
-            local currentRoom = workspace.Rooms:FindFirstChild(tostring(LocalPlayer:GetAttribute("CurrentRoom")))
-            if currentRoom then
-                for _, v in pairs(currentRoom:GetDescendants()) do
-                    if v.Name == "Snare" then
-                        local hit = v:FindFirstChild("Hitbox") or v:FindFirstChild("TrapPrompt")
-                        if hit and hit:IsA("BasePart") then
-                            hit.CanTouch = false
-                        end
-                    end
-                end
-            end
-        end)
-    end
-end)
-
--- 5. GloomBats Egg Bypass (Karanlık yumurtaları)
-task.spawn(function()
-    while task.wait(0.5) do
-        pcall(function()
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v.Name == "GloombatSwarm" or v.Name:lower():find("gloombat") then
-                    local part = v:FindFirstChild("Hitbox")
-                    if part then
-                        part.CanTouch = false
-                    end
-                end
-            end
-        end)
-    end
-end)
-
--- 6. KillBricks Bypass (Ölüm blokları / Lav vb.)
-task.spawn(function()
-    Services.RunService.Stepped:Connect(function()
-        pcall(function()
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("BasePart") and (v.Name == "KillBrick" or v.Name == "Death" or v.BrickColor.Name == "Really red") then
-                    v.CanTouch = false
-                end
-            end
+            StatusText.Text = "Game: DOORS( " .. SelectedFloor .. " )  |  Hub: DarkNess  |  Modular Final"
         end)
     end)
+    
+    startY = startY + 40
+end
+
 end)
 
--- 7. Jeff Bypass (Dükkan sahibi / Saldırgan halleri)
-task.spawn(function()
-    while task.wait(1) do
-        pcall(function()
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v.Name == "JeffTheKiller" then
-                    local hrp = v:FindFirstChild("HumanoidRootPart")
-                    if hrp then
-                        -- Zararsız hale getirmek için dokunulmazlık
-                        for _, part in pairs(v:GetDescendants()) do
-                            if part:IsA("BasePart") then
-                                part.CanTouch = false
-                            end
-                        end
-                    end
-                end
-            end
-        end)
+local Stairwell_Misc = Tabs.Stairwell:AddLeftGroupbox("功能 / 防护 / 杂项")
+
+Stairwell_Misc:AddDivider()
+Stairwell_Misc:AddToggle("BypassNoise", { Text = "Noise 电视破坏", Default = false, Tooltip = "手持时破坏 Noise 的电视。" })[span_0](start_span)[span_0](end_span)
+Stairwell_Misc:AddToggle("DroppedItemValue", { Text = "物品编号", Default = false, Tooltip = "显示掉落物数量。" })[span_1](start_span)[span_1](end_span)
+Stairwell_Misc:AddToggle("KillAllWithCart", { Text = "全清（需 ≥1 矿车）", Default = false })[span_2](start_span)[span_2](end_span)
+Stairwell_Misc:AddToggle("FlingCreak", { Text = "击退 Creak（需 ≥5 矿车）", Default = false, ToolTip = "千万别自己碰矿车，会死" })[span_3](start_span)[span_3](end_span)
+Stairwell_Misc:AddToggle("CreakAggressionMeter", { Text = "Creak 攻击性计量条", Default = false, Tooltip = "在 Creak 头顶显示攻击性数值。" })[span_4](start_span)[span_4](end_span)
+
+local CreakAggressionMetersTable = {}
+local CreakAggressionCamera = Workspace.CurrentCamera
+local CreakAggressionChildAddedConnection = nil
+
+local function CleanupCreakAggressionMeter(CreakModel)
+    local CreakMeterData = CreakAggressionMetersTable[CreakModel]
+    if not CreakMeterData then return end
+    CreakAggressionMetersTable[CreakModel] = nil
+    if CreakMeterData.RenderConnection then CreakMeterData.RenderConnection:Disconnect() end
+    if CreakMeterData.DestroyConnection then CreakMeterData.DestroyConnection:Disconnect() end
+    for _, CreakDrawingObject in ipairs(CreakMeterData.Drawings) do
+        pcall(function() CreakDrawingObject:Remove() end)
     end
-end)
+end
 
--- 8. Banana Peel Bypass (Muz kabuğu kaymaları)
-task.spawn(function()
-    while task.wait(0.5) do
-        pcall(function()
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v.Name == "BananaPeel" or v.Name:lower():find("banana") then
-                    if v:IsA("BasePart") then
-                        v.CanTouch = false
-                    elseif v:IsA("Model") then
-                        for _, p in pairs(v:GetDescendants()) do
-                            if p:IsA("BasePart") then
-                                p.CanTouch = false
-                            end
-                        end
-                    end
-                end
+local function GetCreakAggressionValue(CreakModel)
+    local CreakAnimator = CreakModel:FindFirstChildOfClass("Animator")
+        or (CreakModel:FindFirstChild("AnimationController") and CreakModel.AnimationController:FindFirstChildOfClass("Animator"))
+        or CreakModel:FindFirstChildOfClass("AnimationController")
+    if not CreakAnimator then return nil end
+    for _, CreakAnimationTrack in ipairs(CreakAnimator:GetPlayingAnimationTracks()) do
+        if CreakAnimationTrack.Name == "CreakGraph" or (CreakAnimationTrack.Animation and CreakAnimationTrack.Animation.Name == "CreakGraph") then
+            local CreakSuccess, CreakAggressionValue = pcall(CreakAnimationTrack.GetParameter, CreakAnimationTrack, "Aggression")
+            if CreakSuccess and typeof(CreakAggressionValue) == "number" then
+                return math.clamp(CreakAggressionValue, 0, 1)
             end
-        end)
+        end
     end
-end)
+    return nil
+end
 
--- 9. Seeking Wall & Seek Obstructions (Seek Ateşi ve Duvar Engelleri)
-task.spawn(function()
-    Services.RunService.Stepped:Connect(function()
-        pcall(function()
-            -- Seek kovalamacasındaki el/ateş engelleri ve duvarlar
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v.Name == "SeekObstruction" or v.Name == "Fire" or v.Name:lower():find("firearm") or v.Name == "Hand" then
-                    if v:IsA("BasePart") then
-                        v.CanTouch = false
-                    end
-                end
-            end
-        end)
+local function CreateCreakAggressionDrawings()
+    local CreakDrawingList = {}
+    local function CreateCreakDrawing(CreakDrawingType)
+        local CreakNewDrawing = Drawing.new(CreakDrawingType)
+        table.insert(CreakDrawingList, CreakNewDrawing)
+        return CreakNewDrawing
+    end
+    local CreakTitleText = CreateCreakDrawing("Text")
+    CreakTitleText.Text = "攻击性 --%"
+    CreakTitleText.Size = 16
+    CreakTitleText.Font = Drawing.Fonts.Plex
+    CreakTitleText.Color = Color3.fromRGB(255, 255, 255)
+    CreakTitleText.Center = true
+    CreakTitleText.Outline = true
+    CreakTitleText.Visible = false
+
+    local CreakBarBackground = CreateCreakDrawing("Square")
+    CreakBarBackground.Size = Vector2.new(112, 6)
+    CreakBarBackground.Filled = true
+    CreakBarBackground.Color = Color3.fromRGB(58, 58, 64)
+    CreakBarBackground.Transparency = 0.15
+    CreakBarBackground.Visible = false
+
+    local CreakBarFill = CreateCreakDrawing("Square")
+    CreakBarFill.Size = Vector2.new(0, 6)
+    CreakBarFill.Filled = true
+    CreakBarFill.Visible = false
+
+    return { Drawings = CreakDrawingList, TitleText = CreakTitleText, BarBackground = CreakBarBackground, BarFill = CreakBarFill }
+end
+
+local function AddCreakAggressionMeter(CreakModel)
+    if not Toggles.CreakAggressionMeter.Value or CreakModel.Name ~= "Creak" or CreakAggressionMetersTable[CreakModel] then return end
+    local CreakHeadPart = CreakModel:FindFirstChild("Head")
+    if not CreakHeadPart or not CreakHeadPart:IsA("BasePart") then return end
+    local CreakMeterData = CreateCreakAggressionDrawings()
+    CreakAggressionMetersTable[CreakModel] = CreakMeterData
+
+    CreakMeterData.RenderConnection = RunService.RenderStepped:Connect(function()
+        if not Toggles.CreakAggressionMeter.Value or not CreakModel.Parent or not CreakHeadPart.Parent then
+            CleanupCreakAggressionMeter(CreakModel)
+            return
+        end
+        if not CreakAggressionCamera or not CreakAggressionCamera.Parent then
+            CreakAggressionCamera = Workspace.CurrentCamera
+            if not CreakAggressionCamera then return end
+        end
+        local CreakScreenPosition, CreakIsOnScreen = CreakAggressionCamera:WorldToViewportPoint(CreakHeadPart.Position + Vector3.new(0, 1.85, 0))
+        if not (CreakIsOnScreen and CreakScreenPosition.Z > 0) then
+            CreakMeterData.TitleText.Visible = false
+            CreakMeterData.BarBackground.Visible = false
+            CreakMeterData.BarFill.Visible = false
+            return
+        end
+        CreakMeterData.TitleText.Position = Vector2.new(CreakScreenPosition.X, CreakScreenPosition.Y - 28)
+        CreakMeterData.BarBackground.Position = Vector2.new(CreakScreenPosition.X - 56, CreakScreenPosition.Y - 6)
+        CreakMeterData.BarFill.Position = CreakMeterData.BarBackground.Position
+        local CreakAggressionValue = GetCreakAggressionValue(CreakModel)
+        if not CreakAggressionValue then
+            CreakMeterData.TitleText.Text = "攻击性 --%"
+            CreakMeterData.TitleText.Color = Color3.fromRGB(200, 200, 200)
+            CreakMeterData.BarFill.Size = Vector2.new(0, 6)
+            CreakMeterData.TitleText.Visible = true
+            CreakMeterData.BarBackground.Visible = true
+            CreakMeterData.BarFill.Visible = false
+            return
+        end
+        CreakMeterData.TitleText.Text = "攻击性 " .. math.floor(CreakAggressionValue * 100 + 0.5) .. "%"
+        CreakMeterData.TitleText.Color = Color3.fromRGB(255, 255, 255)
+        CreakMeterData.BarFill.Size = Vector2.new(112 * CreakAggressionValue, 6)
+        CreakMeterData.BarFill.Color = Color3.fromRGB(70, 220, 100):Lerp(Color3.fromRGB(255, 55, 55), CreakAggressionValue)
+        CreakMeterData.TitleText.Visible = true
+        CreakMeterData.BarBackground.Visible = true
+        CreakMeterData.BarFill.Visible = true
     end)
+    CreakMeterData.DestroyConnection = CreakModel.Destroying:Connect(function() CleanupCreakAggressionMeter(CreakModel) end)
+end
+
+Toggles.CreakAggressionMeter:OnChanged(function(CreakToggleEnabled)
+    if CreakToggleEnabled then
+        for _, CreakEntityModel in ipairs(Objects.Entities or {}) do AddCreakAggressionMeter(CreakEntityModel) end
+        local CreakLiveEntitiesFolder = Workspace:FindFirstChild("LiveEntities")
+        local CreakExistingModel = CreakLiveEntitiesFolder and CreakLiveEntitiesFolder:FindFirstChild("Creak")
+        if CreakExistingModel then AddCreakAggressionMeter(CreakExistingModel) end
+        if not CreakAggressionChildAddedConnection and CreakLiveEntitiesFolder then
+            CreakAggressionChildAddedConnection = CreakLiveEntitiesFolder.ChildAdded:Connect(function(CreakNewChild)
+                if CreakNewChild.Name == "Creak" then AddCreakAggressionMeter(CreakNewChild) end
+            end)
+        end
+    else
+        if CreakAggressionChildAddedConnection then CreakAggressionChildAddedConnection:Disconnect(); CreakAggressionChildAddedConnection = nil end
+        for CreakEntityModel in pairs(CreakAggressionMetersTable) do CleanupCreakAggressionMeter(CreakEntityModel) end
+    end
 end)
 
-print("İstediğiniz tüm özel yaratık ve tuzak bypassları aktif edildi!")
+Toggles.KillAllWithCart:OnChanged(function(KillAllWithCartState)
+	if not KillAllWithCartState then return end
+	local KillAllWithCartIndex = 1
+	task.spawn(function()
+		while Toggles.KillAllWithCart.Value do
+			local KillAllWithCartCarts = {}
+			for _, KillAllWithCartModel in ipairs(workspace.Misc:GetChildren()) do
+				if KillAllWithCartModel.Name == "ShoppingCart" and KillAllWithCartModel:IsA("Model") then
+					KillAllWithCartCarts[#KillAllWithCartCarts + 1] = KillAllWithCartModel
+				end
+			end
+			local KillAllWithCartAlivePlayers = {}
+			for _, KillAllWithCartPlayer in ipairs(game.Players:GetPlayers()) do
+				if KillAllWithCartPlayer ~= game.Players.LocalPlayer and KillAllWithCartPlayer.Character then
+					local KillAllWithCartHumanoid = KillAllWithCartPlayer.Character:FindFirstChildOfClass("Humanoid")
+					if KillAllWithCartHumanoid and KillAllWithCartHumanoid.Health > 0 then
+						KillAllWithCartAlivePlayers[#KillAllWithCartAlivePlayers + 1] = KillAllWithCartPlayer
+					end
+				end
+			end
+			if #KillAllWithCartCarts > 0 and #KillAllWithCartAlivePlayers > 0 then
+				if KillAllWithCartIndex > #KillAllWithCartAlivePlayers then KillAllWithCartIndex = 1 end
+				local KillAllWithCartTarget = KillAllWithCartAlivePlayers[KillAllWithCartIndex]
+				local KillAllWithCartTargetCFrame = KillAllWithCartTarget.Character:GetPivot()
+				for KillAllWithCartCartIndex = 1, #KillAllWithCartCarts do
+					KillAllWithCartCarts[KillAllWithCartCartIndex]:PivotTo(KillAllWithCartTargetCFrame)
+				end
+				KillAllWithCartIndex = KillAllWithCartIndex + 1
+			end
+			task.wait(0.10)
+		end
+	end)
+end)
+
+Toggles.FlingCreak:OnChanged(function(FlingCreakState)
+	if not FlingCreakState then return end
+	task.spawn(function()
+		while Toggles.FlingCreak.Value do
+			local creak = workspace:FindFirstChild("LiveEntities") and workspace.LiveEntities:FindFirstChild("Creak")
+			if creak then
+				local targetCFrame = creak:GetPivot()
+				for _, model in ipairs(workspace.Misc:GetChildren()) do
+					if model.Name == "ShoppingCart" and model:IsA("Model") then
+						model:PivotTo(targetCFrame)
+					end
+				end
+			end
+			task.wait(0.10)
+		end
+	end)
+end)
+
+Stairwell_Misc:AddDivider()
+Stairwell_Misc:AddToggle("DisableStairwellCrusherCollision", { Text = "禁用碾压机关", Default = false })[span_5](start_span)[span_5](end_span)
+Stairwell_Misc:AddToggle("DeleteStairwellCrusherExceptBasicWall", { Text = "删除碾压机关", Default = false })[span_6](start_span)[span_6](end_span)
+Stairwell_Misc:AddToggle("MeldRemover", { Text = "移除 Meld", Default = false })[span_7](start_span)[span_7](end_span)
+Stairwell_Misc:AddToggle("StairwellLandingSpam", { Text = "传送到垃圾处并丢弃垃圾。", Tooltip = "配合环绕使用，或直接拾取所有掉落物。", Default = false })[span_8](start_span)[span_8](end_span)
+
+Toggles.DisableStairwellCrusherCollision:OnChanged(function(DisableStairwellCrusherCollisionState)
+	if not DisableStairwellCrusherCollisionState then return end
+	task.spawn(function()
+		while Toggles.DisableStairwellCrusherCollision.Value do
+			for _, DisableStairwellCrusherRoom in ipairs(workspace.CurrentRooms:GetChildren()) do
+				local DisableStairwellCrusherAssets = DisableStairwellCrusherRoom:FindFirstChild("Assets")
+				if DisableStairwellCrusherAssets then
+					for _, DisableStairwellCrusherContainer in ipairs(DisableStairwellCrusherAssets:GetChildren()) do
+						if DisableStairwellCrusherContainer.Name == "StairwellCrusherContainer1" then
+							for _, DisableStairwellCrusherDescendant in ipairs(DisableStairwellCrusherContainer:GetDescendants()) do
+								if DisableStairwellCrusherDescendant:IsA("BasePart") and DisableStairwellCrusherDescendant.CanCollide then
+									local DisableStairwellCrusherUnderBasicWall = false
+									local DisableStairwellCrusherParent = DisableStairwellCrusherDescendant.Parent
+									while DisableStairwellCrusherParent and DisableStairwellCrusherParent ~= DisableStairwellCrusherContainer do
+										if DisableStairwellCrusherParent.Name == "BasicWall" then
+											DisableStairwellCrusherUnderBasicWall = true
+											break
+										end
+										DisableStairwellCrusherParent = DisableStairwellCrusherParent.Parent
+									end
+									if not DisableStairwellCrusherUnderBasicWall then
+										DisableStairwellCrusherDescendant.CanCollide = false
+									end
+								end
+							end
+						end
+						local DisableStairwellCrusher = DisableStairwellCrusherContainer:FindFirstChild("StairwellCrusher")
+						if DisableStairwellCrusher then
+							local DisableStairwellCrusherOuterTrigger = DisableStairwellCrusher:FindFirstChild("OuterTrigger")
+							local DisableStairwellCrusherCoreTrigger = DisableStairwellCrusher:FindFirstChild("CoreTrigger")
+							if DisableStairwellCrusherOuterTrigger then DisableStairwellCrusherOuterTrigger:Destroy() end
+							if DisableStairwellCrusherCoreTrigger then DisableStairwellCrusherCoreTrigger:Destroy() end
+						end
+					end
+				end
+			end
+			task.wait(0.5)
+		end
+	end)
+end)
+
+Toggles.DeleteStairwellCrusherExceptBasicWall:OnChanged(function(DeleteStairwellCrusherExceptBasicWallState)
+	if not DeleteStairwellCrusherExceptBasicWallState then return end
+	task.spawn(function()
+		while Toggles.DeleteStairwellCrusherExceptBasicWall.Value do
+			for _, DeleteStairwellCrusherRoom in ipairs(workspace.CurrentRooms:GetChildren()) do
+				local DeleteStairwellCrusherAssets = DeleteStairwellCrusherRoom:FindFirstChild("Assets")
+				if DeleteStairwellCrusherAssets then
+					for _, DeleteStairwellCrusherContainer in ipairs(DeleteStairwellCrusherAssets:GetChildren()) do
+						if DeleteStairwellCrusherContainer.Name == "StairwellCrusherContainer1" then
+							local DeleteStairwellCrusherToDestroy = {}
+							for _, DeleteStairwellCrusherDescendant in ipairs(DeleteStairwellCrusherContainer:GetDescendants()) do
+								local DeleteStairwellCrusherUnderBasicWall = false
+								local DeleteStairwellCrusherParent = DeleteStairwellCrusherDescendant.Parent
+								while DeleteStairwellCrusherParent and DeleteStairwellCrusherParent ~= DeleteStairwellCrusherContainer do
+									if DeleteStairwellCrusherParent.Name == "BasicWall" then
+										DeleteStairwellCrusherUnderBasicWall = true
+										break
+									end
+									DeleteStairwellCrusherParent = DeleteStairwellCrusherParent.Parent
+								end
+								if not DeleteStairwellCrusherUnderBasicWall and DeleteStairwellCrusherDescendant.Name ~= "BasicWall" then
+									DeleteStairwellCrusherToDestroy[#DeleteStairwellCrusherToDestroy + 1] = DeleteStairwellCrusherDescendant
+								end
+							end
+							for _, DeleteStairwellCrusherInstance in ipairs(DeleteStairwellCrusherToDestroy) do
+								if DeleteStairwellCrusherInstance and DeleteStairwellCrusherInstance.Parent then
+									DeleteStairwellCrusherInstance:Destroy()
+								end
+							end
+						end
+					end
+				end
+			end
+			task.wait(0.5)
+		end
+	end)
+end)
+
+Toggles.MeldRemover:OnChanged(function(State)
+	if not State then return end
+	task.spawn(function()
+		while Toggles.MeldRemover.Value do
+			for _, room in pairs(workspace.CurrentRooms:GetChildren()) do
+				for _, folderName in ipairs({"Assets", "Parts"}) do
+					local folder = room:FindFirstChild(folderName)
+					if folder then
+						for _, child in ipairs(folder:GetChildren()) do
+							if child.Name == "MeldWall" or child.Name == "Boleahghth29tdgfhy2thuy2htuu259uhh3u" then
+								child:Destroy()
+							end
+						end
+					end
+				end
+				for _, name in ipairs({"MeldData", "MeldPads", "Meldview", "Meld"}) do
+					local obj = room:FindFirstChild(name)
+					if obj and obj:IsA("Folder") then obj:Destroy() end
+				end
+			end
+			task.wait(0.5)
+		end
+	end)
+end)
+
+local StairwellLandingToken = 0
+Toggles.StairwellLandingSpam:OnChanged(function(Value)
+	StairwellLandingToken += 1
+	if not Value then return end
+	local CurrentToken = StairwellLandingToken
+	task.spawn(function()
+		local CurrentRooms = workspace.CurrentRooms
+		local LocalPlayer = Services.Players.LocalPlayer
+		while Toggles.StairwellLandingSpam.Value and CurrentToken == StairwellLandingToken do
+			local StairwellModels = {}
+			for _, Room in ipairs(CurrentRooms:GetChildren()) do
+				local StairwellLandingLogic = Room:FindFirstChild("StairwellLandingLogic")
+				if StairwellLandingLogic then
+					for _, Model in ipairs(StairwellLandingLogic:GetChildren()) do
+						if Model:IsA("Model") then
+							local Prompts = {}
+							for _, Object in ipairs(Model:GetDescendants()) do
+								if Object:IsA("ProximityPrompt") then Prompts[#Prompts + 1] = Object end
+							end
+							if #Prompts > 0 then
+								StairwellModels[#StairwellModels + 1] = { Model = Model, Prompts = Prompts }
+							end
+						end
+					end
+				end
+			end
+			table.sort(StairwellModels, function(First, Second)
+				local FirstRoom = First.Model.Parent and First.Model.Parent.Parent
+				local SecondRoom = Second.Model.Parent and Second.Model.Parent.Parent
+				return (tonumber(FirstRoom and FirstRoom.Name) or math.huge) < (tonumber(SecondRoom and SecondRoom.Name) or math.huge)
+			end)
+			for _, Data in ipairs(StairwellModels) do
+				if not Toggles.StairwellLandingSpam.Value or CurrentToken ~= StairwellLandingToken then break end
+				local Model = Data.Model
+				while Model.Parent and Model:IsDescendantOf(workspace) and Toggles.StairwellLandingSpam.Value and CurrentToken == StairwellLandingToken do
+					local Character = LocalPlayer.Character
+					local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+					if HumanoidRootPart then
+						HumanoidRootPart.CFrame = Model:GetPivot() + Vector3.new(0, 5, 0)
+						for Index = 1, #Data.Prompts do
+							local Prompt = Data.Prompts[Index]
+							if Prompt.Parent and Prompt.Enabled and fireproximityprompt then
+								fireproximityprompt(Prompt)
+							end
+						end
+						if keypress and keyrelease then
+							keypress(0x58); task.wait(0.03); keyrelease(0x58)
+						elseif Abysall and Abysall.Environment and Abysall.Environment.keypress and Abysall.Environment.keyrelease then
+							Abysall.Environment.keypress(0x58); task.wait(0.03); Abysall.Environment.keyrelease(0x58)
+						end
+					end
+					Services.RunService.Heartbeat:Wait()
+				end
+			end
+			Services.RunService.Heartbeat:Wait()
+		end
+	end)
+end)
+
+Stairwell_Misc:AddDivider()
+Stairwell_Misc:AddButton("传送购物车到玩家", function()
+	local ShoppingCartTargetName = Options.ShoppingCartTarget.Value
+	local ShoppingCartTargetPlayer = game.Players:FindFirstChild(ShoppingCartTargetName)
+	if not ShoppingCartTargetPlayer or not ShoppingCartTargetPlayer.Character then return end
+	local ShoppingCartTargetCFrame = ShoppingCartTargetPlayer.Character:GetPivot()
+	for _, ShoppingCartModel in ipairs(workspace.Misc:GetChildren()) do
+		if ShoppingCartModel.Name == "ShoppingCart" and ShoppingCartModel:IsA("Model") then
+			ShoppingCartModel:PivotTo(ShoppingCartTargetCFrame)
+		end
+	end
+end)
+
+Stairwell_Misc:AddDropdown("ShoppingCartTarget", {
+	Text = "购物车目标",
+	Values = (function()
+		local ShoppingCartPlayerNames = {}
+		for _, ShoppingCartPlayer in ipairs(game.Players:GetPlayers()) do
+			ShoppingCartPlayerNames[#ShoppingCartPlayerNames + 1] = ShoppingCartPlayer.Name
+		end
+		return ShoppingCartPlayerNames
+	end)(),
+	Default = game.Players.LocalPlayer.Name,
+})
+
+Stairwell_Misc:AddButton("刷新玩家", function()
+	local ShoppingCartPlayerNames = {}
+	for _, ShoppingCartPlayer in ipairs(game.Players:GetPlayers()) do
+		ShoppingCartPlayerNames[#ShoppingCartPlayerNames + 1] = ShoppingCartPlayer.Name
+	end
+	Options.ShoppingCartTarget:SetValues(ShoppingCartPlayerNames)
+end)
+
+local Stairwell_Experimental = Tabs.Stairwell:AddRightGroupbox("实验性")
+
+local function TPDropsToNearestGrinder()
+    local TPDropsToNearestGrinderDropsFolder = workspace:FindFirstChild("Drops")
+    local TPDropsToNearestGrinderRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+    if not TPDropsToNearestGrinderDropsFolder or not TPDropsToNearestGrinderRootPart or not CurrentRooms then return end
+    local TPDropsToNearestGrinderPlayerPosition = TPDropsToNearestGrinderRootPart.Position
+    local TPDropsToNearestGrinderNearestGrinder = nil
+    local TPDropsToNearestGrinderNearestDistance = math.huge
+    for _, TPDropsToNearestGrinderRoom in ipairs(CurrentRooms:GetChildren()) do
+        local TPDropsToNearestGrinderScrapper = TPDropsToNearestGrinderRoom:FindFirstChild("StairwellScrapper", true)
+        if TPDropsToNearestGrinderScrapper then
+            for _, TPDropsToNearestGrinderObject in ipairs(TPDropsToNearestGrinderScrapper:GetDescendants()) do
+                if TPDropsToNearestGrinderObject.Name == "Grinder1" and (TPDropsToNearestGrinderObject:IsA("Model") or TPDropsToNearestGrinderObject:IsA("BasePart")) then
+                    local TPDropsToNearestGrinderPosition = TPDropsToNearestGrinderObject:GetPivot().Position
+                    local TPDropsToNearestGrinderDistance = (TPDropsToNearestGrinderPlayerPosition - TPDropsToNearestGrinderPosition).Magnitude
+                    if TPDropsToNearestGrinderDistance < TPDropsToNearestGrinderNearestDistance then
+                        TPDropsToNearestGrinderNearestDistance = TPDropsToNearestGrinderDistance
+                        TPDropsToNearestGrinderNearestGrinder = TPDropsToNearestGrinderObject
+                    end
+                end
+            end
+        end
+    end
+    if not TPDropsToNearestGrinderNearestGrinder then return end
+    local TPDropsToNearestGrinderCFrame = TPDropsToNearestGrinderNearestGrinder:GetPivot()
+    for _, TPDropsToNearestGrinderDropItem in ipairs(TPDropsToNearestGrinderDropsFolder:GetChildren()) do
+        if TPDropsToNearestGrinderDropItem:IsA("Model") or TPDropsToNearestGrinderDropItem:IsA("BasePart") then
+            TPDropsToNearestGrinderDropItem:PivotTo(TPDropsToNearestGrinderCFrame)
+        end
+    end
+end
+
+Stairwell_Experimental:AddButton({
+    Text = "传送所有掉落物到最近的研磨机",
+    Func = TPDropsToNearestGrinder,
+    DoubleClick = false,
+    Tooltip = "将每个掉落物传送到离你最近的研磨机",
+})
+
+local function BringDroppedItems()
+	local workspaceDropsFolder = workspace:FindFirstChild("Drops")
+	if LocalPlayer and LocalPlayer.Character then
+		local playerHumanoidRootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+		if playerHumanoidRootPart and workspaceDropsFolder then
+			for _, itemToBring in ipairs(workspaceDropsFolder:GetChildren()) do
+				if itemToBring:IsA("Model") then
+					itemToBring:PivotTo(playerHumanoidRootPart.CFrame)
+				elseif itemToBring:IsA("BasePart") then
+					itemToBring.CFrame = playerHumanoidRootPart.CFrame
+				end
+			end
+		end
+	end
+end
+
+Stairwell_Experimental:AddButton({
+	Text = "拾取掉落物",
+	Func = function() BringDroppedItems() end,
+	DoubleClick = false,
+	Tooltip = "拾取所有掉落物。"
+})
+
+Stairwell_Experimental:AddToggle("EnableDroppedItemsInterval", { Text = "启用间隔", Default = false, Tooltip = "按设定间隔自动拾取掉落物。" })[span_9](start_span)[span_9](end_span)
+Stairwell_Experimental:AddSlider("DroppedItemsInterval", { Text = "间隔", Default = 1, Min = 0, Max = 60, Rounding = 1, Compact = false, Tooltip = "拾取掉落物的频率。" })[span_10](start_span)[span_10](end_span)
+
+Toggles.EnableDroppedItemsInterval:OnChanged(function(enabled)
+	if enabled then
+		if droppedItemsIntervalRunning then return end
+		droppedItemsIntervalRunning = true
+		task.spawn(function()
+			while Toggles.EnableDroppedItemsInterval.Value do
+				BringDroppedItems()
+				local interval = Options.DroppedItemsInterval.Value
+				if interval <= 0 then task.wait() else task.wait(interval) end
+			end
+			droppedItemsIntervalRunning = false
+		end)
+	end
+end)
+
+Stairwell_Experimental:AddDivider()
+Stairwell_Experimental:AddToggle("OrbitDroppedItems", { Text = "环绕掉落物", Default = false, Tooltip = "让掉落物环绕在你身边。每 10 秒传送一次以防止消失。" })[span_11](start_span)[span_11](end_span)
+Stairwell_Experimental:AddSlider("OrbitDroppedItemsHeight", { Text = "高度", Default = 2, Min = -20, Max = 20, Rounding = 1, Compact = false, Tooltip = "环绕的高度。" })[span_12](start_span)[span_12](end_span)
+Stairwell_Experimental:AddSlider("OrbitDroppedItemsDistance", { Text = "距离", Default = 5, Min = 0, Max = 50, Rounding = 1, Compact = false, Tooltip = "环绕的距离。" })[span_13](start_span)[span_13](end_span)
+Stairwell_Experimental:AddSlider("OrbitDroppedItemsSpeed", { Text = "速度", Default = 2, Min = 0, Max = 20, Rounding = 1, Compact = false, Tooltip = "环绕的速度。" })[span_14](start_span)[span_14](end_span)
+
+Toggles.OrbitDroppedItems:OnChanged(function(OrbitDroppedItemsEnabled)
+	if OrbitDroppedItemsConnection then OrbitDroppedItemsConnection:Disconnect(); OrbitDroppedItemsConnection = nil end
+	if not OrbitDroppedItemsEnabled then return end
+	OrbitDroppedItemsAngle = 0
+	OrbitDroppedItemsLastTeleport = tick()
+	OrbitDroppedItemsPauseUntil = 0
+	OrbitDroppedItemsConnection = RunService.Heartbeat:Connect(function(OrbitDroppedItemsDeltaTime)
+		if not LocalPlayer or not LocalPlayer.Character then return end
+		local OrbitDroppedItemsHumanoidRootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+		local OrbitDroppedItemsDropsFolder = workspace:FindFirstChild("Drops")
+		if not OrbitDroppedItemsHumanoidRootPart or not OrbitDroppedItemsDropsFolder then return end
+		local OrbitDroppedItemsHeightValue = Options.OrbitDroppedItemsHeight.Value
+		local OrbitDroppedItemsDistanceValue = Options.OrbitDroppedItemsDistance.Value
+		local OrbitDroppedItemsSpeedValue = Options.OrbitDroppedItemsSpeed.Value
+		local OrbitDroppedItemsCurrentTime = tick()
+		local OrbitDroppedItemsList = {}
+		for _, OrbitDroppedItemsObject in ipairs(OrbitDroppedItemsDropsFolder:GetChildren()) do
+			if OrbitDroppedItemsObject:IsA("Model") or OrbitDroppedItemsObject:IsA("BasePart") then
+				OrbitDroppedItemsList[#OrbitDroppedItemsList + 1] = OrbitDroppedItemsObject
+			end
+		end
+		local OrbitDroppedItemsCount = #OrbitDroppedItemsList
+		if OrbitDroppedItemsCount == 0 then return end
+		if OrbitDroppedItemsCurrentTime - OrbitDroppedItemsLastTeleport >= 10 then
+			OrbitDroppedItemsLastTeleport = OrbitDroppedItemsCurrentTime
+			OrbitDroppedItemsPauseUntil = OrbitDroppedItemsCurrentTime + 2
+			local OrbitDroppedItemsCenterPosition = OrbitDroppedItemsHumanoidRootPart.Position
+			for _, OrbitDroppedItemsObject in ipairs(OrbitDroppedItemsList) do
+				if OrbitDroppedItemsObject:IsA("Model") then
+					OrbitDroppedItemsObject:PivotTo(CFrame.new(OrbitDroppedItemsCenterPosition))
+				else
+					OrbitDroppedItemsObject.CFrame = CFrame.new(OrbitDroppedItemsCenterPosition)
+				end
+			end
+		end
+		if OrbitDroppedItemsCurrentTime < OrbitDroppedItemsPauseUntil then return end
+		OrbitDroppedItemsAngle += OrbitDroppedItemsDeltaTime * OrbitDroppedItemsSpeedValue
+		for OrbitDroppedItemsIndex, OrbitDroppedItemsObject in ipairs(OrbitDroppedItemsList) do
+			local OrbitDroppedItemsObjectAngle = OrbitDroppedItemsAngle + ((OrbitDroppedItemsIndex - 1) / OrbitDroppedItemsCount) * math.pi * 2
+			local OrbitDroppedItemsOffset = Vector3.new(
+				math.cos(OrbitDroppedItemsObjectAngle) * OrbitDroppedItemsDistanceValue,
+				OrbitDroppedItemsHeightValue,
+				math.sin(OrbitDroppedItemsObjectAngle) * OrbitDroppedItemsDistanceValue
+			)
+			local OrbitDroppedItemsPosition = OrbitDroppedItemsHumanoidRootPart.Position + OrbitDroppedItemsOffset
+			if OrbitDroppedItemsObject:IsA("Model") then
+				OrbitDroppedItemsObject:PivotTo(CFrame.new(OrbitDroppedItemsPosition))
+			else
+				OrbitDroppedItemsObject.CFrame = CFrame.new(OrbitDroppedItemsPosition)
+			end
+		end
+	end)
+end)
+
+Toggles.BypassNoise:OnChanged(function(value)
+	for i = #Connections, 1, -1 do
+		local existingConnection = Connections[i]
+		if existingConnection and existingConnection.Disconnect then existingConnection:Disconnect() end
+		table.remove(Connections, i)
+	end
+	if not value then return end
+	local function checkBypassNoiseTvStand(targetTvStand)
+		if not targetTvStand:IsA("Model") then return end
+		if targetTvStand.Name ~= "TV_Stand" then return end
+		local tvStandCurrentCFrame = targetTvStand:GetPivot()
+		if tvStandCurrentCFrame.Position.Y > -119 then
+			targetTvStand:PivotTo(CFrame.new(tvStandCurrentCFrame.Position.X, -120, tvStandCurrentCFrame.Position.Z))
+		end
+	end
+	local bypassNoiseMiscFolder = workspace:FindFirstChild("Misc")
+	if not bypassNoiseMiscFolder then return end
+	local bypassNoiseMiscChildAddedConnection = bypassNoiseMiscFolder.ChildAdded:Connect(function(bypassNoiseNewChild)
+		checkBypassNoiseTvStand(bypassNoiseNewChild)
+	end)
+	Connections[#Connections + 1] = bypassNoiseMiscChildAddedConnection
+	for _, bypassNoiseMiscChild in ipairs(bypassNoiseMiscFolder:GetChildren()) do
+		checkBypassNoiseTvStand(bypassNoiseMiscChild)
+	end
+end)
+
+Toggles.DroppedItemValue:OnChanged(function(DroppedItemValue)
+	local DroppedItemValueScreenGui = game:GetService("CoreGui"):FindFirstChild("DropsCoinCounter")
+	if not DroppedItemValue then
+		if DroppedItemValueScreenGui then DroppedItemValueScreenGui:Destroy() end
+		return
+	end
+	local DroppedItemValueWorkspaceDrops = workspace:WaitForChild("Drops")
+	if DroppedItemValueScreenGui then DroppedItemValueScreenGui:Destroy() end
+	DroppedItemValueScreenGui = Instance.new("ScreenGui")
+	DroppedItemValueScreenGui.Name = "DropsCoinCounter"
+	DroppedItemValueScreenGui.ResetOnSpawn = false
+	DroppedItemValueScreenGui.Parent = game:GetService("CoreGui")
+	local DroppedItemValueCoinText = Instance.new("TextLabel")
+	DroppedItemValueCoinText.Name = "CoinText"
+	DroppedItemValueCoinText.AnchorPoint = Vector2.new(0.5, 0)
+	DroppedItemValueCoinText.Position = UDim2.new(0.5, 0, 0.02, 0)
+	DroppedItemValueCoinText.Size = UDim2.new(0, 250, 0, 40)
+	DroppedItemValueCoinText.BackgroundTransparency = 1
+	DroppedItemValueCoinText.Text = "物品: 0"
+	DroppedItemValueCoinText.TextSize = 24
+	DroppedItemValueCoinText.Font = Enum.Font.GothamBold
+	DroppedItemValueCoinText.TextColor3 = Color3.fromRGB(255, 255, 255)
+	DroppedItemValueCoinText.TextStrokeTransparency = 0.5
+	DroppedItemValueCoinText.Parent = DroppedItemValueScreenGui
+	local DroppedItemValueCountedDrops = {}
+	task.spawn(function()
+		while Toggles.DroppedItemValue.Value do
+			for _, DroppedItemValueDrop in ipairs(DroppedItemValueWorkspaceDrops:GetChildren()) do
+				if DroppedItemValueDrop:IsA("Model") and not DroppedItemValueCountedDrops[DroppedItemValueDrop] then
+					DroppedItemValueDrop:SetAttribute("CoinsChecked", true)
+					DroppedItemValueCountedDrops[DroppedItemValueDrop] = true
+				end
+			end
+			for DroppedItemValueDrop in pairs(DroppedItemValueCountedDrops) do
+				if not DroppedItemValueDrop.Parent or DroppedItemValueDrop.Parent ~= DroppedItemValueWorkspaceDrops then
+					DroppedItemValueCountedDrops[DroppedItemValueDrop] = nil
+				end
+			end
+			local DroppedItemValueTotalItems = 0
+			for DroppedItemValueDrop in pairs(DroppedItemValueCountedDrops) do
+				if DroppedItemValueDrop.Parent == DroppedItemValueWorkspaceDrops then
+					DroppedItemValueTotalItems += 1
+				end
+			end
+			DroppedItemValueCoinText.Text = "物品: " .. DroppedItemValueTotalItems
+			task.wait(1)
+		end
+		if DroppedItemValueScreenGui and DroppedItemValueScreenGui.Parent then
+			DroppedItemValueScreenGui:Destroy()
+		end
+	end)
+end)
