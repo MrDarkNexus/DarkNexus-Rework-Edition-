@@ -1013,4 +1013,257 @@ end
 end)
 
 
-																
+							-- ========================================================
+-- DARKNESS HUB (🇹🇷) - HOTEL / MAIN ÖZELLİKLERİ BAĞLANTI KODU
+-- (Bu kısmı scriptin en altına yapıştırabilirsin)
+-- ========================================================
+
+local MainCard = Instance.new("Frame")
+MainCard.Name = "MainCard"
+MainCard.Parent = mainPage
+MainCard.BackgroundColor3 = Color3.fromRGB(16, 12, 24)
+MainCard.Position = UDim2.new(0, 10, 0, 10)
+MainCard.Size = UDim2.new(1, -20, 0, 460)
+
+Instance.new("UICorner", MainCard).CornerRadius = UDim.new(0, 8)
+local mainCardStroke = Instance.new("UIStroke")
+mainCardStroke.Name = "CardStroke"
+mainCardStroke.Color = Color3.fromRGB(160, 60, 240)
+mainCardStroke.Thickness = 1.5
+mainCardStroke.Parent = MainCard
+
+local MainCardTitle = Instance.new("TextLabel")
+MainCardTitle.Parent = MainCard
+MainCardTitle.BackgroundTransparency = 1
+MainCardTitle.Position = UDim2.new(0, 15, 0, 15)
+MainCardTitle.Size = UDim2.new(1, -30, 0, 25)
+MainCardTitle.Font = Enum.Font.Code
+MainCardTitle.Text = "⚡ Karakter & Hareket (Main)"
+MainCardTitle.TextColor3 = Color3.fromRGB(240, 180, 255)
+MainCardTitle.TextSize = 15
+MainCardTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+-- 1) WalkSpeed Toggle
+local WS_ToggleBtn = Instance.new("TextButton")
+WS_ToggleBtn.Parent = MainCard
+WS_ToggleBtn.BackgroundColor3 = Color3.fromRGB(90, 50, 160)
+WS_ToggleBtn.Position = UDim2.new(0, 15, 0, 55)
+WS_ToggleBtn.Size = UDim2.new(0, 260, 0, 32)
+WS_ToggleBtn.Font = Enum.Font.Code
+WS_ToggleBtn.Text = "🔴 WalkSpeed (Hız): Kapalı"
+WS_ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+WS_ToggleBtn.TextSize = 12
+Instance.new("UICorner", WS_ToggleBtn).CornerRadius = UDim.new(0, 6)
+
+local wsEnabled = false
+local currentSpeedValue = 16
+
+WS_ToggleBtn.MouseButton1Click:Connect(function()
+    wsEnabled = not wsEnabled
+    if wsEnabled then
+        WS_ToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 180, 80)
+        WS_ToggleBtn.Text = "🟢 WalkSpeed (Hız): Açık (" .. currentSpeedValue .. ")"
+    else
+        WS_ToggleBtn.BackgroundColor3 = Color3.fromRGB(90, 50, 160)
+        WS_ToggleBtn.Text = "🔴 WalkSpeed (Hız): Kapalı"
+    end
+    
+    local character = LocalPlayer.Character
+    if character and character:FindFirstChildOfClass("Humanoid") then
+        character:FindFirstChildOfClass("Humanoid").WalkSpeed = wsEnabled and currentSpeedValue or 16
+    end
+end)
+
+-- 2) Uzun Mor Obsidian Temalı Slider (1-150)
+local SliderBg = Instance.new("Frame")
+SliderBg.Name = "SliderBg"
+SliderBg.Parent = MainCard
+SliderBg.BackgroundColor3 = Color3.fromRGB(12, 8, 20)
+SliderBg.Position = UDim2.new(0, 15, 0, 98)
+SliderBg.Size = UDim2.new(0, 380, 0, 50)
+Instance.new("UICorner", SliderBg).CornerRadius = UDim.new(0, 6)
+local sliderStroke = Instance.new("UIStroke")
+sliderStroke.Name = "SliderStroke"
+sliderStroke.Color = Color3.fromRGB(120, 50, 200)
+sliderStroke.Parent = SliderBg
+
+local SliderLabel = Instance.new("TextLabel")
+SliderLabel.Parent = SliderBg
+SliderLabel.BackgroundTransparency = 1
+SliderLabel.Position = UDim2.new(0, 10, 0, 5)
+SliderLabel.Size = UDim2.new(1, -20, 0, 20)
+SliderLabel.Font = Enum.Font.Code
+SliderLabel.Text = "WalkSpeed Değeri: 16 (Max: 150)"
+SliderLabel.TextColor3 = Color3.fromRGB(220, 180, 255)
+SliderLabel.TextSize = 11
+SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local SliderFill = Instance.new("Frame")
+SliderFill.Name = "SliderFill"
+SliderFill.Parent = SliderBg
+SliderFill.BackgroundColor3 = Color3.fromRGB(160, 60, 240)
+SliderFill.Position = UDim2.new(0, 10, 0, 32)
+SliderFill.Size = UDim2.new(16/150, -20, 0, 8)
+Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(0, 4)
+
+local SliderButton = Instance.new("TextButton")
+SliderButton.Parent = SliderBg
+SliderButton.BackgroundTransparency = 1
+SliderButton.Position = UDim2.new(0, 10, 0, 26)
+SliderButton.Size = UDim2.new(1, -20, 0, 20)
+SliderButton.Text = ""
+
+SliderButton.MouseButton1Down:Connect(function()
+    local mouse = LocalPlayer:GetMouse()
+    local connection
+    connection = game:GetService("RunService").RenderStepped:Connect(function()
+        local relativeX = math.clamp(mouse.X - SliderBg.AbsolutePosition.X - 10, 0, 360)
+        local percentage = relativeX / 360
+        currentSpeedValue = math.floor(percentage * 149 + 1)
+        
+        SliderFill.Size = UDim2.new(percentage, 0, 0, 8)
+        SliderLabel.Text = "WalkSpeed Değeri: " .. currentSpeedValue .. " (Max: 150)"
+        
+        if wsEnabled then
+            local character = LocalPlayer.Character
+            if character and character:FindFirstChildOfClass("Humanoid") then
+                character:FindFirstChildOfClass("Humanoid").WalkSpeed = currentSpeedValue
+            end
+        end
+        
+        if currentSpeedValue >= 35 then
+            SliderLabel.Text = "WalkSpeed Değeri: " .. currentSpeedValue .. " ⚠️ (35+ Geriye Atabilir!)"
+        end
+        
+        if not game:GetService("UserInputService"):IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
+            connection:Disconnect()
+        end
+    end)
+end)
+
+-- 3) Remove Acceleration Toggle
+local RemoveAccelBtn = Instance.new("TextButton")
+RemoveAccelBtn.Parent = MainCard
+RemoveAccelBtn.BackgroundColor3 = Color3.fromRGB(90, 50, 160)
+RemoveAccelBtn.Position = UDim2.new(0, 15, 0, 160)
+RemoveAccelBtn.Size = UDim2.new(0, 260, 0, 32)
+RemoveAccelBtn.Font = Enum.Font.Code
+RemoveAccelBtn.Text = "🔴 Remove Acceleration: Kapalı"
+RemoveAccelBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+RemoveAccelBtn.TextSize = 12
+Instance.new("UICorner", RemoveAccelBtn).CornerRadius = UDim.new(0, 6)
+
+local removeAccelEnabled = false
+RemoveAccelBtn.MouseButton1Click:Connect(function()
+    removeAccelEnabled = not removeAccelEnabled
+    if removeAccelEnabled then
+        RemoveAccelBtn.BackgroundColor3 = Color3.fromRGB(50, 180, 80)
+        RemoveAccelBtn.Text = "🟢 Remove Acceleration: Açık"
+    else
+        RemoveAccelBtn.BackgroundColor3 = Color3.fromRGB(90, 50, 160)
+        RemoveAccelBtn.Text = "🔴 Remove Acceleration: Kapalı"
+    end
+    
+    local character = LocalPlayer.Character
+    if character then
+        local customPhysics = PhysicalProperties.new(100, 0, 0, 0, 0)
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CustomPhysicalProperties = removeAccelEnabled and customPhysics or nil
+            end
+        end
+    end
+end)
+
+-- 4) Fly Toggle
+local FlyBtn = Instance.new("TextButton")
+FlyBtn.Parent = MainCard
+FlyBtn.BackgroundColor3 = Color3.fromRGB(90, 50, 160)
+FlyBtn.Position = UDim2.new(0, 15, 0, 204)
+FlyBtn.Size = UDim2.new(0, 260, 0, 32)
+FlyBtn.Font = Enum.Font.Code
+FlyBtn.Text = "🔴 Fly (Uçuş): Kapalı"
+FlyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+FlyBtn.TextSize = 12
+Instance.new("UICorner", FlyBtn).CornerRadius = UDim.new(0, 6)
+
+local flyEnabled = false
+local flyConnection = nil
+
+FlyBtn.MouseButton1Click:Connect(function()
+    flyEnabled = not flyEnabled
+    local character = LocalPlayer.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+    local rootPart = character.HumanoidRootPart
+    
+    if flyEnabled then
+        FlyBtn.BackgroundColor3 = Color3.fromRGB(50, 180, 80)
+        FlyBtn.Text = "🟢 Fly (Uçuş): Açık"
+        
+        local bv = Instance.new("BodyVelocity")
+        bv.Name = "DarkNessFlyVelocity"
+        bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+        bv.Velocity = Vector3.zero
+        bv.Parent = rootPart
+        
+        flyConnection = game:GetService("RunService").RenderStepped:Connect(function()
+            local camera = workspace.CurrentCamera
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid and humanoid.MoveDirection ~= Vector3.zero then
+                local lookFlat = Vector3.new(camera.CFrame.LookVector.X, 0, camera.CFrame.LookVector.Z)
+                local flatFrame = CFrame.new(camera.CFrame.Position, camera.CFrame.Position + lookFlat)
+                local velocity = (camera.CFrame * CFrame.new(flatFrame:VectorToObjectSpace(humanoid.MoveDirection))).Position - camera.CFrame.Position
+                bv.Velocity = velocity.Unit * 50
+            else
+                bv.Velocity = Vector3.zero
+            end
+        end)
+    else
+        FlyBtn.BackgroundColor3 = Color3.fromRGB(90, 50, 160)
+        FlyBtn.Text = "🔴 Fly (Uçuş): Kapalı"
+        if rootPart:FindFirstChild("DarkNessFlyVelocity") then
+            rootPart.DarkNessFlyVelocity:Destroy()
+        end
+        if flyConnection then
+            flyConnection:Disconnect()
+            flyConnection = nil
+        end
+    end
+end)
+
+-- 5) NoClip Toggle
+local NoClipBtn = Instance.new("TextButton")
+NoClipBtn.Parent = MainCard
+NoClipBtn.BackgroundColor3 = Color3.fromRGB(90, 50, 160)
+NoClipBtn.Position = UDim2.new(0, 15, 0, 248)
+NoClipBtn.Size = UDim2.new(0, 260, 0, 32)
+NoClipBtn.Font = Enum.Font.Code
+NoClipBtn.Text = "🔴 NoClip (Duvarlardan Geç): Kapalı"
+NoClipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+NoClipBtn.TextSize = 12
+Instance.new("UICorner", NoClipBtn).CornerRadius = UDim.new(0, 6)
+
+local noclipEnabled = false
+NoClipBtn.MouseButton1Click:Connect(function()
+    noclipEnabled = not noclipEnabled
+    if noclipEnabled then
+        NoClipBtn.BackgroundColor3 = Color3.fromRGB(50, 180, 80)
+        NoClipBtn.Text = "🟢 NoClip (Duvarlardan Geç): Açık"
+    else
+        NoClipBtn.BackgroundColor3 = Color3.fromRGB(90, 50, 160)
+        NoClipBtn.Text = "🔴 NoClip (Duvarlardan Geç): Kapalı"
+    end
+end)
+
+game:GetService("RunService").Stepped:Connect(function()
+    if noclipEnabled then
+        local character = LocalPlayer.Character
+        if character then
+            for _, part in ipairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end
+end)									
